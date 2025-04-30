@@ -3,6 +3,10 @@ const { Pool } = require('pg')
 
 dotenv.config()
 
+// added
+const { PrismaClient } = require('./generated/prisma');
+const prisma = new PrismaClient();
+
 const PASSWORD = process.env.PASSWORD;
 
 /*const pool = new Pool({
@@ -24,8 +28,8 @@ const pool = new Pool({
 
 async function testDB() {
   try {
-    const res = await pool.query('SELECT * FROM testh4i');
-    console.log('Connected successfully:', res.rows[0]);
+    const members = await prisma.member.findMany();
+    console.log('Connected successfully: ', members);
   } catch (err) {
     console.error('Database connection error:', err);
   } finally {

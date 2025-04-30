@@ -28,3 +28,8 @@ docker run --name test-backend -e POSTGRES_USER=johndoe -e POSTGRES_PASSWORD=ran
 ```bash 
 node index.js
 ``` 
+
+# Prisma
+
+1. Run npx prisma db pull to update models in schema.prisma according to the database in supabase
+2. Run npx prisma generate

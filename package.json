@@ -19,15 +19,15 @@
   },
   "homepage": "https://github.com/hack4impact/test-backend#readme",
   "dependencies": {
-    "@prisma/client": "^6.6.0",
+    "@prisma/client": "^6.7.0",
     "@supabase/supabase-js": "^2.49.4",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "pg": "^8.15.6",
-    "prisma": "^6.6.0"
+    "pg": "^8.15.6"
   },
   "devDependencies": {
     "jest": "^29.7.0",
+    "prisma": "^6.7.0",
     "supertest": "^7.1.0"
   }
 }
