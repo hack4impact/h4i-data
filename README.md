@@ -17,6 +17,12 @@ This is a repository for testing Prisma orm, jest tests, and databases.
 ```bash
 npm i
 ```
+---
+## Run tests 
+```bash 
+npm test 
+```
+---
 
 ### Postgres in a Docker Container
 1. Open Docker Desktop
