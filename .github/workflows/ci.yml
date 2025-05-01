@@ -27,6 +27,7 @@ jobs:
 
     env:
       DATABASE_URL: postgres://johndoe:testpass@localhost:5432/testdb
+      SUPABASE_URL: postgres://johndoe:testpass@localhost:5432/testdb 
 
     steps:
       - name: Checkout code
@@ -43,12 +44,8 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
-      - name: Run DB migrations (optional if you have migrations)
+      - name: Run DB migrations
         run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ env.DATABASE_URL }}
 
-      - name: Run tests or script
+      - name: Run app
         run: node index.js
-        env:
-          SUPABASE_URL: ${{ env.DATABASE_URL }}
