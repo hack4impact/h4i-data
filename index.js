@@ -30,7 +30,7 @@ async function connectToDB() {
 // prints verification of insertion
 async function addMember(name, university) {
   try {
-    const newMember = await prisma.Member.create({
+    const newMember = await prisma.member.create({
       data: {
         name: name,
         university: university
@@ -52,7 +52,7 @@ async function addMember(name, university) {
 // TODO: Fix delete to obey foriegn key constraint
 async function deleteMemberById(id) {
   try {
-    const member = await prisma.Member.delete({
+    const member = await prisma.member.delete({
       where: { id: id }
     })
     console.log(`Deleted Member: 
@@ -69,7 +69,7 @@ async function deleteMemberById(id) {
 // Get the member id from the name and university. Returns the first match
 async function getMemberId(name, university) {
   try {
-    const member = await prisma.Member.findFirst({
+    const member = await prisma.member.findFirst({
       where: {
         name: name,
         university: university
@@ -90,7 +90,7 @@ async function getMemberId(name, university) {
 // add a project to the Project table successfully
 async function addProject(name, chapter) {
   try {
-    const newProject = await prisma.Project.create({
+    const newProject = await prisma.project.create({
       data: {
         name: name,
         chapter: chapter
@@ -110,7 +110,7 @@ async function addProject(name, chapter) {
 // retrieve project ID from the Project Table
 async function getProjectId(name, chapter) {
   try {
-    const project = await prisma.Project.findFirst({
+    const project = await prisma.project.findFirst({
       where: {
         name: name,
         chapter: chapter
@@ -131,13 +131,13 @@ async function getProjectId(name, chapter) {
 // add an entry connecting Member and Project table
 async function addMemberProject(memberId, projectId) {
   try {
-    const memberProject = await prisma.Member_Project.create({
+    const memberProject = await prisma.member_project.create({
       data: {
         // Member_Project is meant to be keep track of Member and Project pairs,
         // the lines below tell prisma: "connect the memberId to the member 
         // associated with that id" and same with the project
-        Member: { connect: { id: memberId } },
-        Project: { connect: { id: projectId } },
+        member: { connect: { id: memberId } },
+        project: { connect: { id: projectId } },
       },
     });
     console.log(`Added member project pair: 
@@ -163,6 +163,7 @@ async function main() {
   const uni = "cal poly univ";
   const project = "project s";
   const chapter = "chapter s";
+  
   // add member and project
   await addMember(name, uni);
   await addProject(project, chapter);
