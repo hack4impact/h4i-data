@@ -40,7 +40,7 @@ async function connectToDB() {
 // prints verification of insertion
 async function addMember(name, university) {
   try {
-    const newMember = await prisma.member.create({
+    const newMember = await prisma.Member.create({
       data: {
         name: name,
         university: university
@@ -59,9 +59,10 @@ async function addMember(name, university) {
 
 // We must delete by a unique identifier, which is the id
 // prints verification of deletion
+// TODO: Fix delete to obey foriegn key constraint
 async function deleteMemberById(id) {
   try {
-    const member = await prisma.member.delete({
+    const member = await prisma.Member.delete({
       where: { id: id }
     })
     console.log(`Deleted Member: 
@@ -78,7 +79,7 @@ async function deleteMemberById(id) {
 // Get the member id from the name and university. Returns the first match
 async function getMemberId(name, university) {
   try {
-    const member = await prisma.member.findFirst({
+    const member = await prisma.Member.findFirst({
       where: {
         name: name,
         university: university
@@ -96,21 +97,86 @@ async function getMemberId(name, university) {
   }
 }
 
-async function disconnectFromDB() {
-  await prisma.$disconnect()
+async function addProject(name, chapter) {
+  try {
+    const newProject = await prisma.Project.create({
+      data: {
+        name: name,
+        chapter: chapter
+      },
+    })
+    console.log(`Inserted Project: 
+      id: ${newProject.id}
+      created_at: ${newProject.created_at}
+      name: ${newProject.name}
+      chapter: ${newProject.chapter}`);
+  }
+  catch (error) {
+    console.error("Insertion Error: " + error)
+  }
 }
 
-// connect to the db once before running commands
-connectToDB();
+async function getProjectId(name, chapter) {
+  try {
+    const project = await prisma.Project.findFirst({
+      where: {
+        name: name,
+        chapter: chapter
+      },
+      select: { id: true }
+    });
+    if (project) { return project.id }
+    else {
+      console.log(`Project ${name}, ${chapter} not found`)
+      return null
+    }
+  }
+  catch (error) {
+    console.error("Find Error: " + error);
+  }
+}
 
-// below script adds a member and immediately deletes it. 
-// to test, comment out the insertion / deletion code and check Supabase
-addMember("Harsh", "UMD")
-// use .then() since getMemberId() is an async function
-getMemberId("Harsh", "UMD").then(memberId => {
-  console.log(memberId);
-  deleteMemberById(memberId)
-});
+async function addMemberProject(memberId, projectId) {
+  try {
+    const memberProject = await prisma.Member_Project.create({
+      data: {
+        Member: { connect: { id: memberId } },
+        Project: { connect: { id: projectId } },
+      },
+    });
+    console.log(`Added member project pair: 
+      id: ${memberProject.id}
+      member_id: ${memberProject.member_id}
+      project_id: ${memberProject.project_id}`);
+  }
+  catch (error) {
+    console.error("Insertion error: " + error);
+  }
+}
 
-// disconnect from db when done with commands
-disconnectFromDB()
+async function disconnectFromDB() {
+  await prisma.$disconnect();
+}
+
+async function main() {
+  // connect to the db once before running commands
+  await connectToDB();
+
+  // create labels to add to tables
+  const name = "Eve";
+  const uni = "Cornell";
+  const project = "Non-Profit-Project-4";
+  const chapter = "Cornell";
+  // add member and project
+  await addMember(name, uni);
+  await addProject(project, chapter);
+  // add the member and project pair to the join table
+  memberId = await getMemberId(name, uni)
+  projectId = await getProjectId(project, chapter)
+  await addMemberProject(memberId, projectId);
+
+  // disconnect from db when done with commands
+  disconnectFromDB();
+}
+
+main()
