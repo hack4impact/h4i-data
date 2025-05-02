@@ -3,19 +3,9 @@ const { Pool } = require('pg')
 
 dotenv.config()
 
-// added
+// create a prisma client
 const { PrismaClient } = require('./generated/prisma');
 const prisma = new PrismaClient();
-
-// const PASSWORD = process.env.PASSWORD;
-
-/*const pool = new Pool({
-  user: 'johndoe',
-  host: 'localhost',
-  database: 'mydb',
-  password: PASSWORD,
-  port: 5432,
-});*/
 
 // connect to supabase
 const pool = new Pool({
@@ -97,6 +87,7 @@ async function getMemberId(name, university) {
   }
 }
 
+// add a project to the Project table successfully
 async function addProject(name, chapter) {
   try {
     const newProject = await prisma.Project.create({
@@ -116,6 +107,7 @@ async function addProject(name, chapter) {
   }
 }
 
+// retrieve project ID from the Project Table
 async function getProjectId(name, chapter) {
   try {
     const project = await prisma.Project.findFirst({
@@ -136,6 +128,7 @@ async function getProjectId(name, chapter) {
   }
 }
 
+// add an entry connecting Member and Project table
 async function addMemberProject(memberId, projectId) {
   try {
     const memberProject = await prisma.Member_Project.create({
@@ -163,10 +156,10 @@ async function main() {
   await connectToDB();
 
   // create labels to add to tables
-  const name = "Eve";
-  const uni = "Cornell";
-  const project = "Non-Profit-Project-4";
-  const chapter = "Cornell";
+  const name = "sophia";
+  const uni = "cal poly univ";
+  const project = "project s";
+  const chapter = "chapter s";
   // add member and project
   await addMember(name, uni);
   await addProject(project, chapter);
@@ -174,6 +167,9 @@ async function main() {
   memberId = await getMemberId(name, uni)
   projectId = await getProjectId(project, chapter)
   await addMemberProject(memberId, projectId);
+
+  // delete member, which should delete all other rows with its relation
+  deleteMemberById(memberId)
 
   // disconnect from db when done with commands
   disconnectFromDB();
