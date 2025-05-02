@@ -7,16 +7,6 @@ dotenv.config()
 const { PrismaClient } = require('./generated/prisma');
 const prisma = new PrismaClient();
 
-// const PASSWORD = process.env.PASSWORD;
-
-/*const pool = new Pool({
-  user: 'johndoe',
-  host: 'localhost',
-  database: 'mydb',
-  password: PASSWORD,
-  port: 5432,
-});*/
-
 // connect to supabase
 const pool = new Pool({
   connectionString: process.env.SUPABASE_URL,
@@ -140,6 +130,9 @@ async function addMemberProject(memberId, projectId) {
   try {
     const memberProject = await prisma.Member_Project.create({
       data: {
+        // Member_Project is meant to be keep track of Member and Project pairs,
+        // the lines below tell prisma: "connect the memberId to the member 
+        // associated with that id" and same with the project
         Member: { connect: { id: memberId } },
         Project: { connect: { id: projectId } },
       },
@@ -163,10 +156,10 @@ async function main() {
   await connectToDB();
 
   // create labels to add to tables
-  const name = "Eve";
-  const uni = "Cornell";
-  const project = "Non-Profit-Project-4";
-  const chapter = "Cornell";
+  const name = "example_name";
+  const uni = "example_university";
+  const project = "example_project";
+  const chapter = "example_university";;
   // add member and project
   await addMember(name, uni);
   await addProject(project, chapter);
@@ -179,4 +172,11 @@ async function main() {
   disconnectFromDB();
 }
 
-main()
+if (require.main === module) {
+  main();
+}
+
+module.exports.connectToDB = connectToDB;
+module.exports.disconnectFromDB = disconnectFromDB;
+module.exports.getMemberId = getMemberId;
+module.exports.getProjectId = getProjectId;
