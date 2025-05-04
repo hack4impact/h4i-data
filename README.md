@@ -40,3 +40,7 @@ node index.js
 npm test 
 ```
 ---
+
+## Helpful Links
+
+1. Prisma: https://www.prisma.io/docs/getting-started/setup-prisma/add-to-existing-project/relational-databases-typescript-postgresql
