@@ -6,7 +6,7 @@ This is a repository for setting up the Prisma ORM, tests, and database.
 ## 🛠 Technology Used
 
 - **Express** — Javascript backend framework
-- **PostgreSQL** — Relational Database (Supabase is our hosting service - for the .env info ask Sophia, Harsh, or Josh for it!)
+- **PostgreSQL** — Relational Database (Supabase is our hosting service - for the .env info ask Sophia, Harsh, or Josh for it! To view the databases in Supabase, DM Sophia to get an invitation!)
 - **Prisma** - Object Relational Mapping for convenience (with this, we don't have to write raw SQL!)
 - **Jest** - Testing Framework, CI
 
