@@ -29,6 +29,12 @@ npx prisma db pull - This is to update models in schema.prisma according to the 
 
 npx prisma generate - This generates the Prisma Client code based on our schema.prisma (use this whenever you update the schema.prisma)
 
+```bash
+npx prisma migrate dev
+```
+
+Run this whenever you make changes to the schema.prisma
+
 ---
 ## Run index.ts
 ```bash
