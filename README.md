@@ -17,7 +17,7 @@ This is a repository for setting up the Prisma ORM, tests, and database.
 npm i
 ```
 ---
-# Prisma
+## Prisma
 
 ```bash
 npx prisma db pull
@@ -35,7 +35,7 @@ node index.js
 ```
 
 ---
-## Run tests 
+## Run Tests
 ```bash 
 npm test 
 ```
