@@ -1,10 +1,10 @@
-const dotenv = require('dotenv')
-const { Pool } = require('pg')
+import dotenv from 'dotenv';
+import { Pool } from 'pg';
 
 dotenv.config()
 
 // create a prisma client
-const { PrismaClient } = require('./generated/prisma');
+import { PrismaClient } from './generated/prisma';
 const prisma = new PrismaClient();
 
 // connect to supabase
@@ -28,7 +28,7 @@ async function connectToDB() {
 }
 
 // adds a member to the db with name, university,
-async function addMember(name, university) {
+async function addMember(name: string, university: string) {
   try {
     // add the new member
     const newMember = await prisma.member.create({
@@ -51,7 +51,7 @@ async function addMember(name, university) {
 }
 
 // deletes member by a unique identifier, which is the id
-async function deleteMemberById(id) {
+async function deleteMemberById(id: any) {
   try {
     // delete member based on id
     const member = await prisma.member.delete({
@@ -71,7 +71,7 @@ async function deleteMemberById(id) {
 }
 
 // get the member id from the name and university (returns the first match)
-async function getMemberId(name, university) {
+async function getMemberId(name: string, university: string) {
   try {
     // retrieve first match of the member by university and name
     const member = await prisma.member.findFirst({
@@ -97,7 +97,7 @@ async function getMemberId(name, university) {
 }
 
 // adds a project to the Project table
-async function addProject(name, chapter) {
+async function addProject(name: string, chapter: string) {
   try {
     // add a new project
     const newProject = await prisma.project.create({
@@ -119,7 +119,7 @@ async function addProject(name, chapter) {
 }
 
 // retrieve project ID from the Project Table
-async function getProjectId(name, chapter) {
+async function getProjectId(name: string, chapter: string) {
   try {
     // retreive the id of the project by name and chapter
     const project = await prisma.project.findFirst({
@@ -145,7 +145,7 @@ async function getProjectId(name, chapter) {
 }
 
 // adds an entry connecting Member and Project table
-async function addMemberProject(memberId, projectId) {
+async function addMemberProject(memberId: any, projectId: any) {
   try {
     // connect project id and member id together into the Member_Project table
     const memberProject = await prisma.member_project.create({
@@ -189,9 +189,9 @@ async function main() {
   await addProject(project, chapter);
 
   // retrieve member id
-  memberId = await getMemberId(name, uni)
+  const memberId = await getMemberId(name, uni)
   // retrieve project id
-  projectId = await getProjectId(project, chapter)
+  const projectId = await getProjectId(project, chapter)
 
   // add the member and project pair to the join table
   await addMemberProject(memberId, projectId);

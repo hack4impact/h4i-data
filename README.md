@@ -5,6 +5,7 @@ This is a repository for setting up the Prisma ORM, tests, and database.
 ---
 ## 🛠 Technology Used
 
+- **Language** - Typescript
 - **Express** — Javascript backend framework
 - **PostgreSQL** — Relational Database (Supabase is our hosting service - for the .env info ask Sophia, Harsh, or Josh for it! To view the databases in Supabase, DM Sophia to get an invitation!)
 - **Prisma** - Object Relational Mapping for convenience (with this, we don't have to write raw SQL!)
@@ -29,9 +30,9 @@ npx prisma db pull - This is to update models in schema.prisma according to the 
 npx prisma generate - This generates the Prisma Client code based on our schema.prisma (use this whenever you update the schema.prisma)
 
 ---
-## Run index.js
+## Run index.ts
 ```bash
-node index.js
+npx ts-node index.ts
 ```
 
 ---
