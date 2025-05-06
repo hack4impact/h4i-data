@@ -48,4 +48,4 @@ jobs:
         run: npx prisma migrate deploy
 
       - name: Run app
-        run: node index.js
+        run: npx ts-node index.ts
