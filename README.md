@@ -44,7 +44,7 @@ npx ts-node index.ts
 ---
 ## Rules When Creating Branches
 
-1. Please make sure to name your branch with your name (ex. JaneDoe)
+1. Please make sure to name your branch with your name (ex. jane)
 
 ---
 ## Run Tests
