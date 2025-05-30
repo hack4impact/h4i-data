@@ -36,9 +36,9 @@ npx prisma migrate dev
 Run this whenever you make changes to the schema.prisma
 
 ---
-## Run index.ts
+## Run main.ts
 ```bash
-npx ts-node index.ts
+npx ts-node main.ts
 ```
 
 ---
