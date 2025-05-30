@@ -42,6 +42,20 @@ npx ts-node main.ts
 ```
 
 ---
+## GraphQL
+
+Example of what you can run:
+```
+{
+  getMembers {
+    id
+    name
+    university
+  }
+}
+```
+This retreives ALL members in the database of the Member table
+---
 ## Rules When Creating Branches
 
 1. Please make sure to name your branch with your name (ex. jane)
