@@ -16,7 +16,7 @@ new Pool({
 });
 
 // connects to the db and lists the db 
-async function connectToDB() {
+export async function connectToDB() {
   try {
     // connects to the database
     await prisma.$connect()
@@ -28,7 +28,7 @@ async function connectToDB() {
 }
 
 // adds a member to the db with name, university,
-async function addMember(name: string, university: string) {
+export async function addMember(name: string, university: string) {
   try {
     // add the new member
     const newMember = await prisma.member.create({
@@ -51,7 +51,7 @@ async function addMember(name: string, university: string) {
 }
 
 // deletes member by a unique identifier, which is the id
-async function deleteMemberById(id: any) {
+export async function deleteMemberById(id: any) {
   try {
     // delete member based on id
     const member = await prisma.member.delete({
@@ -71,7 +71,7 @@ async function deleteMemberById(id: any) {
 }
 
 // get the member id from the name and university (returns the first match)
-async function getMemberId(name: string, university: string) {
+export async function getMemberId(name: string, university: string) {
   try {
     // retrieve first match of the member by university and name
     const member = await prisma.member.findFirst({
@@ -97,7 +97,7 @@ async function getMemberId(name: string, university: string) {
 }
 
 // adds a project to the Project table
-async function addProject(name: string, chapter: string) {
+export async function addProject(name: string, chapter: string) {
   try {
     // add a new project
     const newProject = await prisma.project.create({
@@ -118,8 +118,30 @@ async function addProject(name: string, chapter: string) {
   }
 }
 
+export async function getAllMembers() {
+  try {
+    // retreive all members
+    const members = await prisma.member.findMany();
+    // if we find the project, return the id
+    if (members) {
+      return members.map((m) => ({
+        ...m,
+        id: m.id.toString(), // make sure it's a string
+      }))
+    }
+    // otherwise print the error of it not being found
+    else {
+      console.log(`Failed to get all members in the database`)
+      return null
+    }
+  }
+  catch (error) {
+    console.error("Find Error: " + error);
+  }
+}
+
 // retrieve project ID from the Project Table
-async function getProjectId(name: string, chapter: string) {
+export async function getProjectId(name: string, chapter: string) {
   try {
     // retreive the id of the project by name and chapter
     const project = await prisma.project.findFirst({
@@ -145,7 +167,7 @@ async function getProjectId(name: string, chapter: string) {
 }
 
 // adds an entry connecting Member and Project table
-async function addMemberProject(memberId: any, projectId: any) {
+export async function addMemberProject(memberId: any, projectId: any) {
   try {
     // connect project id and member id together into the Member_Project table
     const memberProject = await prisma.member_project.create({
@@ -169,45 +191,18 @@ async function addMemberProject(memberId: any, projectId: any) {
 }
 
 // disconnect the database
-async function disconnectFromDB() {
+export async function disconnectFromDB() {
   await prisma.$disconnect();
-}
-
-async function main() {
-  // connect to the db once before running commands
-  await connectToDB();
-
-  // create labels to add to tables
-  const name = "Jane Doe";
-  const uni = "Hack4Impact University";
-  const project = "Project A";
-  const chapter = "Hack4Impact Chapter";
-  
-  // add a member
-  await addMember(name, uni);
-  // add a project
-  await addProject(project, chapter);
-
-  // retrieve member id
-  const memberId = await getMemberId(name, uni)
-  // retrieve project id
-  const projectId = await getProjectId(project, chapter)
-
-  // add the member and project pair to the join table
-  await addMemberProject(memberId, projectId);
-
-  // delete member, which would delete all other rows with its relation
-  deleteMemberById(memberId)
-
-  // disconnect from db when done with commands
-  disconnectFromDB();
-}
-
-if (require.main === module) {
-  main();
+  console.log("Disconnected successfully");
 }
 
 module.exports.connectToDB = connectToDB;
 module.exports.disconnectFromDB = disconnectFromDB;
 module.exports.getMemberId = getMemberId;
 module.exports.getProjectId = getProjectId;
+module.exports.addMember = addMember;
+module.exports.addMemberProject = addMemberProject;
+module.exports.addProject = addProject;
+module.exports.deleteMemberById = deleteMemberById;
+module.exports.getAllMembers = getAllMembers;
+
