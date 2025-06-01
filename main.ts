@@ -13,13 +13,19 @@ const graphqlModels = `
   }
 
   type Query {
-    getMembers: [Member]
+    getAllMembers: [Member],
+    getMemberId(name: String, university: String): ID,
+    getProjectId(project: String, chapter: String): ID,
   }
 `;
 
 const resolvers = {
   Query: {
-    getMembers: () => getAllMembers(),
+    getAllMembers: () => getAllMembers(),
+    getMemberId: (_: any, args: { name: string; university: string }) =>
+      getMemberId(args.name, args.university),
+    getProjectId: (_: any, args: { project: string; chapter: string }) =>
+      getProjectId(args.project, args.chapter),
   },
 };
 

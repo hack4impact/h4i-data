@@ -77,13 +77,13 @@ export async function getMemberId(name: string, university: string) {
     const member = await prisma.member.findFirst({
       where: {
         name: name,
-        university: university
+        university: university,
       },
       select: { id: true }
     });
     // if we find the member, return its id
     if (member) {
-      return member.id
+      return member.id.toString()
     }
     else {
       // otherwise state that it's not found
@@ -153,7 +153,7 @@ export async function getProjectId(name: string, chapter: string) {
     });
     // if we find the project, return the id
     if (project) {
-      return project.id
+      return project.id.toString()
     }
     // otherwise print the error of it not being found
     else {
