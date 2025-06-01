@@ -12,10 +12,19 @@ const graphqlModels = `
     university: String
   }
 
+  type Project {
+    project: String,
+    chapter: String
+  }
+
   type Query {
     getAllMembers: [Member],
     getMemberId(name: String, university: String): ID,
     getProjectId(project: String, chapter: String): ID,
+    addProject(project: String, chapter: String): String,
+    addMember(name: String, university: String): String,
+    deleteMemberById(memberId: ID): String,
+    addMemberProject(memberId: ID, projectId: ID): String,
   }
 `;
 
@@ -26,6 +35,14 @@ const resolvers = {
       getMemberId(args.name, args.university),
     getProjectId: (_: any, args: { project: string; chapter: string }) =>
       getProjectId(args.project, args.chapter),
+    addProject: (_: any, args: { project: string; chapter: string }) =>
+      addProject(args.project, args.chapter),
+    addMember: (_: any, args: { name: string; university: string }) =>
+      addMember(args.name, args.university),
+    deleteMemberById: (_: any, args: { memberId: number }) =>
+      deleteMemberById(args.memberId),
+    addMemberProject: (_: any, args: { memberId: string; projectId: string }) =>
+      addMemberProject(args.memberId, args.projectId),
   },
 };
 

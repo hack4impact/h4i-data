@@ -44,14 +44,18 @@ export async function addMember(name: string, university: string) {
       created_at: ${newMember.created_at}
       name: ${newMember.name}
       university: ${newMember.university}`);
+
+    return "Successfully added member!"
   }
   catch (error) {
     console.error("Insertion Error: " + error)
+    return "Failed to add member!"
   }
 }
 
 // deletes member by a unique identifier, which is the id
-export async function deleteMemberById(id: any) {
+export async function deleteMemberById(id: number) {
+  console.log('got id', id)
   try {
     // delete member based on id
     const member = await prisma.member.delete({
@@ -64,9 +68,11 @@ export async function deleteMemberById(id: any) {
       created_at: ${member.created_at}
       name: ${member.name}
       university: ${member.university}`);
+    return "Successfully deleted member!"
   }
   catch (error) {
     console.error("Deletion Error: " + error);
+    return "Failed to delete member!"
   }
 }
 
@@ -112,9 +118,12 @@ export async function addProject(name: string, chapter: string) {
       created_at: ${newProject.created_at}
       name: ${newProject.name}
       chapter: ${newProject.chapter}`);
+
+    return "Successfully added project!"
   }
   catch (error) {
     console.error("Insertion Error: " + error)
+    return "Failed to add project!"
   }
 }
 
@@ -184,9 +193,11 @@ export async function addMemberProject(memberId: any, projectId: any) {
       id: ${memberProject.id}
       member_id: ${memberProject.member_id}
       project_id: ${memberProject.project_id}`);
+    return "Successfully added link in member_project table!"
   }
   catch (error) {
     console.error("Insertion error: " + error);
+    return "Failed to add link in member_project table!"
   }
 }
 
