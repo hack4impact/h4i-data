@@ -1,4 +1,4 @@
-# getAllMembers
+# Retreiving All Members' Information
 ```bash
 query gettingAllMembers {
   getAllMembers {
@@ -9,37 +9,45 @@ query gettingAllMembers {
 }
 ```
 
-# getMemberId
+# Getting A Specific Member's ID
+```bash
 query gettingMemberIdSophia {
   getMemberId(name: "sophia", university: "cal poly")
 }
+```
 
 
-# getProjectId
+# Getting A Specific Project's ID
+```bash
 query gettingProjectIdBytesOfGood {
   getProjectId(project: "Bytes of Good", chapter: "GTech")
 }
+```
 
-query gettingProjectIdWorldWildLifeFund {
-  getProjectId(project: "world-wildlife-fund", chapter: "UMD")
-}
-
-# addProject
+# Adding A Project
+```bash
 query addProjectTestMIT {
   addProject(project: "test", chapter: "MIT")
 }
+```
 
-# addMember and deleteMember
-query add_and_deleteMemberKaylie {
+# Adding A Member
+```bash
+query addMemberKaylie {
   addMember(name: "Kaylie", university: "UC Santa Cruz")
 }
+```
 
-# deleteMemberId
+# Deleting A Member
+```bash
 query deletingMemberKaylie {
-  deleteMemberById(memberId: 87) # pick a number from the Member table
+  deleteMemberById(memberId: 87) # pick a number from the Member table to replace 87
 }
+```
 
-# addMemberProject
+# Adding A Member Project Link (Linking Project with Member)
+```bash
 query addMemberProjectSophiaMIT {
   addMemberProject(memberId: 2, projectId: 70)
 }
+```
