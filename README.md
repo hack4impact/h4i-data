@@ -50,15 +50,15 @@ npx ts-node main.ts
 
 Example of what you can run:
 ```
-{
-  getMembers {
+query gettingAllMembers {
+  getAllMembers {
     id
     name
     university
   }
 }
 ```
-This retreives ALL members in the database of the Member table
+This retreives ALL members in the database of the Member table. Other examples are listed in the docs folder!
 ---
 ## Rules When Creating Branches
 
