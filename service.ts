@@ -129,13 +129,16 @@ export async function addProject(name: string, chapter: string) {
 
 export async function getAllMembers() {
   try {
-    // retreive all members
+    // retreive all members - prisma has built-in functions such as findMany(), which can be found in the documentation linked in the README.md
+    // we use member in prisma.member.findMany() because we are focusing on the member table
+    // member is referred from schema.prisma, where you can see that member is defined; this is case sensitive, so make sure it's matching with schema.prisma! 
     const members = await prisma.member.findMany();
     // if we find the project, return the id
     if (members) {
+      // returning an array of members, with their ID's as strings 
       return members.map((m) => ({
         ...m,
-        id: m.id.toString(), // make sure it's a string
+        id: m.id.toString(), // convert it to a string so we can retreive and view properly
       }))
     }
     // otherwise print the error of it not being found
