@@ -7,7 +7,7 @@ This is a repository for setting up the Prisma ORM, tests, and database.
 
 - **Language** - Typescript
 - **Express** — Javascript backend framework
-- **PostgreSQL** — Relational Database (Supabase is our hosting service - for the .env info ask Sophia, Harsh, or Josh for it! To view the databases in Supabase, DM Sophia to get an invitation!)
+- **PostgreSQL** — Relational Database (Supabase is our hosting service)
 - **Prisma** - Object Relational Mapping for convenience (with this, we don't have to write raw SQL!)
 - **Jest** - Testing Framework, CI
 
@@ -17,6 +17,10 @@ This is a repository for setting up the Prisma ORM, tests, and database.
 ```bash
 npm i
 ```
+---
+
+Then create a file in the main directory called ".env". For the .env info, ask Sophia, Harsh, or Josh for it! To view the databases in Supabase, DM Sophia to get access!
+
 ---
 ## Prisma
 
