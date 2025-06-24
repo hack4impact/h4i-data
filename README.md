@@ -29,17 +29,12 @@ npx prisma db pull
 npx prisma generate
 ```
 
-npx prisma db pull - This is to update models in schema.prisma according to the database in Supabase
+npx prisma db pull - This is to update models in schema.prisma according to the database in Supabase (so if you created a new table in supabase, then you can update schema.prisma by executing this command - test it out and see it for yourself! the tables would appear if you create one and run this command)
 
-npx prisma generate - This generates the Prisma Client code based on our schema.prisma (use this whenever you update the schema.prisma)
-
-```bash
-npx prisma migrate dev
-```
-
-Run this whenever you make changes to the schema.prisma
+npx prisma generate - This generates the Prisma Client code based on our schema.prisma. We need this to generate a new Prisma Client, which allows us to use the helpful Prisma Client CRUD functions such as findMany(), findFirst(), and more with our new tables!
 
 ---
+
 ## Run main.ts
 ```bash
 npx ts-node main.ts
@@ -90,7 +85,21 @@ This retreives ALL members in the database of the Member table. Other examples a
 
 ---
 
+## How to Make Changes to Supabase Tables
+
+1. Access the hack4impact project and navigate to Table Editor using the left sidebar
+2. You can use Insert button to create new rows of data, create new tables with "+ New Table" button, etc.
+3. After making changes, in your terminal, in order to update your code to match what the database has, run "npx prisma db pull" and "npx prisma generate" (explanations provided above in Prisma section)
+4. With this, your code is up to date with the database and you can safely query data!
+
+---
+
+## How to Write Tests
+
+todo
+
+---
+
 ## Helpful Links
 
-1. Prisma: https://www.prisma.io/docs/getting-started/setup-prisma/add-to-existing-project/relational-databases-typescript-postgresql
-2. Prisma Client CRUD Operations: https://www.prisma.io/docs/orm/prisma-client/queries/crud
+1. Prisma Client CRUD Operations: https://www.prisma.io/docs/orm/prisma-client/queries/crud
