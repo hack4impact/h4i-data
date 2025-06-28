@@ -88,9 +88,9 @@ This retreives ALL members in the database of the Member table. Other examples a
 ## How To Add/Update GraphQL Endpoints
 
 1. Define all data querying functions in the service.ts file - follow the patterns in how functions are written based on the current existing functions:
-  - async functions, because we are fetching data and don't know how long it'll take
-  - try and catch functions to catch any errors that may result in attempting to query data
-  - you will notice the prisma.member.create or prisma.project.findFirst functions and more. The endings of the functions (create, findFirst, findMany, etc.) are the Prisma Client CRUD Operations (link below in Helpful Links), while "member", "project", "member_project" within those functions are taken from schema.prisma file located in the prisma folder; make sure you copy them properly because they are case sensitive!
+  - Async functions, because we are fetching data and don't know how long it'll take
+  - Try and catch functions to catch any errors that may result in attempting to query data
+  - You will notice the prisma.member.create or prisma.project.findFirst functions and more. The endings of the functions (create, findFirst, findMany, etc.) are the Prisma Client CRUD Operations (link below in Helpful Links), while "member", "project", "member_project" within those functions are taken from schema.prisma file located in the prisma folder; make sure you copy them properly because they are case sensitive!
 2. Make sure to export the function you write by writing "module.exports.[function name] = [function name]; with many examples listed below in the file - we need to do this in order to use the function in the main.ts file
 3. Now, let's look at main.ts - first thing to note is that a schema needs 2 crucial parts - typeDefs (we defined in graphqlModels) and resolvers (explanation below)
   - In graphqlModels, this is where we define the actual GraphQL schema
