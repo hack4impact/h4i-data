@@ -28,7 +28,7 @@ const graphqlModels = `
   }
 `;
 
-const resolvers = {
+export const resolvers = {
   Query: {
     getAllMembers: () => getAllMembers(),
     getMemberId: (_: any, args: { name: string; university: string }) =>
@@ -61,10 +61,12 @@ app.use(
 
 app.use(express.json());
 
-const server = app.listen(3000, () => {
-  console.log("Server running at http://localhost:3000");
-  console.log("GraphQL: http://localhost:3000/graphql");
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(3000, () => {
+    console.log("Server running at http://localhost:3000");
+    console.log("GraphQL: http://localhost:3000/graphql");
+  });  
+}
 
 async function main() {
   // connect to the db once before running commands

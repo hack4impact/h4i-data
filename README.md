@@ -3,25 +3,29 @@
 This is a repository for setting up the Prisma ORM, tests, and database.
 
 ---
+
 ## 🛠 Technology Used
 
 - **Language** - Typescript
 - **Express** — Javascript backend framework
 - **PostgreSQL** — Relational Database (Supabase is our hosting service)
-- **Prisma** - Object Relational Mapping for convenience (with this, we don't have to write raw SQL!)
+- **Prisma** - Object Relational Mapping (ORM) so we don't have to write raw SQL
 - **Jest** - Testing Framework, CI
 
 ---
+
 ## Setup and Run
 
 ```bash
 npm i
 ```
+
 ---
 
 Then create a file in the main directory called ".env". For the .env info, ask Sophia, Harsh, or Josh for it! To view the databases in Supabase, DM Sophia to get access!
 
 ---
+
 ## Prisma
 
 ```bash
@@ -36,6 +40,7 @@ npx prisma generate - This generates the Prisma Client code based on our schema.
 ---
 
 ## Run main.ts
+
 ```bash
 npx ts-node main.ts
 ```
@@ -47,15 +52,25 @@ npx ts-node main.ts
 1. Please make sure to name your branch with your name (ex. jane)
 
 ---
-## Run Tests
+
+## Run Tests (2 ways)
+
 ```bash 
 npm test 
 ```
+
+OR
+
+```bash
+npx jest
+```
+
 ---
 
 ## Running GraphQL
 
 Example of what you can run:
+
 ```
 query gettingAllMembers {
   getAllMembers {
@@ -96,10 +111,15 @@ This retreives ALL members in the database of the Member table. Other examples a
 
 ## How to Write Tests
 
-todo
+1. Examples with detailed comments in userResolvers.test.ts and db.test.ts (for the first test)
+2. When mocking functions, such as getMemberId in userResolvers.test.ts, make sure to mock the service BEFORE importing. The reason is due to Jest replacing the actual module with our mock and if we do it the other way around, then mocking won't be successful. After that, import any necessary functions
+3. Next, we have describe(). This groups up related tests that we will have and is useful for organization. If you only have one test or so, a describe() isn't necessary.
+4. Now we can start creating individual tests. it() and test() both do the same thing in Jest, and test() is just a more general function, while it() allows us to read everything in a sentence easily (ex. it("returns an id") vs test("returns an id")). Make sure the functions are async!
+5. Then write the test logic inside, normally creating a mock object that we will test to get or update, etc. and then comparing its result with our real result using the expect() method. More detailed documentation is listed below in the Helpful Links.
 
 ---
 
 ## Helpful Links
 
 1. Prisma Client CRUD Operations: https://www.prisma.io/docs/orm/prisma-client/queries/crud
+2. Jest Documentation: https://jestjs.io/docs/getting-started

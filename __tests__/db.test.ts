@@ -1,13 +1,19 @@
 const { PrismaClient } = require('../generated/prisma');
 const prisma = new PrismaClient();
 
+// this tells the Prisma to disconnect from the database after all tests are done
 afterAll(async () => {
     await prisma.$disconnect();
 }); 
 
+// describe() groups up related tests together to keep tests organized
 describe('Prisma DB tests', () => {
+    // test() is an individual test case - in this case, this test should "Fetch members" as listed in the description
     test('Fetch members', async () => {
+        // test logic here; first, members in the db are retrieved
         const members = await prisma.member.findMany();
+        // use expect() to verify the outcome!
+        // in this case, we are expecting that the members we retrieved IS an array
         expect(Array.isArray(members)).toBe(true);
     });
 
