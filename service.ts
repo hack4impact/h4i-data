@@ -16,7 +16,7 @@ new Pool({
 });
 
 // connects to the db and lists the db 
-async function connectToDB() {
+export async function connectToDB() {
   try {
     // connects to the database
     await prisma.$connect()
@@ -28,7 +28,7 @@ async function connectToDB() {
 }
 
 // adds a member to the db with name, university,
-async function addMember(name: string, university: string) {
+export async function addMember(name: string, university: string) {
   try {
     // add the new member
     const newMember = await prisma.member.create({
@@ -44,14 +44,18 @@ async function addMember(name: string, university: string) {
       created_at: ${newMember.created_at}
       name: ${newMember.name}
       university: ${newMember.university}`);
+
+    return "Successfully added member!"
   }
   catch (error) {
     console.error("Insertion Error: " + error)
+    return "Failed to add member!"
   }
 }
 
 // deletes member by a unique identifier, which is the id
-async function deleteMemberById(id: any) {
+export async function deleteMemberById(id: number) {
+  console.log('got id', id)
   try {
     // delete member based on id
     const member = await prisma.member.delete({
@@ -64,26 +68,28 @@ async function deleteMemberById(id: any) {
       created_at: ${member.created_at}
       name: ${member.name}
       university: ${member.university}`);
+    return "Successfully deleted member!"
   }
   catch (error) {
     console.error("Deletion Error: " + error);
+    return "Failed to delete member!"
   }
 }
 
 // get the member id from the name and university (returns the first match)
-async function getMemberId(name: string, university: string) {
+export async function getMemberId(name: string, university: string) {
   try {
     // retrieve first match of the member by university and name
     const member = await prisma.member.findFirst({
       where: {
         name: name,
-        university: university
+        university: university,
       },
       select: { id: true }
     });
     // if we find the member, return its id
     if (member) {
-      return member.id
+      return member.id.toString()
     }
     else {
       // otherwise state that it's not found
@@ -97,7 +103,7 @@ async function getMemberId(name: string, university: string) {
 }
 
 // adds a project to the Project table
-async function addProject(name: string, chapter: string) {
+export async function addProject(name: string, chapter: string) {
   try {
     // add a new project
     const newProject = await prisma.project.create({
@@ -112,14 +118,42 @@ async function addProject(name: string, chapter: string) {
       created_at: ${newProject.created_at}
       name: ${newProject.name}
       chapter: ${newProject.chapter}`);
+
+    return "Successfully added project!"
   }
   catch (error) {
     console.error("Insertion Error: " + error)
+    return "Failed to add project!"
+  }
+}
+
+export async function getAllMembers() {
+  try {
+    // retreive all members - prisma has built-in functions such as findMany(), which can be found in the documentation linked in the README.md
+    // we use member in prisma.member.findMany() because we are focusing on the member table
+    // member is referred from schema.prisma, where you can see that member is defined; this is case sensitive, so make sure it's matching with schema.prisma! 
+    const members = await prisma.member.findMany();
+    // if we find the project, return the id
+    if (members) {
+      // returning an array of members, with their ID's as strings 
+      return members.map((m) => ({
+        ...m,
+        id: m.id.toString(), // convert it to a string so we can retreive and view properly
+      }))
+    }
+    // otherwise print the error of it not being found
+    else {
+      console.log(`Failed to get all members in the database`)
+      return null
+    }
+  }
+  catch (error) {
+    console.error("Find Error: " + error);
   }
 }
 
 // retrieve project ID from the Project Table
-async function getProjectId(name: string, chapter: string) {
+export async function getProjectId(name: string, chapter: string) {
   try {
     // retreive the id of the project by name and chapter
     const project = await prisma.project.findFirst({
@@ -131,7 +165,7 @@ async function getProjectId(name: string, chapter: string) {
     });
     // if we find the project, return the id
     if (project) {
-      return project.id
+      return project.id.toString()
     }
     // otherwise print the error of it not being found
     else {
@@ -145,7 +179,7 @@ async function getProjectId(name: string, chapter: string) {
 }
 
 // adds an entry connecting Member and Project table
-async function addMemberProject(memberId: any, projectId: any) {
+export async function addMemberProject(memberId: any, projectId: any) {
   try {
     // connect project id and member id together into the Member_Project table
     const memberProject = await prisma.member_project.create({
@@ -162,52 +196,27 @@ async function addMemberProject(memberId: any, projectId: any) {
       id: ${memberProject.id}
       member_id: ${memberProject.member_id}
       project_id: ${memberProject.project_id}`);
+    return "Successfully added link in member_project table!"
   }
   catch (error) {
     console.error("Insertion error: " + error);
+    return "Failed to add link in member_project table!"
   }
 }
 
 // disconnect the database
-async function disconnectFromDB() {
+export async function disconnectFromDB() {
   await prisma.$disconnect();
-}
-
-async function main() {
-  // connect to the db once before running commands
-  await connectToDB();
-
-  // create labels to add to tables
-  const name = "Jane Doe";
-  const uni = "Hack4Impact University";
-  const project = "Project A";
-  const chapter = "Hack4Impact Chapter";
-  
-  // add a member
-  await addMember(name, uni);
-  // add a project
-  await addProject(project, chapter);
-
-  // retrieve member id
-  const memberId = await getMemberId(name, uni)
-  // retrieve project id
-  const projectId = await getProjectId(project, chapter)
-
-  // add the member and project pair to the join table
-  await addMemberProject(memberId, projectId);
-
-  // delete member, which would delete all other rows with its relation
-  deleteMemberById(memberId)
-
-  // disconnect from db when done with commands
-  disconnectFromDB();
-}
-
-if (require.main === module) {
-  main();
+  console.log("Disconnected successfully");
 }
 
 module.exports.connectToDB = connectToDB;
 module.exports.disconnectFromDB = disconnectFromDB;
 module.exports.getMemberId = getMemberId;
 module.exports.getProjectId = getProjectId;
+module.exports.addMember = addMember;
+module.exports.addMemberProject = addMemberProject;
+module.exports.addProject = addProject;
+module.exports.deleteMemberById = deleteMemberById;
+module.exports.getAllMembers = getAllMembers;
+
