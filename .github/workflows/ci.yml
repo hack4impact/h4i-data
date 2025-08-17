@@ -1,10 +1,11 @@
-name: CI
+name: Backend CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main, ci-cd-testing ]
   pull_request:
-    branches: [main]
+    branches: [ main, ci-cd-testing ]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -13,39 +14,46 @@ jobs:
     services:
       postgres:
         image: postgres:15
-        ports:
-          - 5432:5432
         env:
           POSTGRES_DB: testdb
           POSTGRES_USER: johndoe
           POSTGRES_PASSWORD: testpass
+        ports:
+          - "5432:5432"
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    env:
-      DATABASE_URL: postgres://johndoe:testpass@localhost:5432/testdb
-      SUPABASE_URL: postgres://johndoe:testpass@localhost:5432/testdb 
+          --health-cmd="pg_isready -h 127.0.0.1 -p 5432 -U johndoe -d testdb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
+          cache: npm
 
-      - name: Install dependencies
-        run: npm install
+      - run: npm ci
 
-      - name: Generate Prisma client
-        run: npx prisma generate
+      - name: Create .env.test
+        run: |
+          cat > .env.test << 'EOF'
+          DATABASE_URL=postgresql://johndoe:testpass@localhost:5432/testdb
+          EOF
 
-      - name: Run DB migrations
-        run: npx prisma migrate deploy
+      - name: Wait for Postgres
+        run: |
+          for i in {1..30}; do
+            if pg_isready -h 127.0.0.1 -p 5432 -U johndoe -d testdb; then
+              echo "Postgres is ready"; exit 0
+            fi
+            echo "Waiting for Postgres ($i/30)"; sleep 2
+          done
+          echo "Postgres did not become ready in time"; exit 1
 
-      - name: Run app
-        run: npx ts-node main.ts
+      - run: npx prisma generate
+      - run: npx prisma migrate deploy
+
+      - name: Run tests
+        run: npm test -- --runInBand
