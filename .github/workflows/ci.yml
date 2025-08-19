@@ -1,34 +1,97 @@
-name: Backend CI
+name: Backend CI (Supabase + Prisma)
 
 on:
   push:
-    branches: [ main, ci-cd-testing ]
+    branches:
+      - main
+      - ci-cd-testing
   pull_request:
-    branches: [ main, ci-cd-testing ]
+    branches:
+      - main
+      - ci-cd-testing
   workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment: testing # pulls secrets from the "testing" environment
+    environment: testing
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      - name: Install deps
+        run: npm ci
 
-      - name: Generate Prisma client
+      # ---------- DIAGNOSTICS ----------
+      - name: Show environment name
+        run: echo "Environment in use: testing"
+
+      - name: Confirm secrets injected (no values shown)
+        run: |
+          if [ -n "${DATABASE_URL:-}" ]; then echo "DATABASE_URL present ✅"; else echo "DATABASE_URL missing ❌"; exit 1; fi
+          if [ -n "${DIRECT_URL:-}" ]; then echo "DIRECT_URL present ✅"; else echo "DIRECT_URL missing ❌"; exit 1; fi
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+
+      - name: Parse hosts from URLs (no secrets printed)
+        run: |
+          echo "DATABASE_URL host: $(echo "$DATABASE_URL" | sed -E 's#.*://[^@]+@([^:/?]+).*#\1#')"
+          echo "DIRECT_URL host:   $(echo "$DIRECT_URL"   | sed -E 's#.*://[^@]+@([^:/?]+).*#\1#')"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+
+      - name: DNS & TCP checks to DIRECT_URL host
+        run: |
+          set -x
+          DIRECT_HOST=$(echo "$DIRECT_URL" | sed -E 's#.*://[^@]+@([^:/?]+).*#\1#')
+          getent hosts "$DIRECT_HOST" || true
+          if command -v nc >/dev/null 2>&1; then nc -vz "$DIRECT_HOST" 5432 || true; fi
+          if command -v timeout >/dev/null 2>&1; then timeout 5 bash -c "</dev/tcp/${DIRECT_HOST}/5432" && echo "tcp ok" || echo "tcp failed"; fi
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+
+      - name: Verify DIRECT_URL has sslmode=require
+        run: |
+          echo "$DIRECT_URL" | grep -q 'sslmode=require' && echo "sslmode=require present ✅" || (echo "sslmode=require missing ❌"; exit 1)
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+
+      - name: Install psql client & check readiness
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+          DIRECT_HOST=$(echo "$DIRECT_URL" | sed -E 's#.*://[^@]+@([^:/?]+).*#\1#')
+          pg_isready -h "$DIRECT_HOST" -p 5432 -d postgres || true
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      # ---------- END DIAGNOSTICS ----------
+
+      - name: Prisma generate
         run: npx prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
-      - name: Prisma migrate
-        run: npx prisma migrate deploy
+      - name: Prisma migrate (retry up to 3x)
+        run: |
+          set -e
+          for i in 1 2 3; do
+            echo "Attempt $i/3: prisma migrate deploy"
+            npx prisma migrate deploy && exit 0
+            echo "Retrying in 5s…"
+            sleep 5
+          done
+          echo "Migrate failed after 3 attempts"
+          exit 1
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
