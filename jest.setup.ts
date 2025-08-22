@@ -1,10 +1,15 @@
-import { prisma } from './prisma';
-import dotenv from 'dotenv';
+// jest.setup.ts
+let prisma: any;
 
-// Load environment variables
-dotenv.config();
+beforeAll(() => {
+  const { PrismaClient } = require('@prisma/client'); // dynamic require
+  prisma = new PrismaClient({
+    log: ['query', 'info', 'warn'],
+  });
+});
 
-// Cleanup database after all tests
 afterAll(async () => {
   await prisma.$disconnect();
 });
+
+export { prisma };
