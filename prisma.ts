@@ -1,9 +1,6 @@
-// prisma.ts
 import { PrismaClient } from "./generated/prisma";
 
-//import { PrismaClient } from '@prisma/client';
-
-// Extend the global object to hold a single PrismaClient instance in dev
+// Extend the global object to hold a SINGLE PrismaClient instance in dev
 declare global {
   // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined;
