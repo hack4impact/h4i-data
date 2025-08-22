@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test' });
+
+// Load the default .env file
+dotenv.config();
 
 afterAll(async () => {
   await prisma.member_project.deleteMany();
@@ -7,6 +9,3 @@ afterAll(async () => {
   await prisma.project.deleteMany();
   await prisma.$disconnect();
 });
-
-
-SUPABASE_URL="postgresql://postgres:postgres@localhost:5432/testdb"
