@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-      - ci-cd-testing
+      - sophia-ci-cd
   pull_request:
     branches:
       - main
-      - ci-cd-testing
+      - sophia-ci-cd
   workflow_dispatch:
 
 jobs:
