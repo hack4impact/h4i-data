@@ -35,11 +35,6 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
-      - name: Debug env
-        run: env | grep DATABASE_URL
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
       - name: Check DATABASE_URL
         run: |
           echo "DATABASE_URL is set"
@@ -47,18 +42,6 @@ jobs:
           echo "Host extracted: $HOST"
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: Check connectivity to pooler host
-        run: |
-          set -e
-          DIRECT_HOST=$(echo "$DIRECT_URL" | sed -E 's#.*://[^@]+@([^:/?]+).*#\1#')
-          echo "DIRECT_HOST=$DIRECT_HOST"
-          getent hosts "$DIRECT_HOST" || true
-          sudo apt-get update -y
-          sudo apt-get install -y postgresql-client
-          pg_isready -h "$DIRECT_HOST" -p 5432 -d postgres || true
-        env:
-          DIRECT_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Print DB host and user
         run: |
@@ -72,6 +55,9 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Verify Prisma client
+        run: ls -la node_modules/.prisma/client
 
       - name: Run tests
         run: npm test -- --runInBand
