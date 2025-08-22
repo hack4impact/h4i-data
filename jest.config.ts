@@ -9,6 +9,6 @@ module.exports = {
     moduleNameMapper: {
       '^@/(.*)$': '<rootDir>/src/$1', // optional alias mapping if you use @/ paths
     },
-    setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+    setupFilesAfterEnv: ["<rootDir>/prisma.ts"],
   };
   
