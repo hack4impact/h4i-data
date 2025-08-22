@@ -63,7 +63,7 @@ jobs:
         run: ls -la node_modules/.prisma/client
 
       - name: Run tests
-        run: npm test -- --runInBand
+        run: npm run test
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DATABASE_URL }}
