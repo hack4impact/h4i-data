@@ -35,6 +35,19 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
+      - name: Debug env
+        run: env | grep DATABASE_URL
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Check DATABASE_URL
+        run: |
+          echo "DATABASE_URL is set"
+          HOST=$(echo $DATABASE_URL | sed -E 's#.*://[^@]+@([^:/?]+).*#\1#')
+          echo "Host extracted: $HOST"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: Check connectivity to DIRECT_URL host
         run: |
           set -e
