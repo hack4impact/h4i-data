@@ -59,6 +59,13 @@ jobs:
           pg_isready -h "$DIRECT_HOST" -p 5432 -d postgres || true
         env:
           DIRECT_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Print DB host and user
+        run: |
+          echo "Host: $(echo $DATABASE_URL | sed -E 's#.*://[^:]+:.*@([^:/?]+).*#\1#')"
+          echo "User: $(echo $DATABASE_URL | sed -E 's#.*://([^:]+):.*@.*#\1#')"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         
       - name: Prisma migrate
         run: npx prisma migrate deploy
