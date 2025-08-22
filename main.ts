@@ -102,7 +102,7 @@ async function main() {
 
   // close server
   /*server.close(() => {
-    console.log("Server closed");
+    console.log("Server closed!");
   });*/
 }
 
