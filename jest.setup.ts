@@ -1,11 +1,10 @@
+import { prisma } from './prisma';
 import dotenv from 'dotenv';
 
-// Load the default .env file
+// Load environment variables
 dotenv.config();
 
+// Cleanup database after all tests
 afterAll(async () => {
-  await prisma.member_project.deleteMany();
-  await prisma.member.deleteMany();
-  await prisma.project.deleteMany();
   await prisma.$disconnect();
 });
