@@ -1,9 +1,7 @@
-import { prisma } from '../prisma';
-
 // this tells the Prisma to disconnect from the database after all tests are done
-afterAll(async () => {
+/*afterAll(async () => {
     await prisma.$disconnect();
-}); 
+}); */
 
 
 describe('Prisma basic test', () => {

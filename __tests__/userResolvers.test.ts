@@ -1,5 +1,3 @@
-import { prisma } from '../prisma';
-
 describe('Prisma basic test', () => {
     test('sample test', async () => {
       expect(0).toBe(0);
