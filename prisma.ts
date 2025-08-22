@@ -1,5 +1,7 @@
 // prisma.ts
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "./generated/prisma";
+
+//import { PrismaClient } from '@prisma/client';
 
 // Extend the global object to hold a single PrismaClient instance in dev
 declare global {
