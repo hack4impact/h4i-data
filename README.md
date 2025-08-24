@@ -29,7 +29,7 @@ npm i
 
 ---
 
-Then create a file in the main directory called ".env". For the .env info, ask Sophia for it! To view the databases in Supabase, DM Sophia to get access!
+Then create a file in the main directory called ".env". For the .env info, ask Sophia for it! To view the databases in Supabase, Slack Sophia to get access!
 
 ---
 
