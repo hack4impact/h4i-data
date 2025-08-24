@@ -1,15 +1,38 @@
-// 8/21/2025 - OUT OF DATE
+import { prisma } from '../prisma'; // Adjust the path as necessary
+import { VolunteerStatus, VolunteerType } from '../enums';
 
 // this tells the Prisma to disconnect from the database after all tests are done
-/*afterAll(async () => {
+afterAll(async () => {
     await prisma.$disconnect();
-}); */
+});
 
+describe('Jest example test', () => {
+    test('Create Volunteer and Get Volunteer Info by ID', async () => {
+        // create volunteer
+        const testVolunteer = await prisma.volunteers.create({
+            data: {
+                first_name: "Test Jane",
+                last_name: "Test Doe",
+                email: "test@gmail.com" + Math.floor(Math.random() * 1000).toString(),
+                graduation_date: new Date("2026-06-18"),
+                volunteer_status: VolunteerStatus.STUDENT,
+                H4I_email: "janedoe@hack4impact.org",
+                volunteer_type: VolunteerType.CHAPTER,
+                university_id: "860b69b4-a14e-41d9-a367-2632b342e549",
+            },
+        })
 
-describe('Prisma basic test', () => {
-    test('sample test', async () => {
-        expect(0).toBe(0);
-      });
+        // retreive member information by ID
+        const found = await prisma.volunteers.findUnique({
+            where: { volunteer_id: testVolunteer.volunteer_id },
+        });
+
+        expect(found?.first_name).toBe("Test Jane");
+        expect(found?.last_name).toBe("Test Doe");
+
+        // cleanup 
+        await prisma.volunteers.delete({ where: { volunteer_id: testVolunteer.volunteer_id }});
+    });
 })
 
 // describe() groups up related tests together to keep tests organized

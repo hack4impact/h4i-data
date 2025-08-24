@@ -14,6 +14,12 @@ This is a repository for setting up the Prisma ORM, tests, and database.
 
 ---
 
+## Guidelines
+
+- Do not edit schema.prisma - once we are in production, we will only edit from supabase and run "npx prisma db pull" and "npx prisma generate" to stay consistent (explanations provided above in Prisma section). This means we will not have any migration folders to keep track of our migrations!
+
+---
+
 ## Setup and Run
 
 ```bash
@@ -72,16 +78,23 @@ npx jest
 Example of what you can run:
 
 ```
-query gettingAllMembers {
-  getAllMembers {
-    id
-    name
-    university
-  }
+mutation {
+  addVolunteer(
+    volunteer: {
+      first_name: "Jane"
+      last_name: "Doe"
+      email: "janedoe@example.com"
+      graduation_date: "2026-06-18"
+      volunteer_status: STUDENT
+      H4I_email: "jane@hack4impact.org"
+      volunteer_type: CHAPTER
+      university_id: "860b69b4-a14e-41d9-a367-2632b342e549"
+    }
+  )
 }
 ```
 
-This retreives ALL members in the database of the Member table. Other examples are listed in the docs folder!
+This creates a volunteer in the Volunteer table. Other examples are listed in the docs/graphqlExamples.md
 
 ---
 

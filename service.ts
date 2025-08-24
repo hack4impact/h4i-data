@@ -1,12 +1,13 @@
-// 8/21/2025 - CURRENTLY OUT OF DATE!
-
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
+import { VolunteerStatus, VolunteerType } from './enums';
 
 dotenv.config()
 
 // create a prisma client
-import { PrismaClient } from './generated/prisma';
+import { Prisma, PrismaClient } from './generated/prisma';
+import { VolunteerTypeTS } from './main';
+
 const prisma = new PrismaClient();
 
 // connect to supabase
@@ -29,23 +30,38 @@ export async function connectToDB() {
   }
 }
 
-// adds a member to the db with name, university,
-export async function addMember(name: string, university: string) {
+// disconnect the database
+export async function disconnectFromDB() {
+  await prisma.$disconnect();
+  console.log("Disconnected successfully");
+}
+
+// adds a volunteer to the Volunteers table
+export async function addVolunteer(volunteer: VolunteerTypeTS) {
   try {
-    // add the new member
-    const newMember = await prisma.member.create({
+    // add the new volunteer
+    const newVolunteer = await prisma.volunteers.create({
       data: {
-        name: name,
-        university: university
-      },
+        first_name: volunteer.first_name,
+        last_name: volunteer.last_name,
+        email: volunteer.email,
+        graduation_date: new Date(volunteer.graduation_date),
+        volunteer_status: volunteer.volunteer_status as VolunteerStatus,
+        H4I_email: volunteer.H4I_email,
+        volunteer_type: volunteer.volunteer_type as VolunteerType,
+        university_id: volunteer.university_id,
+      } as Prisma.volunteersUncheckedCreateInput,
     })
 
     // print verification of insertion
     console.log(`Inserted Member: 
-      id: ${newMember.id}
-      created_at: ${newMember.created_at}
-      name: ${newMember.name}
-      university: ${newMember.university}`);
+      id: ${newVolunteer.volunteer_id}
+      name: ${newVolunteer.first_name} ${newVolunteer.last_name}
+      email: ${newVolunteer.email}
+      graduation_date: ${newVolunteer.graduation_date}
+      volunteer_status: ${newVolunteer.volunteer_status}
+      H4I_email: ${newVolunteer.H4I_email}
+      volunteer_type: ${newVolunteer.volunteer_type}`);
 
     return "Successfully added member!"
   }
@@ -56,7 +72,7 @@ export async function addMember(name: string, university: string) {
 }
 
 // deletes member by a unique identifier, which is the id
-export async function deleteMemberById(id: number) {
+/*export async function deleteMemberById(id: number) {
   console.log('got id', id)
   try {
     // delete member based on id
@@ -206,19 +222,16 @@ export async function addMemberProject(memberId: any, projectId: any) {
   }
 }
 
-// disconnect the database
-export async function disconnectFromDB() {
-  await prisma.$disconnect();
-  console.log("Disconnected successfully");
-}
 
-module.exports.connectToDB = connectToDB;
-module.exports.disconnectFromDB = disconnectFromDB;
+
 module.exports.getMemberId = getMemberId;
 module.exports.getProjectId = getProjectId;
-module.exports.addMember = addMember;
 module.exports.addMemberProject = addMemberProject;
 module.exports.addProject = addProject;
 module.exports.deleteMemberById = deleteMemberById;
 module.exports.getAllMembers = getAllMembers;
 
+*/
+module.exports.connectToDB = connectToDB;
+module.exports.addVolunteer = addVolunteer;
+module.exports.disconnectFromDB = disconnectFromDB;

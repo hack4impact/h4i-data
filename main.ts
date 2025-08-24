@@ -1,56 +1,73 @@
-//8/21/2025 - OUT OF DATE
-
+import { GraphQLDate } from "graphql-iso-date";
 import express, { Application } from "express";
 import { graphqlHTTP } from "express-graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { getAllMembers, addProject, deleteMemberById, connectToDB, disconnectFromDB, getMemberId, getProjectId, addMember, addMemberProject } from './service';
+import { addVolunteer, connectToDB, disconnectFromDB } from "./service";
+import { VolunteerStatus, VolunteerType } from "./enums";
+
+export type VolunteerTypeTS = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  graduation_date: Date;
+  volunteer_status: VolunteerStatus;
+  H4I_email: string;
+  volunteer_type: VolunteerType;
+  university_id?: string;
+}
 
 const app: Application = express();
 
 const graphqlModels = `
-  type Member {
-    id: ID
-    name: String
-    university: String
+  scalar Date
+
+  enum VOLUNTEER_STATUS {
+    STUDENT
+    PROFESSIONAL
   }
 
-  type Project {
-    project: String,
-    chapter: String
+  enum VOLUNTEER_TYPE {
+    CHAPTER
+    NATIONALS
+    BOTH
+  }
+
+  input VolunteerInput {
+    first_name: String! # with !, it means required
+    last_name: String!
+    email: String!
+    graduation_date: Date!
+    volunteer_status: VOLUNTEER_STATUS!
+    H4I_email: String
+    volunteer_type: VOLUNTEER_TYPE!
+    university_id: ID
+  }
+
+  type Mutation {
+    addVolunteer(volunteer: VolunteerInput!): String
   }
 
   type Query {
-    getAllMembers: [Member],
-    getMemberId(name: String, university: String): ID,
-    getProjectId(project: String, chapter: String): ID,
-    addProject(project: String, chapter: String): String,
-    addMember(name: String, university: String): String,
-    deleteMemberById(memberId: ID): String,
-    addMemberProject(memberId: ID, projectId: ID): String,
+    _empty: String
   }
 `;
 
 export const resolvers = {
-  Query: {
-    getAllMembers: () => getAllMembers(),
-    getMemberId: (_: any, args: { name: string; university: string }) =>
-      getMemberId(args.name, args.university),
-    getProjectId: (_: any, args: { project: string; chapter: string }) =>
-      getProjectId(args.project, args.chapter),
-    addProject: (_: any, args: { project: string; chapter: string }) =>
-      addProject(args.project, args.chapter),
-    addMember: (_: any, args: { name: string; university: string }) =>
-      addMember(args.name, args.university),
-    deleteMemberById: (_: any, args: { memberId: number }) =>
-      deleteMemberById(args.memberId),
-    addMemberProject: (_: any, args: { memberId: string; projectId: string }) =>
-      addMemberProject(args.memberId, args.projectId),
+  Query: {},
+  Mutation: {
+    addVolunteer: (_: any, { volunteer }: { volunteer: VolunteerTypeTS }) => {
+      return addVolunteer(volunteer);
+    },
   },
 };
 
 const schema = makeExecutableSchema({
   typeDefs: graphqlModels,
-  resolvers,
+  resolvers: {
+    Date: GraphQLDate, // <- mandatory
+    Query: {},
+    Mutation: resolvers.Mutation,
+  },
 });
 
 app.use(
@@ -61,10 +78,14 @@ app.use(
   })
 );
 
-app.use(express.json());
+// only if we need to have a middleware
+//app.use(express.json());
 
+let server: ReturnType<typeof app.listen>;
+
+// need this if statement to prevent the server from starting in test environment
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(3000, () => {
+  server = app.listen(3000, () => {
     console.log("Server running at http://localhost:3000");
     console.log("GraphQL: http://localhost:3000/graphql");
   });  
@@ -74,38 +95,26 @@ async function main() {
   // connect to the db once before running commands
   await connectToDB();
 
-  /*const members = await getAllMembers();
-  console.log(members)
-
-  // create labels to add to tables
-  const name = "NAMEEE";
-  const uni = "UNIII";
-  const project = "PROJECTTT";
-  const chapter = "CHAPTTERR";
-  
-  // add a member
-  await addMember(name, uni);
-  // add a project
-  await addProject(project, chapter);
-
-  // retrieve member id
-  const memberId = await getMemberId(name, uni)
-  // retrieve project id
-  const projectId = await getProjectId(project, chapter)
-
-  // add the member and project pair to the join table
-  await addMemberProject(memberId, projectId);
-
-  // delete member, which would delete all other rows with its relation
-  await deleteMemberById(memberId)
+  // add a volunteer
+  await addVolunteer({
+    first_name: "Sophia",
+    last_name: "C",
+    email: "test@gmail.com" + Math.floor(Math.random() * 1000).toString(),
+    graduation_date: new Date("2026-06-18"),
+    volunteer_status: VolunteerStatus.STUDENT,
+    H4I_email: "sophia@hack4impact.org",
+    volunteer_type: VolunteerType.CHAPTER,
+    university_id: "860b69b4-a14e-41d9-a367-2632b342e549",
+  });
 
   // disconnect from db when done with commands
-  await disconnectFromDB();*/
+  await disconnectFromDB();
 
-  // close server
-  /*server.close(() => {
-    console.log("Server closed!");
-  });*/
+  // uncomment the following lines to close the server after running commands
+  // if you want to run graphql commands then comment this out
+  if (server) {
+    server.close(() => console.log("Server closed!"));
+  }  
 }
 
 if (require.main === module) {
