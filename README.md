@@ -1,6 +1,6 @@
 # Backend Test Repository
 
-This is a repository for setting up the Prisma ORM, tests, and database.
+This is the backend repository for setting up the Prisma ORM, tests, and database.
 
 ---
 
@@ -10,7 +10,8 @@ This is a repository for setting up the Prisma ORM, tests, and database.
 - **Express** — Javascript backend framework
 - **PostgreSQL** — Relational Database (Supabase is our hosting service)
 - **Prisma** - Object Relational Mapping (ORM) so we don't have to write raw SQL
-- **Jest** - Testing Framework, CI
+- **Jest** - Testing Framework
+- **Github Actions** - CI
 
 ---
 
@@ -28,7 +29,7 @@ npm i
 
 ---
 
-Then create a file in the main directory called ".env". For the .env info, ask Sophia, Harsh, or Josh for it! To view the databases in Supabase, DM Sophia to get access!
+Then create a file in the main directory called ".env". For the .env info, ask Sophia for it! To view the databases in Supabase, DM Sophia to get access!
 
 ---
 

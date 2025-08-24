@@ -1,14 +1,15 @@
 import { prisma } from '../prisma'; // Adjust the path as necessary
 import { VolunteerStatus, VolunteerType } from '../enums';
 
-// this tells the Prisma to disconnect from the database after all tests are done
+// runs after all tests are complete
 afterAll(async () => {
+    // this tells the Prisma to disconnect from the database after all tests are done
     await prisma.$disconnect();
 });
 
 describe('Jest example test', () => {
     test('Create Volunteer and Get Volunteer Info by ID', async () => {
-        // create volunteer
+        // create a volunteer
         const testVolunteer = await prisma.volunteers.create({
             data: {
                 first_name: "Test Jane",
@@ -27,6 +28,7 @@ describe('Jest example test', () => {
             where: { volunteer_id: testVolunteer.volunteer_id },
         });
 
+        // verify information
         expect(found?.first_name).toBe("Test Jane");
         expect(found?.last_name).toBe("Test Doe");
 
