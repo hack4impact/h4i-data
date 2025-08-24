@@ -40,7 +40,7 @@ const graphqlModels = `
     volunteer_status: VOLUNTEER_STATUS!
     H4I_email: String
     volunteer_type: VOLUNTEER_TYPE!
-    university_id: ID
+    university_id: ID!
   }
 
   type Mutation {
