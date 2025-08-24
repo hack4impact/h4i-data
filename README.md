@@ -1,6 +1,6 @@
 # Backend Test Repository
 
-This is a repository for setting up the Prisma ORM, tests, and database.
+This is the backend repository for setting up the Prisma ORM, tests, and database.
 
 ---
 
@@ -10,7 +10,14 @@ This is a repository for setting up the Prisma ORM, tests, and database.
 - **Express** — Javascript backend framework
 - **PostgreSQL** — Relational Database (Supabase is our hosting service)
 - **Prisma** - Object Relational Mapping (ORM) so we don't have to write raw SQL
-- **Jest** - Testing Framework, CI
+- **Jest** - Testing Framework
+- **Github Actions** - CI
+
+---
+
+## Guidelines
+
+- Do not edit schema.prisma - once we are in production, we will only edit from supabase and run "npx prisma db pull" and "npx prisma generate" to stay consistent (explanations provided above in Prisma section). This means we will not have any migration folders to keep track of our migrations!
 
 ---
 
@@ -22,7 +29,7 @@ npm i
 
 ---
 
-Then create a file in the main directory called ".env". For the .env info, ask Sophia, Harsh, or Josh for it! To view the databases in Supabase, DM Sophia to get access!
+Then create a file in the main directory called ".env". For the .env info, ask Sophia for it! To view the databases in Supabase, DM Sophia to get access!
 
 ---
 
@@ -72,16 +79,23 @@ npx jest
 Example of what you can run:
 
 ```
-query gettingAllMembers {
-  getAllMembers {
-    id
-    name
-    university
-  }
+mutation {
+  addVolunteer(
+    volunteer: {
+      first_name: "Jane"
+      last_name: "Doe"
+      email: "janedoe@example.com"
+      graduation_date: "2026-06-18"
+      volunteer_status: STUDENT
+      H4I_email: "jane@hack4impact.org"
+      volunteer_type: CHAPTER
+      university_id: "860b69b4-a14e-41d9-a367-2632b342e549"
+    }
+  )
 }
 ```
 
-This retreives ALL members in the database of the Member table. Other examples are listed in the docs folder!
+This creates a volunteer in the Volunteer table. Other examples are listed in the docs/graphqlExamples.md
 
 ---
 

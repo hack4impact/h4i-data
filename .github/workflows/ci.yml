@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - main
-      - sophia-ci-cd
   pull_request:
     branches:
-      - main
-      - sophia-ci-cd
+      - '*'
   workflow_dispatch:
 
 jobs:
@@ -30,28 +28,13 @@ jobs:
         run: npm cache clean --force
 
       - name: Install deps
-        run: npm ci
+        run: npm ci --fetch-retries=5
 
       - name: Prisma generate
         run: npx prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
-
-      - name: Check DATABASE_URL
-        run: |
-          echo "DATABASE_URL is set"
-          HOST=$(echo $DATABASE_URL | sed -E 's#.*://[^@]+@([^:/?]+).*#\1#')
-          echo "Host extracted: $HOST"
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: Print DB host and user
-        run: |
-          echo "Host: $(echo $DATABASE_URL | sed -E 's#.*://[^:]+:.*@([^:/?]+).*#\1#')"
-          echo "User: $(echo $DATABASE_URL | sed -E 's#.*://([^:]+):.*@.*#\1#')"
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         
       - name: Prisma migrate
         run: npx prisma migrate deploy

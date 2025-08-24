@@ -14,7 +14,7 @@ model chapters {
   name                      String
   location_id               String?                     @db.Uuid
   founded_date              DateTime                    @db.Date
-  status_type               status_type                 @default(Active)
+  status_type               status_type                 @default(ACTIVE)
   created_at                DateTime                    @db.Timestamptz(6)
   updated_at                DateTime                    @db.Timestamptz(6)
   locations                 locations?                  @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
@@ -97,7 +97,7 @@ model nonprofit_chapter_project {
   start_date                                                      DateTime    @db.Date
   end_date                                                        DateTime?   @db.Date
   notes                                                           String?
-  project_status                                                  status_type @default(Active)
+  project_status                                                  status_type @default(ACTIVE)
   created_at                                                      DateTime    @default(now()) @db.Timestamptz(6)
   updated_at                                                      DateTime    @default(now()) @db.Timestamptz(6)
   chapters                                                        chapters?   @relation(fields: [chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction)
@@ -141,7 +141,7 @@ model roles {
   name                   String
   description            String
   permissions            Json
-  level_type             level_type               @default(Regular_Chapter_Volunteer_Level)
+  level_type             level_type               @default(REGULAR_CHAPTER_VOLUNTEER_LEVEL)
   volunteer_assignment   volunteer_assignment[]
   volunteer_role_project volunteer_role_project[]
 }
@@ -180,7 +180,7 @@ model volunteer_assignment {
   branch_id               String?            @db.Uuid
   start_date              DateTime           @db.Date
   end_date                DateTime           @db.Date
-  status                  status_type        @default(Active)
+  status                  status_type        @default(ACTIVE)
   created_at              DateTime?          @default(now()) @db.Timestamptz(6)
   updated_at              DateTime?          @default(now()) @db.Timestamptz(6)
   national_branches       national_branches? @relation(fields: [branch_id], references: [branch_id], onDelete: NoAction, onUpdate: NoAction, map: "member_assignment_branch_id_fkey")
@@ -192,7 +192,7 @@ model volunteer_assignment {
 model volunteer_history {
   history_id   String      @id(map: "membership_history_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   volunteer_id String      @db.Uuid
-  action_type  action_type @default(Joined)
+  action_type  action_type @default(JOINED)
   reason       String?
   action_date  DateTime    @db.Date
   created_at   DateTime?   @default(now()) @db.Timestamptz(6)
@@ -225,12 +225,12 @@ model volunteers {
   email                  String                   @unique(map: "person_email_key")
   graduation_date        DateTime                 @db.Date
   university_id          String                   @db.Uuid
-  volunteer_status       volunteer_status         @default(Student)
+  volunteer_status       volunteer_status         @default(STUDENT)
   H4I_email              String?
   chapter_id             String?                  @db.Uuid
-  volunteer_type         volunteer_type           @default(Chapter)
-  created_at             DateTime                 @db.Timestamptz(6)
-  updated_at             DateTime                 @db.Timestamptz(6)
+  volunteer_type         volunteer_type           @default(CHAPTER)
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
   connections            connections?
   volunteer_assignment   volunteer_assignment[]
   volunteer_history      volunteer_history[]
@@ -241,34 +241,34 @@ model volunteers {
 
 /// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 enum action_type {
-  Joined
-  Left
-  On_Hiatus @map("On Hiatus")
+  JOINED
+  LEFT
+  ON_HIATUS @map("ON HIATUS")
 }
 
 /// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 enum level_type {
-  Regular_Chapter_Volunteer_Level  @map("1 - Regular Chapter Volunteer Level")
-  Chapter_Board_Level              @map("2 - Chapter Board Level")
-  Regular_National_Volunteer_Level @map("3 - Regular National Volunteer Level")
-  National_Board_Level             @map("4 - National Board Level")
+  REGULAR_CHAPTER_VOLUNTEER_LEVEL  @map("1 - REGULAR CHAPTER VOLUNTEER LEVEL")
+  CHAPTER_BOARD_LEVEL              @map("2 - CHAPTER BOARD LEVEL")
+  REGULAR_NATIONAL_VOLUNTEER_LEVEL @map("3 - REGULAR NATIONAL VOLUNTEER LEVEL")
+  NATIONAL_BOARD_LEVEL             @map("4 - NATIONAL BOARD LEVEL")
 }
 
 /// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 enum status_type {
-  Active
-  Inactive
+  ACTIVE
+  INACTIVE
 }
 
 /// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 enum volunteer_status {
-  Student
-  Professional
+  STUDENT
+  PROFESSIONAL
 }
 
 /// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 enum volunteer_type {
-  Chapter
-  Nationals
-  Both
+  CHAPTER
+  NATIONALS
+  BOTH
 }
