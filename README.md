@@ -17,7 +17,7 @@ This is the backend repository for setting up the Prisma ORM, tests, and databas
 
 ## Guidelines
 
-- Do not edit schema.prisma - once we are in production, we will only edit from supabase and run "npx prisma db pull" and "npx prisma generate" to stay consistent (explanations provided above in Prisma section). This means we will not have any migration folders to keep track of our migrations!
+- Do not edit schema.prisma - once we are in production, we will only edit from supabase and run "npx prisma db pull" and "npx prisma generate" to stay consistent (explanations provided above in Prisma section). This means we will not have any migration folders to keep track of our migrations!!
 
 ---
 
