@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { volunteerService } from "../../services";
+import { asyncHandler } from "../middleware";
 
 const router = Router();
 
@@ -14,23 +15,21 @@ const router = Router();
 // });
 
 // GET /api/volunteers
-router.get("/", async (req, res) => {
-  try {
-    const volunteers = await volunteerService.getAllVolunteers(); // ← Same service call!
+router.get(
+  "/",
+  asyncHandler(async (req: any, res: any) => {
+    const volunteers = await volunteerService.getAllVolunteers();
     res.json({ success: true, data: volunteers });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
+  }),
+);
 
 // POST /api/volunteers
-router.post("/", async (req, res) => {
-  try {
-    const volunteer = await volunteerService.createVolunteer(req.body); // ← Same service call!
+router.post(
+  "/",
+  asyncHandler(async (req: any, res: any) => {
+    const volunteer = await volunteerService.createVolunteer(req.body);
     res.status(201).json({ success: true, data: volunteer });
-  } catch (error: any) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
+  }),
+);
 
 export { router as volunteerRoutes };
