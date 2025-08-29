@@ -16,7 +16,7 @@ export const validateVolunteerInput = (
     university_id,
   } = req.body;
 
-  // Check required fields
+  // check required fields
   const requiredFields = [
     "first_name",
     "last_name",
@@ -35,7 +35,7 @@ export const validateVolunteerInput = (
     });
   }
 
-  // Validate email format
+  // validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({
@@ -44,7 +44,7 @@ export const validateVolunteerInput = (
     });
   }
 
-  // Validate volunteer_status
+  // validate volunteer_status
   if (!Object.values(VolunteerStatus).includes(volunteer_status)) {
     return res.status(400).json({
       success: false,
@@ -54,7 +54,7 @@ export const validateVolunteerInput = (
     });
   }
 
-  // Validate volunteer_type
+  // validate volunteer_type
   if (!Object.values(VolunteerType).includes(volunteer_type)) {
     return res.status(400).json({
       success: false,
@@ -64,7 +64,7 @@ export const validateVolunteerInput = (
     });
   }
 
-  // Validate graduation_date format
+  // validate graduation_date format
   const graduationDate = new Date(graduation_date);
   if (isNaN(graduationDate.getTime())) {
     return res.status(400).json({
@@ -73,7 +73,7 @@ export const validateVolunteerInput = (
     });
   }
 
-  // Validate graduation date is not in the past (optional business logic)
+  // validate graduation date is not in the past (optional business logic)
   const today = new Date();
   if (graduationDate < today) {
     return res.status(400).json({
@@ -92,7 +92,7 @@ export const validateVolunteerUpdateInput = (
 ) => {
   const { email, volunteer_status, volunteer_type, graduation_date } = req.body;
 
-  // If email is provided, validate format
+  // if email is provided, validate format
   if (email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -103,7 +103,7 @@ export const validateVolunteerUpdateInput = (
     }
   }
 
-  // If volunteer_status is provided, validate it
+  // if volunteer_status is provided, validate it
   if (
     volunteer_status &&
     !Object.values(VolunteerStatus).includes(volunteer_status)
@@ -116,7 +116,7 @@ export const validateVolunteerUpdateInput = (
     });
   }
 
-  // If volunteer_type is provided, validate it
+  // if volunteer_type is provided, validate it
   if (
     volunteer_type &&
     !Object.values(VolunteerType).includes(volunteer_type)
@@ -129,7 +129,7 @@ export const validateVolunteerUpdateInput = (
     });
   }
 
-  // If graduation_date is provided, validate format
+  // if graduation_date is provided, validate format
   if (graduation_date) {
     const graduationDateObj = new Date(graduation_date);
     if (isNaN(graduationDateObj.getTime())) {
@@ -158,7 +158,7 @@ export const validateIdParam = (
     });
   }
 
-  // Basic UUID validation (if you're using UUIDs)
+  // basic UUID validation
   const uuidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(id)) {

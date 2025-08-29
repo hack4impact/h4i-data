@@ -5,7 +5,7 @@ export interface ApiError extends Error {
   isOperational?: boolean;
 }
 
-// Error handler middleware
+// error handler middleware
 export const errorHandler = (
   err: ApiError,
   req: Request,
@@ -21,11 +21,11 @@ export const errorHandler = (
     timestamp: new Date().toISOString(),
   });
 
-  // Default to 500 server error
+  // default to 500 server error
   let statusCode = err.statusCode || 500;
   let message = err.message || "Internal Server Error";
 
-  // Handle specific error types
+  // handle specific error types
   if (err.message.includes("not found")) {
     statusCode = 404;
   } else if (
@@ -55,7 +55,7 @@ export const notFoundHandler = (req: Request, res: Response) => {
   });
 };
 
-// Async error wrapper
+// async error wrapper
 export const asyncHandler =
   (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
     Promise.resolve(fn(req, res, next)).catch(next);

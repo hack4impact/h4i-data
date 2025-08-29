@@ -26,7 +26,7 @@ describe("Volunteer REST API Integration", () => {
       expect(response.body.data.first_name).toBe("John");
       expect(response.body.data.email).toBe("john.student@test.com");
 
-      // Verify it actually exists in database
+      // verify it actually exists in database
       const dbVolunteer = await prisma.volunteers.findUnique({
         where: { volunteer_id: response.body.data.volunteer_id },
       });
