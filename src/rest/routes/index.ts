@@ -3,10 +3,10 @@ import { volunteerRoutes } from "./volunteerRoutes";
 
 const router = Router();
 
-// Mount feature routes
+// mount feature routes, creates path prefix for all volunteer routes
 router.use("/volunteers", volunteerRoutes);
 
-// Health check for REST API
+// health check for REST API
 router.get("/health", (req, res) => {
   res.json({
     status: "OK",
