@@ -10,14 +10,15 @@ This is the backend repository for setting up the Prisma ORM, tests, and databas
 - **Express** — Javascript backend framework
 - **PostgreSQL** — Relational Database (Supabase is our hosting service)
 - **Prisma** - Object Relational Mapping (ORM) so we don't have to write raw SQL
-- **Jest** - Testing Framework
+- **Jest** - Unit testing framework
+- **Supertest** - Integration testing framework
 - **Github Actions** - CI
 
 ---
 
 ## Guidelines
 
-- Do not edit schema.prisma - once we are in production, we will only edit from supabase and run "npx prisma db pull" and "npx prisma generate" to stay consistent (explanations provided above in Prisma section). This means we will not have any migration folders to keep track of our migrations!
+- Do not edit schema.prisma - once we are in production, we will only edit from supabase and run "npx prisma db pull" and "npx prisma generate" to stay consistent (explanations provided in Prisma section). This means we will not have any migration folders to keep track of our migrations!
 
 ---
 
@@ -29,7 +30,7 @@ npm i
 
 ---
 
-Then create a file in the main directory called ".env". For the .env info, ask Sophia for it! To view the databases in Supabase, DM Sophia to get access!
+Then create a file in the main directory called ".env". Copy the fields from .env.example and ask Sophia for necessary variables and keys! To view the databases in Supabase, DM Sophia to get access!
 
 ---
 
@@ -46,24 +47,24 @@ npx prisma generate - This generates the Prisma Client code based on our schema.
 
 ---
 
-## Run main.ts
+## Run app.ts
 
 ```bash
-npx ts-node main.ts
+npx ts-node app.ts
 ```
 
 ---
 
 ## Rules When Creating Branches
 
-1. Please make sure to name your branch with your name (ex. jane)
+Please make sure to name your branch according to your issue (ex. feature/1-issue-name). This will ensure that issues get connected & closed appropriately.
 
 ---
 
 ## Run Tests (2 ways)
 
-```bash 
-npm test 
+```bash
+npm test
 ```
 
 OR
@@ -102,15 +103,18 @@ This creates a volunteer in the Volunteer table. Other examples are listed in th
 ## How To Add/Update GraphQL Endpoints
 
 1. Define all data querying functions in the service.ts file - follow the patterns in how functions are written based on the current existing functions:
-  - Async functions, because we are fetching data and don't know how long it'll take
-  - Try and catch functions to catch any errors that may result in attempting to query data
-  - You will notice the prisma.member.create or prisma.project.findFirst functions and more. The endings of the functions (create, findFirst, findMany, etc.) are the Prisma Client CRUD Operations (link below in Helpful Links), while "member", "project", "member_project" within those functions are taken from schema.prisma file located in the prisma folder; make sure you copy them properly because they are case sensitive!
+
+- Async functions, because we are fetching data and don't know how long it'll take
+- Try and catch functions to catch any errors that may result in attempting to query data
+- You will notice the prisma.member.create or prisma.project.findFirst functions and more. The endings of the functions (create, findFirst, findMany, etc.) are the Prisma Client CRUD Operations (link below in Helpful Links), while "member", "project", "member_project" within those functions are taken from schema.prisma file located in the prisma folder; make sure you copy them properly because they are case sensitive!
+
 2. Make sure to export the function you write by writing "module.exports.[function name] = [function name]; with many examples listed below in the file - we need to do this in order to use the function in the main.ts file
 3. Now, let's look at main.ts - first thing to note is that a schema needs 2 crucial parts - typeDefs (we defined in graphqlModels) and resolvers (explanation below)
-  - In graphqlModels, this is where we define the actual GraphQL schema
-  - "type Member" is us defining what a Member will hold, and same logic for Project - it tells GraphQL what our data LOOKS like (this is only necessary if we want to group our result or input in specific ways)
-  - "type Query" tells GraphQL what kind of OPERATIONS users can execute, so in this case, getAllMembers: [Member] means executing the function getAllMembers() with no inputs would give us result of object Member but in an array because of the brackets around Member. Another example is the deleteMemberById function. We can see that memberId is an input of type ID that will enter the deleteMemberById function, and the output of that will be a String.
-  - Now looking at resolvers! It defines how to respond to queries! So for every query in the schema, we write a corresponding resolver function. So getAllMembers (that we wrote in "type Query") will point to the getAllMembers() function from service.ts. The parenthesis () are empty because we have no inputs we need to insert into the actual function getAllMembers. So with deleteMemberById, we see we have (_: any, args: { memberId: number }). The resolver function accepts (parent, args, context, info) respectively. So in this case, only parent and args are read. We're not using the parent so that is why we use "_" to mark it as "unused". But for args, we need to use it since deleteMemberById must take in a number as input as stated in service.ts, so we wrap the arguments in curly brackets, define the type of argument which in this case is "number", and map it to the deleteMemberById(args.memberId) function from service.ts
+
+- In graphqlModels, this is where we define the actual GraphQL schema
+- "type Member" is us defining what a Member will hold, and same logic for Project - it tells GraphQL what our data LOOKS like (this is only necessary if we want to group our result or input in specific ways)
+- "type Query" tells GraphQL what kind of OPERATIONS users can execute, so in this case, getAllMembers: [Member] means executing the function getAllMembers() with no inputs would give us result of object Member but in an array because of the brackets around Member. Another example is the deleteMemberById function. We can see that memberId is an input of type ID that will enter the deleteMemberById function, and the output of that will be a String.
+- Now looking at resolvers! It defines how to respond to queries! So for every query in the schema, we write a corresponding resolver function. So getAllMembers (that we wrote in "type Query") will point to the getAllMembers() function from service.ts. The parenthesis () are empty because we have no inputs we need to insert into the actual function getAllMembers. So with deleteMemberById, we see we have (_: any, args: { memberId: number }). The resolver function accepts (parent, args, context, info) respectively. So in this case, only parent and args are read. We're not using the parent so that is why we use "_" to mark it as "unused". But for args, we need to use it since deleteMemberById must take in a number as input as stated in service.ts, so we wrap the arguments in curly brackets, define the type of argument which in this case is "number", and map it to the deleteMemberById(args.memberId) function from service.ts
 
 ---
 
@@ -135,5 +139,6 @@ This creates a volunteer in the Volunteer table. Other examples are listed in th
 
 ## Helpful Links
 
-1. Prisma Client CRUD Operations: https://www.prisma.io/docs/orm/prisma-client/queries/crud
-2. Jest Documentation: https://jestjs.io/docs/getting-started
+1. Prisma Client CRUD Operations: <https://www.prisma.io/docs/orm/prisma-client/queries/crud>
+2. Jest Documentation: <https://jestjs.io/docs/getting-started>
+
