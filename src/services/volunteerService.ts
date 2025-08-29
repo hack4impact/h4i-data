@@ -27,6 +27,16 @@ export class VolunteerService {
       throw new Error("Failed to create volunteer");
     }
   };
+
+  getVolunteerById = async (id: string) => {
+    try {
+      return await prisma.volunteers.findUnique({
+        where: { volunteer_id: id },
+      });
+    } catch (error) {
+      throw new Error("Failed to fetch volunteer");
+    }
+  };
 }
 
 // Export singleton instance

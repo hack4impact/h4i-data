@@ -11,9 +11,14 @@ export const volunteerResolvers = {
 
   Query: {
     volunteers: async () => {
-      return await volunteerService.getAllVolunteers(); // ← Service call!
+      return await volunteerService.getAllVolunteers();
+    },
+
+    volunteer: async (_: any, { id }: { id: string }) => {
+      return await volunteerService.getVolunteerById(id);
     },
   },
+
   Mutation: {
     createVolunteer: async (_: any, { input }: { input: VolunteerInput }) => {
       return await volunteerService.createVolunteer(input); // ← Service call!

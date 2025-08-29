@@ -15,10 +15,11 @@ export const volunteerTypeDefs = `
     volunteer_type: String!
     university_id: String!
   }
-
+ 
   type Query {
     volunteers: [Volunteer!]!
-  }
+    volunteer(id: ID!): Volunteer
+  }  
 
   type Mutation {
     createVolunteer(input: VolunteerInput!): Volunteer!

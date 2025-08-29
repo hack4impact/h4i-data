@@ -1,11 +1,12 @@
 import { volunteerService } from "../../../src/services/volunteerService";
 import { prisma } from "../../../src/config/database";
 
-// Mock the database
+// mock the database
 jest.mock("../../../src/config/database", () => ({
   prisma: {
     volunteers: {
       findMany: jest.fn(),
+      findUnique: jest.fn(),
       create: jest.fn(),
     },
   },
