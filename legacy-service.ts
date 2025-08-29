@@ -1,12 +1,12 @@
-import dotenv from 'dotenv';
-import { Pool } from 'pg';
-import { VolunteerStatus, VolunteerType } from './enums';
+import dotenv from "dotenv";
+import { Pool } from "pg";
+import { VolunteerStatus, VolunteerType } from "./legacy-enums";
 
-dotenv.config()
+dotenv.config();
 
 // create a prisma client
-import { Prisma, PrismaClient } from './generated/prisma';
-import { VolunteerTypeTS } from './main';
+import { Prisma, PrismaClient } from "./generated/prisma";
+import { VolunteerTypeTS } from "./main";
 
 const prisma = new PrismaClient();
 
@@ -14,19 +14,19 @@ const prisma = new PrismaClient();
 new Pool({
   connectionString: process.env.SUPABASE_URL,
   ssl: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+  },
 });
 
-// connects to the db and lists the db 
+// connects to the db and lists the db
 export async function connectToDB() {
   try {
     // connects to the database
-    await prisma.$connect()
-    console.log('Connected successfully');
+    await prisma.$connect();
+    console.log("Connected successfully");
   } catch (err) {
     // errors if connection is unsuccessful
-    console.error('Database connection error:', err);
+    console.error("Database connection error:", err);
   }
 }
 
@@ -51,7 +51,7 @@ export async function addVolunteer(volunteer: VolunteerTypeTS) {
         volunteer_type: volunteer.volunteer_type as VolunteerType,
         university_id: volunteer.university_id,
       } as Prisma.volunteersUncheckedCreateInput,
-    })
+    });
 
     // print verification of insertion
     console.log(`Inserted Member: 
@@ -63,11 +63,10 @@ export async function addVolunteer(volunteer: VolunteerTypeTS) {
       H4I_email: ${newVolunteer.H4I_email}
       volunteer_type: ${newVolunteer.volunteer_type}`);
 
-    return "Successfully added member!"
-  }
-  catch (error) {
-    console.error("Insertion Error: " + error)
-    return "Failed to add member!"
+    return "Successfully added member!";
+  } catch (error) {
+    console.error("Insertion Error: " + error);
+    return "Failed to add member!";
   }
 }
 
@@ -235,3 +234,4 @@ module.exports.getAllMembers = getAllMembers;
 module.exports.connectToDB = connectToDB;
 module.exports.addVolunteer = addVolunteer;
 module.exports.disconnectFromDB = disconnectFromDB;
+

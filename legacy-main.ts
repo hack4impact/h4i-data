@@ -3,7 +3,7 @@ import express, { Application } from "express";
 import { graphqlHTTP } from "express-graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { addVolunteer, connectToDB, disconnectFromDB } from "./service";
-import { VolunteerStatus, VolunteerType } from "./enums";
+import { VolunteerStatus, VolunteerType } from "./legacy-enums";
 
 export type VolunteerTypeTS = {
   first_name: string;
@@ -14,7 +14,7 @@ export type VolunteerTypeTS = {
   H4I_email: string;
   volunteer_type: VolunteerType;
   university_id?: string;
-}
+};
 
 const app: Application = express();
 
@@ -75,7 +75,7 @@ app.use(
   graphqlHTTP({
     schema,
     graphiql: true,
-  })
+  }),
 );
 
 // only if we need to have a middleware
@@ -84,11 +84,11 @@ app.use(
 let server: ReturnType<typeof app.listen>;
 
 // need this if statement to prevent the server from starting in test environment
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== "test") {
   server = app.listen(3000, () => {
     console.log("Server running at http://localhost:3000");
     console.log("GraphQL: http://localhost:3000/graphql");
-  });  
+  });
 }
 
 async function main() {
@@ -114,7 +114,7 @@ async function main() {
   // if you want to run graphql commands then comment this out
   if (server) {
     server.close(() => console.log("Server closed!"));
-  }  
+  }
 }
 
 if (require.main === module) {

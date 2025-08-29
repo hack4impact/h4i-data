@@ -8,14 +8,11 @@
     "dev:graphql": "ts-node src/graphql/server.ts",
     "dev:rest": "ts-node src/rest/server.ts",
     "dev:both": "concurrently \"npm run dev:graphql\" \"npm run dev:rest\"",
-    "build": "tsc",
-    "start": "node dist/app.js",
-    "test": "npx prisma generate && jest --runInBand",
-    "test:watch": "jest --watch",
-    "prisma:generate": "npx prisma generate",
-    "prisma:pull": "npx prisma db pull",
-    "prisma:sync": "npm run prisma:pull && npm run prisma:generate",
-    "seed": "SEED_DATA=true ts-node src/app.ts"
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:watch": "jest --watch tests/unit",
+    "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",

@@ -1,5 +1,5 @@
-import { volunteerService } from "../../src/services/volunteerService";
-import { VolunteerStatus, VolunteerType } from "../../src/types";
+import { volunteerService } from "../../../src/services/volunteerService";
+import { VolunteerStatus, VolunteerType } from "../../../src/types";
 
 // Mock Prisma client
 jest.mock("../../src/config/database", () => ({
@@ -14,7 +14,7 @@ jest.mock("../../src/config/database", () => ({
   },
 }));
 
-import { prisma } from "../../src/config/database";
+import { prisma } from "../../../src/config/database";
 
 describe("VolunteerService", () => {
   beforeEach(() => {
