@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import { Pool } from "pg";
-import { PrismaClient } from "../../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 
 dotenv.config();
 
