@@ -1,0 +1,61 @@
+import { Request, Response, NextFunction } from "express";
+
+export interface ApiError extends Error {
+  statusCode?: number;
+  isOperational?: boolean;
+}
+
+// Error handler middleware
+export const errorHandler = (
+  err: ApiError,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  console.error("Error:", {
+    message: err.message,
+    stack: err.stack,
+    url: req.url,
+    method: req.method,
+    body: req.body,
+    timestamp: new Date().toISOString(),
+  });
+
+  // Default to 500 server error
+  let statusCode = err.statusCode || 500;
+  let message = err.message || "Internal Server Error";
+
+  // Handle specific error types
+  if (err.message.includes("not found")) {
+    statusCode = 404;
+  } else if (
+    err.message.includes("validation") ||
+    err.message.includes("required")
+  ) {
+    statusCode = 400;
+  } else if (
+    err.message.includes("duplicate") ||
+    err.message.includes("already exists")
+  ) {
+    statusCode = 409;
+  }
+
+  res.status(statusCode).json({
+    success: false,
+    error: message,
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+  });
+};
+
+// 404 handler for routes that don't exist
+export const notFoundHandler = (req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    error: `Route ${req.method} ${req.originalUrl} not found`,
+  });
+};
+
+// Async error wrapper
+export const asyncHandler =
+  (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
+    Promise.resolve(fn(req, res, next)).catch(next);
