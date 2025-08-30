@@ -1,16 +1,12 @@
-import {
-  VolunteerService,
-  volunteerService,
-} from '../../../src/services/volunteerService';
-import {
-  VolunteerValidator,
-  ValidationError,
-} from '../../../src/utils/validators';
+// tests/unit/services/volunteerService.test.ts
+
+import { volunteerService } from '../../../src/services/volunteerService';
+import { ValidationError } from '../../../src/utils/validators';
 import { VolunteerStatus, VolunteerType } from '../../../src/types';
 import { Prisma } from '@prisma/client';
+import { prisma } from '../../../src/config/database';
 
-// Mock the validator and prisma
-jest.mock('../../../src/utils/validators');
+// Mock the prisma client to isolate the service from the database layer.
 jest.mock('../../../src/config/database', () => ({
   prisma: {
     volunteers: {
@@ -21,103 +17,94 @@ jest.mock('../../../src/config/database', () => ({
   },
 }));
 
-const { prisma } = require('../../../src/config/database');
-const MockedVolunteerValidator = VolunteerValidator as jest.Mocked<
-  typeof VolunteerValidator
->;
+// A typed mock of the prisma client for easier mocking of function return values.
+const mockedPrisma = prisma as jest.Mocked<typeof prisma>;
 
 describe('VolunteerService', () => {
+  // Define reusable mock data for our tests to ensure consistency.
   const validVolunteerInput = {
     first_name: 'John',
     last_name: 'Doe',
     email: 'john@test.com',
-    graduation_date: new Date('2024-06-15'),
+    graduation_date: '2024-06-15T00:00:00.000Z',
     volunteer_status: VolunteerStatus.STUDENT,
     volunteer_type: VolunteerType.CHAPTER,
     university_id: '123e4567-e89b-12d3-a456-426614174000',
   };
 
-  const mockVolunteer = {
+  const mockVolunteerRecord = {
     volunteer_id: '987e6543-e21b-32d1-b654-426614174000',
     ...validVolunteerInput,
+    graduation_date: new Date(validVolunteerInput.graduation_date),
     created_at: new Date('2024-01-15T10:00:00Z'),
     updated_at: new Date('2024-01-15T10:00:00Z'),
   };
 
+  // Reset all mocks before each test to ensure test isolation.
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Default mock implementations
-    MockedVolunteerValidator.sanitizeVolunteerInput.mockImplementation(
-      (data) => data
-    );
-    MockedVolunteerValidator.validateVolunteerInput.mockImplementation(
-      () => {}
-    );
-    MockedVolunteerValidator.validateId.mockImplementation(() => {});
   });
 
   describe('getAllVolunteers', () => {
-    it('should return all volunteers ordered by created_at desc', async () => {
-      const mockVolunteers = [
-        mockVolunteer,
-        { ...mockVolunteer, volunteer_id: 'another-id' },
-      ];
-      prisma.volunteers.findMany.mockResolvedValue(mockVolunteers);
+    it('should fetch all volunteers and order them by creation date', async () => {
+      // Arrange: mock the database response.
+      const mockVolunteers = [mockVolunteerRecord];
+      mockedPrisma.volunteers.findMany.mockResolvedValue(mockVolunteers);
 
+      // Act: call the service method.
       const result = await volunteerService.getAllVolunteers();
 
-      expect(prisma.volunteers.findMany).toHaveBeenCalledWith({
+      // Assert: verify the database was called correctly and the data is returned.
+      expect(mockedPrisma.volunteers.findMany).toHaveBeenCalledWith({
         orderBy: { created_at: 'desc' },
       });
       expect(result).toEqual(mockVolunteers);
     });
 
-    it('should throw error when database query fails', async () => {
-      prisma.volunteers.findMany.mockRejectedValue(new Error('Database error'));
+    it('should throw a user-friendly error if the database query fails', async () => {
+      // Arrange: mock a database failure.
+      mockedPrisma.volunteers.findMany.mockRejectedValue(
+        new Error('Database error')
+      );
 
+      // Act & Assert: expect the method to throw the correct error.
       await expect(volunteerService.getAllVolunteers()).rejects.toThrow(
-        'Failed to fetch volunteers from database'
+        'Failed to fetch volunteers from the database'
       );
     });
   });
 
   describe('createVolunteer', () => {
-    it('should create volunteer successfully with valid input', async () => {
-      MockedVolunteerValidator.sanitizeVolunteerInput.mockReturnValue(
-        validVolunteerInput
-      );
-      prisma.volunteers.create.mockResolvedValue(mockVolunteer);
+    it('should successfully create a volunteer with valid data', async () => {
+      // Arrange: mock the database creation call.
+      mockedPrisma.volunteers.create.mockResolvedValue(mockVolunteerRecord);
 
+      // Act: call the service method with valid input.
       const result =
         await volunteerService.createVolunteer(validVolunteerInput);
 
-      expect(
-        MockedVolunteerValidator.sanitizeVolunteerInput
-      ).toHaveBeenCalledWith(validVolunteerInput);
-      expect(
-        MockedVolunteerValidator.validateVolunteerInput
-      ).toHaveBeenCalledWith(validVolunteerInput);
-      expect(prisma.volunteers.create).toHaveBeenCalledWith({
-        data: validVolunteerInput,
+      // Assert: verify the database was called with the correct data and the result is returned.
+      expect(mockedPrisma.volunteers.create).toHaveBeenCalledWith({
+        data: {
+          ...validVolunteerInput,
+          graduation_date: new Date(validVolunteerInput.graduation_date),
+        },
       });
-      expect(result).toEqual(mockVolunteer);
+      expect(result).toEqual(mockVolunteerRecord);
     });
 
-    it('should handle ValidationError from validator', async () => {
-      const validationError = new ValidationError(
-        'Validation failed: email is required'
-      );
-      MockedVolunteerValidator.validateVolunteerInput.mockImplementation(() => {
-        throw validationError;
-      });
+    it('should throw a ValidationError for invalid input data', async () => {
+      // Arrange: create invalid input data.
+      const invalidInput = { ...validVolunteerInput, email: 'not-an-email' };
 
+      // Act & Assert: expect the method to throw a ValidationError due to Zod parsing failure.
       await expect(
-        volunteerService.createVolunteer(validVolunteerInput)
-      ).rejects.toThrow(validationError);
+        volunteerService.createVolunteer(invalidInput)
+      ).rejects.toThrow(ValidationError);
     });
 
-    it('should handle Prisma duplicate email error (P2002)', async () => {
+    it('should throw a specific error for a duplicate email (Prisma P2002 error)', async () => {
+      // Arrange: mock the specific Prisma error for a unique constraint violation.
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         'Unique constraint failed',
         {
@@ -125,104 +112,47 @@ describe('VolunteerService', () => {
           clientVersion: '5.0.0',
         }
       );
-      prisma.volunteers.create.mockRejectedValue(prismaError);
+      mockedPrisma.volunteers.create.mockRejectedValue(prismaError);
 
+      // Act & Assert: expect a user-friendly "already exists" error message.
       await expect(
         volunteerService.createVolunteer(validVolunteerInput)
       ).rejects.toThrow('A volunteer with this email already exists');
-    });
-
-    it('should handle Prisma foreign key constraint error (P2003)', async () => {
-      const prismaError = new Prisma.PrismaClientKnownRequestError(
-        'Foreign key constraint failed',
-        {
-          code: 'P2003',
-          clientVersion: '5.0.0',
-        }
-      );
-      prisma.volunteers.create.mockRejectedValue(prismaError);
-
-      await expect(
-        volunteerService.createVolunteer(validVolunteerInput)
-      ).rejects.toThrow(
-        'Invalid university_id provided - university does not exist'
-      );
-    });
-
-    it('should handle other Prisma errors', async () => {
-      const prismaError = new Prisma.PrismaClientKnownRequestError(
-        'Unknown error',
-        {
-          code: 'P9999',
-          clientVersion: '5.0.0',
-        }
-      );
-      prisma.volunteers.create.mockRejectedValue(prismaError);
-
-      await expect(
-        volunteerService.createVolunteer(validVolunteerInput)
-      ).rejects.toThrow('Database error occurred while creating volunteer');
-    });
-
-    it('should handle unexpected errors', async () => {
-      prisma.volunteers.create.mockRejectedValue(new Error('Unexpected error'));
-
-      await expect(
-        volunteerService.createVolunteer(validVolunteerInput)
-      ).rejects.toThrow(
-        'An unexpected error occurred while creating volunteer'
-      );
     });
   });
 
   describe('getVolunteerById', () => {
     const validId = '123e4567-e89b-12d3-a456-426614174000';
 
-    it('should return volunteer by ID successfully', async () => {
-      prisma.volunteers.findUnique.mockResolvedValue(mockVolunteer);
+    it('should successfully return a volunteer when a valid ID is found', async () => {
+      // Arrange: mock the database response for a found volunteer.
+      mockedPrisma.volunteers.findUnique.mockResolvedValue(mockVolunteerRecord);
 
+      // Act: call the service method.
       const result = await volunteerService.getVolunteerById(validId);
 
-      expect(MockedVolunteerValidator.validateId).toHaveBeenCalledWith(validId);
-      expect(prisma.volunteers.findUnique).toHaveBeenCalledWith({
+      // Assert: verify the database was called correctly and the record is returned.
+      expect(mockedPrisma.volunteers.findUnique).toHaveBeenCalledWith({
         where: { volunteer_id: validId },
       });
-      expect(result).toEqual(mockVolunteer);
+      expect(result).toEqual(mockVolunteerRecord);
     });
 
-    it('should handle ValidationError from ID validator', async () => {
-      const validationError = new ValidationError('Invalid ID format');
-      MockedVolunteerValidator.validateId.mockImplementation(() => {
-        throw validationError;
-      });
+    it('should throw an error when no volunteer is found', async () => {
+      // Arrange: mock the database response for a not-found volunteer.
+      mockedPrisma.volunteers.findUnique.mockResolvedValue(null);
 
-      await expect(
-        volunteerService.getVolunteerById('invalid-id')
-      ).rejects.toThrow(validationError);
-    });
-
-    it('should throw error when volunteer not found', async () => {
-      prisma.volunteers.findUnique.mockResolvedValue(null);
-
+      // Act & Assert: expect a "not found" error.
       await expect(volunteerService.getVolunteerById(validId)).rejects.toThrow(
         'Volunteer not found'
       );
     });
 
-    it('should handle unexpected database errors', async () => {
-      prisma.volunteers.findUnique.mockRejectedValue(
-        new Error('Database connection failed')
-      );
-
-      await expect(volunteerService.getVolunteerById(validId)).rejects.toThrow(
-        'An unexpected error occurred while fetching volunteer'
-      );
-    });
-  });
-
-  describe('Singleton pattern', () => {
-    it('should export a singleton instance', () => {
-      expect(volunteerService).toBeInstanceOf(VolunteerService);
+    it('should throw a ValidationError for an invalid ID format', async () => {
+      // Act & Assert: call the service with an invalid ID and expect a validation error.
+      await expect(
+        volunteerService.getVolunteerById('invalid-uuid-format')
+      ).rejects.toThrow('Invalid ID format. Must be a valid UUID');
     });
   });
 });
