@@ -25,26 +25,12 @@ model chapters {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model companies {
-  company_id  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id  String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String
-  location_id String?       @db.Uuid
-  locations   locations?    @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
-  connections connections[]
+  location_id String?      @db.Uuid
+  locations   locations?   @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
   sponsors    sponsors[]
   volunteers  volunteers[]
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model connections {
-  volunteer_id   String    @id @db.Uuid
-  company_id     String    @db.Uuid
-  graduated_year DateTime  @db.Date
-  university_id  String    @db.Uuid
-  created_at     DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime  @default(now()) @db.Timestamptz(6)
-  companies      companies @relation(fields: [company_id], references: [company_id], onDelete: NoAction, onUpdate: NoAction)
-  locations      locations @relation(fields: [university_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -64,16 +50,15 @@ model contacts {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model locations {
-  location_id      String        @id(map: "university_pkey1") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  location_id      String       @id(map: "university_pkey1") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name             String
   address          String
-  country_code     String        @default("US") @db.Char(2)
+  country_code     String       @default("US") @db.Char(2)
   subdivision_code String
-  created_at       DateTime      @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime      @default(now()) @db.Timestamptz(6)
+  created_at       DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime     @default(now()) @db.Timestamptz(6)
   chapters         chapters[]
   companies        companies[]
-  connections      connections[]
   nonprofits       nonprofits[]
   sponsors         sponsors[]
   volunteers       volunteers[]
@@ -187,6 +172,7 @@ model volunteer_assignment {
   updated_at              DateTime           @default(now()) @db.Timestamptz(6)
   national_branches       national_branches? @relation(fields: [branch_id], references: [branch_id], onDelete: NoAction, onUpdate: NoAction, map: "member_assignment_branch_id_fkey")
   roles                   roles              @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction, map: "member_assignment_role_id_fkey")
+  volunteers              volunteers         @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -198,6 +184,7 @@ model volunteer_history {
   action_date  DateTime    @db.Date
   created_at   DateTime    @default(now()) @db.Timestamptz(6)
   updated_at   DateTime    @default(now()) @db.Timestamptz(6)
+  volunteers   volunteers  @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -232,6 +219,8 @@ model volunteers {
   created_at             DateTime                 @default(now()) @db.Timestamptz(6)
   updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
   company_id             String?                  @db.Uuid
+  volunteer_assignment   volunteer_assignment[]
+  volunteer_history      volunteer_history[]
   volunteer_role_project volunteer_role_project[]
   chapters               chapters?                @relation(fields: [chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction, map: "members_chapter_id_fkey")
   companies              companies?               @relation(fields: [company_id], references: [company_id], onDelete: NoAction, onUpdate: NoAction)
