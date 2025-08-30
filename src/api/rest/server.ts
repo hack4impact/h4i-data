@@ -14,7 +14,6 @@ export const createRestApp = () => {
   return app;
 };
 
-// --- This startup logic remains the same ---
 const startServer = async () => {
   await connectDB();
   const app = createRestApp();
