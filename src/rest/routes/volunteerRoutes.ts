@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { volunteerService } from '../../services';
 import { asyncHandler } from '../middleware';
 
@@ -17,7 +17,7 @@ const router = Router();
 // GET /api/volunteers
 router.get(
   '/',
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const volunteers = await volunteerService.getAllVolunteers();
     res.json({ success: true, data: volunteers });
   })
@@ -26,7 +26,7 @@ router.get(
 // POST /api/volunteers
 router.post(
   '/',
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const volunteer = await volunteerService.createVolunteer(req.body);
     res.status(201).json({ success: true, data: volunteer });
   })

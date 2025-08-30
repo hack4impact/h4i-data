@@ -1,5 +1,5 @@
 import { prisma } from '../config/database';
-import { Volunteer, VolunteerInput, VolunteerUpdateInput } from '../types';
+import { VolunteerInput } from '../types';
 
 export class VolunteerService {
   // new service function template
@@ -16,7 +16,9 @@ export class VolunteerService {
     try {
       return await prisma.volunteers.findMany();
     } catch (error) {
-      throw new Error('Failed to fetch volunteers');
+      throw new Error(
+        'Failed to fetch volunteers: ' + (error as Error).message
+      );
     }
   };
 
@@ -24,7 +26,9 @@ export class VolunteerService {
     try {
       return await prisma.volunteers.create({ data });
     } catch (error) {
-      throw new Error('Failed to create volunteer');
+      throw new Error(
+        'Failed to create volunteer: ' + (error as Error).message
+      );
     }
   };
 
@@ -34,7 +38,7 @@ export class VolunteerService {
         where: { volunteer_id: id },
       });
     } catch (error) {
-      throw new Error('Failed to fetch volunteer');
+      throw new Error('Failed to fetch volunteer: ' + (error as Error).message);
     }
   };
 }

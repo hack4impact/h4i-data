@@ -6,12 +6,7 @@ export interface ApiError extends Error {
 }
 
 // error handler middleware
-export const errorHandler = (
-  err: ApiError,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const errorHandler = (err: ApiError, req: Request, res: Response) => {
   console.error('Error:', {
     message: err.message,
     stack: err.stack,
@@ -23,7 +18,7 @@ export const errorHandler = (
 
   // default to 500 server error
   let statusCode = err.statusCode || 500;
-  let message = err.message || 'Internal Server Error';
+  const message = err.message || 'Internal Server Error';
 
   // handle specific error types
   if (err.message.includes('not found')) {
@@ -57,5 +52,6 @@ export const notFoundHandler = (req: Request, res: Response) => {
 
 // async error wrapper
 export const asyncHandler =
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
     Promise.resolve(fn(req, res, next)).catch(next);

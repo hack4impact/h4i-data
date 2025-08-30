@@ -6,15 +6,7 @@ export const validateVolunteerInput = (
   res: Response,
   next: NextFunction
 ) => {
-  const {
-    first_name,
-    last_name,
-    email,
-    graduation_date,
-    volunteer_status,
-    volunteer_type,
-    university_id,
-  } = req.body;
+  const { email, graduation_date, volunteer_status, volunteer_type } = req.body;
 
   // check required fields
   const requiredFields = [

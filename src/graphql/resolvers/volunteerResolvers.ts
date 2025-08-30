@@ -1,5 +1,5 @@
 import { volunteerService } from '../../services';
-import { VolunteerInput, VolunteerUpdateInput } from '../../types';
+import { VolunteerInput } from '../../types';
 
 export const volunteerResolvers = {
   // new graphql resolver template
@@ -14,13 +14,16 @@ export const volunteerResolvers = {
       return await volunteerService.getAllVolunteers();
     },
 
-    volunteer: async (_: any, { id }: { id: string }) => {
+    volunteer: async (_: unknown, { id }: { id: string }) => {
       return await volunteerService.getVolunteerById(id);
     },
   },
 
   Mutation: {
-    createVolunteer: async (_: any, { input }: { input: VolunteerInput }) => {
+    createVolunteer: async (
+      _: unknown,
+      { input }: { input: VolunteerInput }
+    ) => {
       return await volunteerService.createVolunteer(input); // ← Service call!
     },
   },

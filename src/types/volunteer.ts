@@ -17,4 +17,4 @@ export interface Volunteer extends VolunteerInput {
   updated_at?: Date;
 }
 
-export interface VolunteerUpdateInput extends Partial<VolunteerInput> {}
+export type VolunteerUpdateInput = Partial<VolunteerInput>;
