@@ -14,3 +14,19 @@ To fix automatic errors:
 ```
 npx eslint --fix .
 ```
+
+### Unused Dependencies
+
+Run to check for unused dependencies
+```
+npx depcheck
+```
+
+Uninstall unused dependencies with
+```
+npm uninstall <dependency-name>
+```
+
+### package.json
+
+- Make sure to order the scripts alphabetically (A - Z)

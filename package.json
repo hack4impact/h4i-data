@@ -5,14 +5,14 @@
   "main": "src/app.ts",
   "scripts": {
     "dev": "ts-node src/app.ts",
+    "dev:both": "concurrently \"npm run dev:graphql\" \"npm run dev:rest\"",
     "dev:graphql": "ts-node src/graphql/server.ts",
     "dev:rest": "ts-node src/rest/server.ts",
-    "dev:both": "concurrently \"npm run dev:graphql\" \"npm run dev:rest\"",
     "test": "jest",
-    "test:unit": "jest tests/unit",
+    "test:coverage": "jest --coverage",
     "test:integration": "jest tests/integration",
-    "test:watch": "jest --watch tests/unit",
-    "test:coverage": "jest --coverage"
+    "test:unit": "jest tests/unit",
+    "test:watch": "jest --watch tests/unit"
   },
   "repository": {
     "type": "git",
@@ -36,7 +36,6 @@
   "dependencies": {
     "@graphql-tools/schema": "^10.0.23",
     "@prisma/client": "^6.14.0",
-    "@supabase/supabase-js": "^2.49.4",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
@@ -48,7 +47,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/graphql-iso-date": "^3.4.3",
-    "@types/jest": "^29.5.14",
+    "@types/jest": "^30.0.0",
     "@types/pg": "^8.11.14",
     "@types/supertest": "^6.0.3",
     "concurrently": "^9.1.0",
