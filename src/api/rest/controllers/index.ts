@@ -1,1 +1,1 @@
-export * as chapterController from './chapter.controller';
+export * from './chapter.controller';

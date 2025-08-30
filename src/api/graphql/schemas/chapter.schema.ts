@@ -1,4 +1,4 @@
-export const chapterTypeDefs = `#graphql
+export const chapterSchemaString = `
   # Using the enum from your Prisma schema
   enum StatusType {
     ACTIVE
@@ -22,7 +22,7 @@ export const chapterTypeDefs = `#graphql
 
   input CreateChapterInput {
     name: String!
-    founded_date: String! # Using String for dates in GraphQL is common
+    founded_date: String! # Using String for dates is common
     status_type: StatusType
     location_id: String
   }

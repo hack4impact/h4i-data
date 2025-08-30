@@ -1,1 +1,1 @@
-export * as chapterService from './chapter.service';
+export * from './chapter.service';
