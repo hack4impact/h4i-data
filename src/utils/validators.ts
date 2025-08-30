@@ -25,7 +25,7 @@ const UUID_REGEX =
 export class ValidationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'ValidationError';  // Helps with error type identification
+    this.name = 'ValidationError'; // Helps with error type identification
   }
 }
 
@@ -38,7 +38,7 @@ export class VolunteerValidator {
   /**
    * Validates a volunteer ID (UUID format).
    * Ensures the ID is present and follows UUID v4 format.
-   * 
+   *
    * @param id - The ID string to validate
    * @throws ValidationError if ID is missing or invalid format
    */
@@ -58,7 +58,7 @@ export class VolunteerValidator {
    * Comprehensive validation of volunteer input data.
    * Validates all required fields, formats, and enum values.
    * Accumulates all errors and throws a single ValidationError with all issues.
-   * 
+   *
    * @param data - Volunteer input data to validate
    * @throws ValidationError with detailed error message if validation fails
    */
@@ -144,7 +144,7 @@ export class VolunteerValidator {
   /**
    * Sanitizes volunteer input data by trimming whitespace and normalizing formats.
    * This should be called after validation to clean up the data before storage.
-   * 
+   *
    * @param data - Raw volunteer input data
    * @returns Sanitized volunteer input data
    */

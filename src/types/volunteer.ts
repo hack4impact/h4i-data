@@ -1,20 +1,17 @@
+import { z } from 'zod';
 import { VolunteerStatus, VolunteerType } from './enums';
 
-export interface VolunteerInput {
-  first_name: string;
-  last_name: string;
-  email: string;
-  graduation_date: Date;
-  volunteer_status: VolunteerStatus;
-  H4I_email?: string;
-  volunteer_type: VolunteerType;
-  university_id: string;
-}
+export const volunteerSchema = z.object({
+  first_name: z.string().trim().min(1, { message: 'first_name is required' }),
+  last_name: z.string().trim().min(1, { message: 'last_name is required' }),
+  email: z.email({ message: 'Invalid email format' }),
+  graduation_date: z.coerce.date(),
+  volunteer_status: z.enum(VolunteerStatus),
+  volunteer_type: z.enum(VolunteerType),
+  university_id: z
+    .string()
+    .uuid({ message: 'Invalid university_id format. Must be a valid UUID' }),
+  H4I_email: z.email().optional(),
+});
 
-export interface Volunteer extends VolunteerInput {
-  volunteer_id: string;
-  created_at?: Date;
-  updated_at?: Date;
-}
-
-export type VolunteerUpdateInput = Partial<VolunteerInput>;
+export type VolunteerInput = z.infer<typeof volunteerSchema>;

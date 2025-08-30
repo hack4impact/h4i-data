@@ -1,156 +1,164 @@
+// src/services/volunteerService.ts
+
 // Volunteer service layer - business logic for volunteer operations
-// This file contains the service layer that sits between API routes/resolvers and the database
+// This file uses Zod for schema validation to ensure data integrity,
+// separating business logic from the database and API layers.
 
 import { prisma } from '../config/database';
-import { VolunteerInput } from '../types';
 import { Prisma } from '@prisma/client';
 import { VolunteerValidator, ValidationError } from '../utils/validators';
+import { volunteerSchema } from '../types/';
+import { core, ZodError } from 'zod';
 
 /**
  * VolunteerService class handles all business logic for volunteer operations.
  * This service layer provides:
- * - Data validation and sanitization
- * - Database operations through Prisma
- * - Error handling and transformation
- * - Business rule enforcement
- * 
- * The service layer pattern separates business logic from API concerns,
- * making the code more testable and maintainable.
+ * - Data validation and sanitization via Zod schemas.
+ * - Database operations through Prisma.
+ * - Centralized error handling and transformation.
+ * - Enforcement of business rules.
+ *
+ * This pattern abstracts the business logic from API concerns (like request/response handling),
+ * making the code more modular, testable, and maintainable.
  */
 export class VolunteerService {
   /**
    * Retrieves all volunteers from the database.
-   * Returns volunteers sorted by creation date (newest first).
-   * 
-   * @returns Promise<Volunteer[]> - Array of all volunteer records
-   * @throws Error if database query fails
+   * Returns volunteers sorted by their creation date in descending order (newest first).
+   *
+   * @returns {Promise<Volunteer[]>} A promise that resolves to an array of all volunteer records.
+   * @throws {Error} If the database query fails, a generic error is thrown.
    */
   getAllVolunteers = async () => {
     try {
       const volunteers = await prisma.volunteers.findMany({
-        // Order by creation date descending (newest first)
-        // This provides a consistent, predictable ordering
+        // A consistent ordering provides a predictable response for API consumers.
         orderBy: { created_at: 'desc' },
       });
       return volunteers;
     } catch (error) {
-      // Log error for debugging while throwing user-friendly message
+      // Log the detailed error for debugging purposes while throwing a more user-friendly message.
       console.error('Failed to fetch volunteers:', error);
-      throw new Error('Failed to fetch volunteers from database');
+      throw new Error('Failed to fetch volunteers from the database');
     }
   };
 
   /**
    * Creates a new volunteer record in the database.
-   * Handles validation, sanitization, and database constraint errors.
-   * 
-   * @param data - Raw volunteer input data from API request
-   * @returns Promise<Volunteer> - The created volunteer record
-   * @throws ValidationError for invalid input data
-   * @throws Error for database constraints or unexpected errors
+   * This method first validates the input data against the `volunteerSchema` using Zod.
+   * If validation is successful, it proceeds to create the record in the database.
+   * It also handles specific database constraint errors, like unique email violations.
+   *
+   * @param {unknown} data - The raw input data from the API request. Using `unknown` forces type-safe parsing.
+   * @returns {Promise<Volunteer>} A promise that resolves to the newly created volunteer record.
+   * @throws {ValidationError} If the input data fails Zod validation.
+   * @throws {Error} For database constraint violations or other unexpected errors.
    */
-  createVolunteer = async (data: VolunteerInput) => {
+  createVolunteer = async (data: unknown) => {
     try {
-      // Step 1: Clean up input data (trim whitespace, normalize case)
-      const sanitizedData = VolunteerValidator.sanitizeVolunteerInput(data);
-      
-      // Step 2: Validate all fields and business rules
-      VolunteerValidator.validateVolunteerInput(sanitizedData);
+      // Step 1: Validate and parse the input data using the Zod schema.
+      // Zod handles both validation and sanitization (trimming, etc.) in one step.
+      // If validation fails, Zod throws an error which is caught in the catch block.
+      const validatedData = volunteerSchema.parse(data);
 
-      // Step 3: Attempt to create the volunteer record
+      // Step 2: Attempt to create the volunteer record with the validated data.
       const volunteer = await prisma.volunteers.create({
-        data: sanitizedData,
+        data: validatedData,
       });
 
       return volunteer;
     } catch (error) {
-      /**
-       * Comprehensive error handling for different error types.
-       * This provides meaningful error messages to API consumers.
-       */
-      
-      // Handle Prisma-specific database errors
+      // Step 3: Provide comprehensive error handling for different failure scenarios.
+
+      // Handle Zod validation errors by converting them into our custom ValidationError.
+      if (error instanceof ZodError) {
+        // We can format a user-friendly error message from Zod's detailed error object.
+        const formattedErrors = error.issues
+          .map((e: core.$ZodIssue) => e.message)
+          .join(', ');
+        throw new ValidationError(`Validation failed: ${formattedErrors}`);
+      }
+
+      // Handle Prisma-specific database errors for more specific feedback.
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {
           case 'P2002':
-            // Unique constraint violation (likely duplicate email)
+            // Unique constraint violation (e.g., duplicate email).
             throw new Error('A volunteer with this email already exists');
           case 'P2003':
-            // Foreign key constraint violation (invalid university_id)
+            // Foreign key constraint violation (e.g., invalid university_id).
             throw new Error(
-              'Invalid university_id provided - university does not exist'
+              'Invalid university_id provided - the specified university does not exist'
             );
           default:
-            // Other Prisma errors - log details but don't expose internals
+            // For other known database errors, log the details but provide a generic message.
             console.error('Prisma error creating volunteer:', error);
-            throw new Error('Database error occurred while creating volunteer');
+            throw new Error(
+              'A database error occurred while creating the volunteer'
+            );
         }
       }
 
-      // Re-throw validation errors unchanged (they have good messages)
-      if (error instanceof ValidationError) {
-        throw error;
-      }
-
-      // Handle any other unexpected errors
+      // Handle any other unexpected errors.
       console.error('Unexpected error creating volunteer:', error);
-      throw new Error('An unexpected error occurred while creating volunteer');
+      throw new Error(
+        'An unexpected error occurred while creating the volunteer'
+      );
     }
   };
 
   /**
    * Retrieves a single volunteer by their unique ID.
-   * Validates the ID format and handles not-found scenarios.
-   * 
-   * @param id - The volunteer UUID to search for
-   * @returns Promise<Volunteer> - The volunteer record if found
-   * @throws ValidationError if ID format is invalid
-   * @throws Error if volunteer not found or database error occurs
+   * Validates the ID format before querying the database and handles not-found scenarios.
+   *
+   * @param {string} id - The UUID of the volunteer to retrieve.
+   * @returns {Promise<Volunteer>} A promise that resolves to the volunteer record if found.
+   * @throws {ValidationError} If the provided ID is not a valid UUID.
+   * @throws {Error} If no volunteer is found with the given ID, or if a database error occurs.
    */
   getVolunteerById = async (id: string) => {
     try {
-      // Validate ID format before querying database
-      // This prevents invalid queries and provides better error messages
+      // Step 1: Validate the ID format before sending a query to the database.
+      // This prevents invalid queries and provides a clear error message for bad requests.
       VolunteerValidator.validateId(id);
 
-      // Query for the specific volunteer
+      // Step 2: Query the database for the specific volunteer.
       const volunteer = await prisma.volunteers.findUnique({
         where: { volunteer_id: id },
       });
 
-      // Handle not found case explicitly
+      // Step 3: Handle the "not found" case explicitly for a clear API response.
       if (!volunteer) {
         throw new Error('Volunteer not found');
       }
 
       return volunteer;
     } catch (error) {
-      /**
-       * Error handling with specific cases for different error types.
-       */
-      
-      // Re-throw validation errors unchanged (ID format issues)
-      if (error instanceof ValidationError) {
+      // Step 4: Handle different types of errors that may occur.
+
+      // Re-throw validation or "not found" errors directly as they are intentional and have clear messages.
+      if (
+        error instanceof ValidationError ||
+        (error instanceof Error && error.message === 'Volunteer not found')
+      ) {
         throw error;
       }
 
-      // Re-throw "not found" errors unchanged (expected business case)
-      if (error instanceof Error && error.message === 'Volunteer not found') {
-        throw error;
-      }
-
-      // Handle any unexpected database or system errors
-      console.error('Unexpected error fetching volunteer:', error);
-      throw new Error('An unexpected error occurred while fetching volunteer');
+      // Handle any unexpected database or system errors.
+      console.error(
+        `Unexpected error fetching volunteer with ID ${id}:`,
+        error
+      );
+      throw new Error(
+        'An unexpected error occurred while fetching the volunteer'
+      );
     }
   };
 }
 
 /**
  * Export a singleton instance of VolunteerService.
- * This pattern ensures:
- * - Single instance across the application
- * - Easy dependency injection for testing
- * - Consistent behavior across different API endpoints
+ * This pattern ensures that a single, consistent instance of the service is used
+ * throughout the application, simplifying state management and dependency injection.
  */
 export const volunteerService = new VolunteerService();
