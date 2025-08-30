@@ -1,3 +1,5 @@
+// tests/unit/services/volunteerService.test.ts
+
 import { volunteerService } from '../../../src/services/volunteerService';
 import { ValidationError } from '../../../src/utils/validators';
 import { VolunteerStatus, VolunteerType } from '../../../src/types';
@@ -16,7 +18,6 @@ jest.mock('../../../src/config/database', () => ({
 }));
 
 // Cast the nested 'volunteers' object to its mocked type.
-// This is the key change that tells TypeScript that .findMany, .create, etc., are Jest mock functions.
 const mockedPrismaVolunteers = prisma.volunteers as jest.Mocked<
   typeof prisma.volunteers
 >;
@@ -27,6 +28,7 @@ describe('VolunteerService', () => {
     first_name: 'John',
     last_name: 'Doe',
     email: 'john@test.com',
+    H4I_email: 'john.doe@hack4impact.org',
     graduation_date: '2024-06-15T00:00:00.000Z',
     volunteer_status: VolunteerStatus.STUDENT,
     volunteer_type: VolunteerType.CHAPTER,
@@ -37,6 +39,8 @@ describe('VolunteerService', () => {
     volunteer_id: '987e6543-e21b-32d1-b654-426614174000',
     ...validVolunteerInput,
     graduation_date: new Date(validVolunteerInput.graduation_date),
+    chapter_id: null,
+    company_id: null,
     created_at: new Date('2024-01-15T10:00:00Z'),
     updated_at: new Date('2024-01-15T10:00:00Z'),
   };

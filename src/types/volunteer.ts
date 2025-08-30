@@ -8,9 +8,9 @@ export const volunteerSchema = z.object({
   graduation_date: z.coerce.date(),
   volunteer_status: z.enum(VolunteerStatus),
   volunteer_type: z.enum(VolunteerType),
-  university_id: z
-    .string()
-    .uuid({ message: 'Invalid university_id format. Must be a valid UUID' }),
+  university_id: z.uuid({
+    message: 'Invalid university_id format. Must be a valid UUID',
+  }),
   H4I_email: z.email().optional(),
 });
 
