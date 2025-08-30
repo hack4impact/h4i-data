@@ -1,12 +1,12 @@
-// src/app.ts
 import express from 'express';
-import { expressMiddleware } from '@apollo/server/express4';
+import { graphqlHTTP } from 'express-graphql';
 import { createRestApp } from './api/rest/server';
-import { createGraphQLServer } from './api/graphql/server';
+import { graphqlSchema } from './api/graphql/server';
 import { env } from './config/server';
 import { connectDB } from './config/database';
 
 const startServer = async () => {
+  // Connect to the database
   await connectDB();
 
   const app = express();
@@ -16,14 +16,20 @@ const startServer = async () => {
   app.use('/api/rest', restApp);
 
   // Mount GraphQL API
-  const graphQLServer = createGraphQLServer();
-  await graphQLServer.start();
-  app.use('/api/graphql', express.json(), expressMiddleware(graphQLServer));
+  app.use(
+    '/api/graphql',
+    graphqlHTTP({
+      schema: graphqlSchema,
+      graphiql: env.NODE_ENV === 'development', // Enable GraphiQL in development
+    })
+  );
 
   app.listen(env.PORT, () => {
     console.log(`Server ready at http://localhost:${env.PORT}`);
-    console.log(`REST API at http://localhost:${env.PORT}/api/rest`);
-    console.log(`GraphQL API at http://localhost:${env.PORT}/api/graphql`);
+    console.log(`REST API available at http://localhost:${env.PORT}/api/rest`);
+    console.log(
+      ` GraphQL API available at http://localhost:${env.PORT}/api/graphql`
+    );
   });
 };
 

@@ -1,1 +1,1 @@
-import { chapterResolvers } from './chapter.resolvers';
+export * from './chapter.resolvers';

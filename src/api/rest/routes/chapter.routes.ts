@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { chapterController } from '../controllers';
+import { chapterController } from '../controllers/chapter.controller';
 
 const router = Router();
 
@@ -9,4 +9,4 @@ router.get('/:id', chapterController.getChapterById);
 router.patch('/:id', chapterController.updateChapter);
 router.delete('/:id', chapterController.deleteChapter);
 
-export default router;
+export const chapterRoutes = router;
