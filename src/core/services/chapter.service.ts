@@ -1,37 +1,30 @@
-import { Prisma, chapters } from '@prisma/client';
-import { prisma } from './index';
+import { prisma } from '../../config/database';
+import { CreateChapterInput, UpdateChapterInput } from '../validators';
 
-export const getChapters = async () => {
+export const getAllChapters = async () => {
   return prisma.chapters.findMany();
 };
 
 export const getChapterById = async (id: string) => {
   return prisma.chapters.findUnique({
     where: { chapter_id: id },
-    include: {
-      // Example of including a relation
-      locations: true,
-    },
   });
 };
 
-export const createChapter = async (
-  data: Prisma.chaptersCreateInput
-): Promise<chapters> => {
-  return prisma.chapters.create({ data });
+export const createChapter = async (data: CreateChapterInput) => {
+  return prisma.chapters.create({
+    data,
+  });
 };
 
-export const updateChapter = async (
-  id: string,
-  data: Prisma.chaptersUpdateInput
-): Promise<chapters | null> => {
+export const updateChapter = async (id: string, data: UpdateChapterInput) => {
   return prisma.chapters.update({
     where: { chapter_id: id },
     data,
   });
 };
 
-export const deleteChapter = async (id: string): Promise<chapters | null> => {
+export const deleteChapter = async (id: string) => {
   return prisma.chapters.delete({
     where: { chapter_id: id },
   });

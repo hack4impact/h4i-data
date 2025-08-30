@@ -1,24 +1,9 @@
 import { Request, Response } from 'express';
-import * as chapterService from '../../services/chapter.service';
-
-/**
- * The controller is responsible for handling the HTTP request and response.
- * It calls the appropriate service function to execute business logic
- * and then sends back a formatted response.
- */
-
-export const getChapterById = async (req: Request, res: Response) => {
-  try {
-    const chapter = await chapterService.getChapterById(req.params.id);
-    if (chapter) {
-      res.status(200).json(chapter);
-    } else {
-      res.status(404).json({ message: 'Chapter not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Error retrieving chapter', error });
-  }
-};
+import {
+  chapterService,
+  createChapterSchema,
+  updateChapterSchema,
+} from '../../../core';
 
 export const getAllChapters = async (req: Request, res: Response) => {
   try {
@@ -26,5 +11,53 @@ export const getAllChapters = async (req: Request, res: Response) => {
     res.status(200).json(chapters);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving chapters', error });
+  }
+};
+
+export const getChapterById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const chapter = await chapterService.getChapterById(id);
+    if (!chapter) {
+      return res.status(404).json({ message: 'Chapter not found' });
+    }
+    res.status(200).json(chapter);
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving chapter', error });
+  }
+};
+
+export const createChapter = async (req: Request, res: Response) => {
+  try {
+    const validatedData = createChapterSchema.parse(req.body);
+    const newChapter = await chapterService.createChapter(validatedData);
+    res.status(201).json(newChapter);
+  } catch (error) {
+    res.status(400).json({ message: 'Validation error', error });
+  }
+};
+
+export const updateChapter = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const validatedData = updateChapterSchema.parse(req.body);
+    const updatedChapter = await chapterService.updateChapter(
+      id,
+      validatedData
+    );
+    res.status(200).json(updatedChapter);
+  } catch (error) {
+    // You might want to differentiate between validation errors and not found errors
+    res.status(400).json({ message: 'Error updating chapter', error });
+  }
+};
+
+export const deleteChapter = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await chapterService.deleteChapter(id);
+    res.status(204).send(); // No content
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting chapter', error });
   }
 };
