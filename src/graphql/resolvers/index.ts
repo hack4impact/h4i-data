@@ -4,7 +4,7 @@ import { volunteerResolvers } from './volunteerResolvers';
 
 export const resolvers = {
   // scalar resolvers
-  Date: DateTimeResolver as GraphQLScalarType,
+  DateTime: DateTimeResolver as GraphQLScalarType,
 
   // combine all feature resolvers
   Query: {

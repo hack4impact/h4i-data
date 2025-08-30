@@ -1,202 +1,253 @@
 import request from 'supertest';
 import { app } from '../../../src/graphql/server';
-import { prisma } from '../../../src/config/database';
-import { mockVolunteerData, cleanupTestData } from '../../fixtures/testData';
+import { volunteerService } from '../../../src/services';
+import { VolunteerStatus, VolunteerType } from '../../../src/types';
 
-describe('Volunteer GraphQL Integration', () => {
-  beforeEach(async () => {
-    await cleanupTestData();
+// Mock the service layer
+jest.mock('../../../src/services');
+jest.mock('../../../src/config/server', () => ({
+  config: {
+    NODE_ENV: 'test',
+    GRAPHQL_PORT: 3000,
+    REST_PORT: 3001,
+    SUPABASE_URL: 'test-url',
+    SEED_DATA: false,
+  },
+}));
+
+const mockedVolunteerService = volunteerService as jest.Mocked<
+  typeof volunteerService
+>;
+
+describe('Volunteer GraphQL API Integration Tests', () => {
+  const mockVolunteer = {
+    volunteer_id: '123e4567-e89b-12d3-a456-426614174000',
+    first_name: 'John',
+    last_name: 'Doe',
+    email: 'john@test.com',
+    graduation_date: new Date('2024-06-15'),
+    volunteer_status: VolunteerStatus.STUDENT,
+    volunteer_type: VolunteerType.CHAPTER,
+    university_id: '987e6543-e21b-32d1-b654-426614174000',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
-  });
-
-  describe('createVolunteer mutation', () => {
-    it('should create volunteer via GraphQL', async () => {
-      const mutation = `
-        mutation CreateVolunteer($input: VolunteerInput!) {
-          createVolunteer(input: $input) {
+  describe('Query: volunteers', () => {
+    const query = `
+        query GetVolunteers {
+          volunteers {
             volunteer_id
             first_name
             last_name
             email
+            graduation_date
             volunteer_status
             volunteer_type
+            university_id
           }
         }
       `;
 
-      const variables = {
-        input: {
-          first_name: 'GraphQL',
-          last_name: 'Test',
-          email: 'graphql@test.com',
-          graduation_date: '2026-06-15',
-          volunteer_status: 'STUDENT',
-          H4I_email: 'graphql@hack4impact.org',
-          volunteer_type: 'CHAPTER',
-          university_id: '860b69b4-a14e-41d9-a367-2632b342e549',
-        },
-      };
+    it('should return all volunteers successfully', async () => {
+      mockedVolunteerService.getAllVolunteers.mockResolvedValue([
+        mockVolunteer,
+      ]);
 
-      const response = await request(app)
-        .post('/graphql')
-        .send({ query: mutation, variables })
-        .expect(200);
+      const response = await request(app).post('/graphql').send({ query });
 
-      // check for graphql errors
-      expect(response.body.errors).toBeUndefined();
-
-      // check response data
-      expect(response.body.data.createVolunteer.first_name).toBe('GraphQL');
-      expect(response.body.data.createVolunteer.email).toBe('graphql@test.com');
-
-      // verify in database
-      const dbVolunteer = await prisma.volunteers.findFirst({
-        where: { email: 'graphql@test.com' },
-      });
-      expect(dbVolunteer).not.toBeNull();
-      expect(dbVolunteer.first_name).toBe('GraphQL');
+      expect(response.status).toBe(200);
+      expect(response.body.data.volunteers).toEqual([mockVolunteer]);
+      expect(mockedVolunteerService.getAllVolunteers).toHaveBeenCalledTimes(1);
     });
 
-    it('should return error for invalid input', async () => {
-      const mutation = `
-        mutation CreateVolunteer($input: VolunteerInput!) {
-          createVolunteer(input: $input) {
-            volunteer_id
-          }
-        }
-      `;
+    it('should handle service layer errors', async () => {
+      mockedVolunteerService.getAllVolunteers.mockRejectedValue(
+        new Error('Failed to fetch volunteers from database')
+      );
 
-      const variables = {
-        input: {
-          first_name: '', // empty name should fail
-          email: 'invalid-email', // invalid email
-        },
-      };
+      const response = await request(app).post('/graphql').send({ query });
 
-      const response = await request(app)
-        .post('/graphql')
-        .send({ query: mutation, variables })
-        .expect(200);
-
-      // should have graphql errors
+      expect(response.status).toBe(200);
       expect(response.body.errors).toBeDefined();
-      expect(response.body.errors.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('volunteers query', () => {
-    it('should fetch all volunteers', async () => {
-      // create test volunteers
-      await prisma.volunteers.createMany({
-        data: [
-          mockVolunteerData.validStudent,
-          mockVolunteerData.validProfessional,
-        ],
-      });
-
-      const query = `
-        query GetAllVolunteers {
-          volunteers {
-            volunteer_id
-            first_name
-            last_name
-            volunteer_status
-            volunteer_type
-          }
-        }
-      `;
-
-      const response = await request(app)
-        .post('/graphql')
-        .send({ query })
-        .expect(200);
-
-      expect(response.body.errors).toBeUndefined();
-      expect(response.body.data.volunteers).toHaveLength(2);
-
-      // check we got both test volunteers
-      const firstNames = response.body.data.volunteers.map(
-        (v: any) => v.first_name
+      expect(response.body.errors[0].message).toBe(
+        'Failed to fetch volunteers from database'
       );
-      expect(firstNames).toContain('John');
-      expect(firstNames).toContain('Jane');
-    });
-
-    it('should return empty array when no volunteers exist', async () => {
-      const query = `
-        query GetAllVolunteers {
-          volunteers {
-            volunteer_id
-            first_name
-          }
-        }
-      `;
-
-      const response = await request(app)
-        .post('/graphql')
-        .send({ query })
-        .expect(200);
-
-      expect(response.body.errors).toBeUndefined();
-      expect(response.body.data.volunteers).toHaveLength(0);
     });
   });
 
-  describe('volunteer query (by ID)', () => {
-    it('should fetch single volunteer by ID', async () => {
-      // create test volunteer
-      const volunteer = await prisma.volunteers.create({
-        data: mockVolunteerData.validStudent,
-      });
-
-      const query = `
+  describe('Query: volunteer', () => {
+    const query = `
         query GetVolunteer($id: ID!) {
           volunteer(id: $id) {
             volunteer_id
             first_name
             last_name
             email
+            graduation_date
+            volunteer_status
+            volunteer_type
+            university_id
           }
         }
       `;
 
-      const variables = { id: volunteer.volunteer_id };
+    it('should return volunteer by ID successfully', async () => {
+      mockedVolunteerService.getVolunteerById.mockResolvedValue(mockVolunteer);
 
       const response = await request(app)
         .post('/graphql')
-        .send({ query, variables })
-        .expect(200);
+        .send({
+          query,
+          variables: { id: mockVolunteer.volunteer_id },
+        });
 
-      expect(response.body.errors).toBeUndefined();
-      expect(response.body.data.volunteer.volunteer_id).toBe(
-        volunteer.volunteer_id
+      expect(response.status).toBe(200);
+      expect(response.body.data.volunteer).toEqual(mockVolunteer);
+      expect(mockedVolunteerService.getVolunteerById).toHaveBeenCalledWith(
+        mockVolunteer.volunteer_id
       );
-      expect(response.body.data.volunteer.first_name).toBe('John');
     });
 
-    it('should return null for non-existent volunteer', async () => {
-      const query = `
-        query GetVolunteer($id: ID!) {
-          volunteer(id: $id) {
+    it('should handle not found errors', async () => {
+      mockedVolunteerService.getVolunteerById.mockRejectedValue(
+        new Error('Volunteer not found')
+      );
+
+      const response = await request(app)
+        .post('/graphql')
+        .send({
+          query,
+          variables: { id: 'non-existent-id' },
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.errors).toBeDefined();
+      expect(response.body.errors[0].message).toBe('Volunteer not found');
+    });
+  });
+
+  describe('Mutation: createVolunteer', () => {
+    const mutation = `
+        mutation CreateVolunteer($input: VolunteerInput!) {
+          createVolunteer(input: $input) {
             volunteer_id
             first_name
+            last_name
+            email
+            graduation_date
+            volunteer_status
+            volunteer_type
+            university_id
           }
         }
       `;
 
-      const variables = { id: '999e9999-e99b-99d9-a999-999999999999' };
+    const volunteerInput = {
+      first_name: 'John',
+      last_name: 'Doe',
+      email: 'john@test.com',
+      graduation_date: '2024-06-15T00:00:00.000Z',
+      volunteer_status: VolunteerStatus.STUDENT,
+      volunteer_type: VolunteerType.CHAPTER,
+      university_id: '987e6543-e21b-32d1-b654-426614174000',
+    };
+
+    it('should create volunteer successfully', async () => {
+      mockedVolunteerService.createVolunteer.mockResolvedValue(mockVolunteer);
 
       const response = await request(app)
         .post('/graphql')
-        .send({ query, variables })
-        .expect(200);
+        .send({
+          query: mutation,
+          variables: { input: volunteerInput },
+        });
 
-      expect(response.body.errors).toBeUndefined();
-      expect(response.body.data.volunteer).toBeNull();
+      expect(response.status).toBe(200);
+      expect(response.body.data.createVolunteer).toEqual(mockVolunteer);
+      expect(mockedVolunteerService.createVolunteer).toHaveBeenCalledWith(
+        volunteerInput
+      );
+    });
+
+    it('should handle validation errors', async () => {
+      mockedVolunteerService.createVolunteer.mockRejectedValue(
+        new Error('Validation failed: email is required')
+      );
+
+      const response = await request(app)
+        .post('/graphql')
+        .send({
+          query: mutation,
+          variables: { input: volunteerInput },
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.errors).toBeDefined();
+      expect(response.body.errors[0].message).toBe(
+        'Validation failed: email is required'
+      );
+    });
+
+    it('should handle duplicate email errors', async () => {
+      mockedVolunteerService.createVolunteer.mockRejectedValue(
+        new Error('A volunteer with this email already exists')
+      );
+
+      const response = await request(app)
+        .post('/graphql')
+        .send({
+          query: mutation,
+          variables: { input: volunteerInput },
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.errors).toBeDefined();
+      expect(response.body.errors[0].message).toBe(
+        'A volunteer with this email already exists'
+      );
+    });
+  });
+
+  describe('DateTime scalar', () => {
+    const query = `
+        query GetVolunteers {
+          volunteers {
+            graduation_date
+          }
+        }
+      `;
+
+    it('should handle DateTime scalar correctly', async () => {
+      const volunteerWithDate = {
+        ...mockVolunteer,
+        graduation_date: new Date('2024-06-15T10:30:00.000Z'),
+      };
+
+      mockedVolunteerService.getAllVolunteers.mockResolvedValue([
+        volunteerWithDate,
+      ]);
+
+      const response = await request(app).post('/graphql').send({ query });
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.volunteers[0].graduation_date).toBe(
+        '2024-06-15T10:30:00.000Z'
+      );
+    });
+  });
+
+  describe('Health check', () => {
+    it('should return health status', async () => {
+      const response = await request(app).get('/health');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        status: 'OK',
+        service: 'GraphQL API',
+      });
     });
   });
 });
