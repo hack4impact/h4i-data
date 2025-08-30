@@ -2,7 +2,6 @@ import request from 'supertest';
 import { app } from '../../../src/graphql/server';
 import { prisma } from '../../../src/config/database';
 import { mockVolunteerData, cleanupTestData } from '../../fixtures/testData';
-import { Volunteer } from '../../../src/types';
 
 describe('Volunteer GraphQL Integration', () => {
   beforeEach(async () => {
@@ -59,7 +58,7 @@ describe('Volunteer GraphQL Integration', () => {
         where: { email: 'graphql@test.com' },
       });
       expect(dbVolunteer).not.toBeNull();
-      expect(dbVolunteer?.first_name).toBe('GraphQL');
+      expect(dbVolunteer.first_name).toBe('GraphQL');
     });
 
     it('should return error for invalid input', async () => {
@@ -121,17 +120,10 @@ describe('Volunteer GraphQL Integration', () => {
 
       // check we got both test volunteers
       const firstNames = response.body.data.volunteers.map(
-<<<<<<< HEAD
-        (v: Volunteer) => v.first_name
+        (v: any) => v.first_name
       );
       expect(firstNames).toContain('John');
       expect(firstNames).toContain('Jane');
-=======
-        (v: any) => v.first_name,
-      );
-      expect(firstNames).toContain("John");
-      expect(firstNames).toContain("Jane");
->>>>>>> b0f3101 (feat: volunteer fix)
     });
 
     it('should return empty array when no volunteers exist', async () => {
