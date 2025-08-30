@@ -8,21 +8,21 @@ type CreateChapterInput = z.infer<typeof createChapterSchema>;
 type UpdateChapterInput = z.infer<typeof updateChapterSchema>;
 
 export const getAllChapters = () => {
-  return prisma.chapter.findMany();
+  return prisma.chapters.findMany();
 };
 
 export const getChapterById = (id: string) => {
-  return prisma.chapter.findUnique({ where: { chapter_id: id } });
+  return prisma.chapters.findUnique({ where: { chapter_id: id } });
 };
 
 export const createChapter = (data: CreateChapterInput) => {
-  return prisma.chapter.create({ data });
+  return prisma.chapters.create({ data });
 };
 
 export const updateChapter = (id: string, data: UpdateChapterInput) => {
-  return prisma.chapter.update({ where: { chapter_id: id }, data });
+  return prisma.chapters.update({ where: { chapter_id: id }, data });
 };
 
 export const deleteChapter = (id: string) => {
-  return prisma.chapter.delete({ where: { chapter_id: id } });
+  return prisma.chapters.delete({ where: { chapter_id: id } });
 };

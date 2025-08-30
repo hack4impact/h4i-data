@@ -26,7 +26,7 @@ const startServer = async () => {
   });
 
   // --- Graceful shutdown logic ---
-  const gracefulShutdown = async (signal: string) => {
+  const shutdown = async (signal: string) => {
     console.log(`\nReceived ${signal}, shutting down gracefully...`);
 
     // 1. Stop the server from accepting new connections
@@ -42,8 +42,8 @@ const startServer = async () => {
   };
 
   // Listen for termination signals
-  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 };
 
 startServer();
