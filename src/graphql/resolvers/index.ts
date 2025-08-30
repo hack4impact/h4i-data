@@ -1,6 +1,6 @@
 import { GraphQLScalarType } from 'graphql';
 import { DateTimeResolver } from 'graphql-scalars';
-import { volunteerResolvers } from "./volunteerResolvers";
+import { volunteerResolvers } from './volunteerResolvers';
 
 export const resolvers = {
   // scalar resolvers
@@ -16,4 +16,4 @@ export const resolvers = {
   },
 };
 
-export * from "./volunteerResolvers";
+export * from './volunteerResolvers';

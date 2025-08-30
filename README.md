@@ -141,4 +141,3 @@ This creates a volunteer in the Volunteer table. Other examples are listed in th
 
 1. Prisma Client CRUD Operations: <https://www.prisma.io/docs/orm/prisma-client/queries/crud>
 2. Jest Documentation: <https://jestjs.io/docs/getting-started>
-

@@ -1,4 +1,4 @@
-import { VolunteerStatus, VolunteerType } from "./enums";
+import { VolunteerStatus, VolunteerType } from './enums';
 
 export interface VolunteerInput {
   first_name: string;

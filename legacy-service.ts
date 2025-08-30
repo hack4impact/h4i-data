@@ -1,12 +1,12 @@
-import dotenv from "dotenv";
-import { Pool } from "pg";
-import { VolunteerStatus, VolunteerType } from "./legacy-enums";
+import dotenv from 'dotenv';
+import { Pool } from 'pg';
+import { VolunteerStatus, VolunteerType } from './legacy-enums';
 
 dotenv.config();
 
 // create a prisma client
-import { Prisma, PrismaClient } from "./generated/prisma";
-import { VolunteerTypeTS } from "./main";
+import { Prisma, PrismaClient } from './generated/prisma';
+import { VolunteerTypeTS } from './main';
 
 const prisma = new PrismaClient();
 
@@ -23,17 +23,17 @@ export async function connectToDB() {
   try {
     // connects to the database
     await prisma.$connect();
-    console.log("Connected successfully");
+    console.log('Connected successfully');
   } catch (err) {
     // errors if connection is unsuccessful
-    console.error("Database connection error:", err);
+    console.error('Database connection error:', err);
   }
 }
 
 // disconnect the database
 export async function disconnectFromDB() {
   await prisma.$disconnect();
-  console.log("Disconnected successfully");
+  console.log('Disconnected successfully');
 }
 
 // adds a volunteer to the Volunteers table
@@ -63,10 +63,10 @@ export async function addVolunteer(volunteer: VolunteerTypeTS) {
       H4I_email: ${newVolunteer.H4I_email}
       volunteer_type: ${newVolunteer.volunteer_type}`);
 
-    return "Successfully added member!";
+    return 'Successfully added member!';
   } catch (error) {
-    console.error("Insertion Error: " + error);
-    return "Failed to add member!";
+    console.error('Insertion Error: ' + error);
+    return 'Failed to add member!';
   }
 }
 
@@ -234,4 +234,3 @@ module.exports.getAllMembers = getAllMembers;
 module.exports.connectToDB = connectToDB;
 module.exports.addVolunteer = addVolunteer;
 module.exports.disconnectFromDB = disconnectFromDB;
-

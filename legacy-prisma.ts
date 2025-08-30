@@ -1,4 +1,4 @@
-import { PrismaClient } from "./generated/prisma";
+import { PrismaClient } from './generated/prisma';
 
 // Extend the global object to hold a SINGLE PrismaClient instance in dev
 declare global {

@@ -1,10 +1,10 @@
 export enum VolunteerStatus {
-  STUDENT = "STUDENT",
-  PROFESSIONAL = "PROFESSIONAL",
+  STUDENT = 'STUDENT',
+  PROFESSIONAL = 'PROFESSIONAL',
 }
 
 export enum VolunteerType {
-  CHAPTER = "CHAPTER",
-  NATIONALS = "NATIONALS",
-  BOTH = "BOTH",
+  CHAPTER = 'CHAPTER',
+  NATIONALS = 'NATIONALS',
+  BOTH = 'BOTH',
 }

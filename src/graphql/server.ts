@@ -1,9 +1,9 @@
-import express from "express";
-import { graphqlHTTP } from "express-graphql";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import { typeDefs } from "./schemas";
-import { resolvers } from "./resolvers";
-import { connectToDB, disconnectFromDB } from "../config/database";
+import express from 'express';
+import { graphqlHTTP } from 'express-graphql';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { typeDefs } from './schemas';
+import { resolvers } from './resolvers';
+import { connectToDB, disconnectFromDB } from '../config/database';
 
 const app = express();
 
@@ -15,16 +15,16 @@ const schema = makeExecutableSchema({
 
 // GraphQL endpoint
 app.use(
-  "/graphql",
+  '/graphql',
   graphqlHTTP({
     schema,
     graphiql: true, // Enable GraphiQL interface
-  }),
+  })
 );
 
 // Health check endpoint
-app.get("/health", (req, res) => {
-  res.json({ status: "OK", service: "GraphQL API" });
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', service: 'GraphQL API' });
 });
 
 const PORT = process.env.GRAPHQL_PORT || 3000;
@@ -42,8 +42,8 @@ export async function startGraphQLServer() {
     });
 
     // Graceful shutdown
-    process.on("SIGTERM", async () => {
-      console.log("SIGTERM received, shutting down gracefully...");
+    process.on('SIGTERM', async () => {
+      console.log('SIGTERM received, shutting down gracefully...');
       server.close(async () => {
         await disconnectFromDB();
         process.exit(0);
@@ -52,7 +52,7 @@ export async function startGraphQLServer() {
 
     return server;
   } catch (error) {
-    console.error("Failed to start GraphQL server:", error);
+    console.error('Failed to start GraphQL server:', error);
     process.exit(1);
   }
 }

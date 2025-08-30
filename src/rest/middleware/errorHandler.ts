@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 
 export interface ApiError extends Error {
   statusCode?: number;
@@ -10,9 +10,9 @@ export const errorHandler = (
   err: ApiError,
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
-  console.error("Error:", {
+  console.error('Error:', {
     message: err.message,
     stack: err.stack,
     url: req.url,
@@ -23,19 +23,19 @@ export const errorHandler = (
 
   // default to 500 server error
   let statusCode = err.statusCode || 500;
-  let message = err.message || "Internal Server Error";
+  let message = err.message || 'Internal Server Error';
 
   // handle specific error types
-  if (err.message.includes("not found")) {
+  if (err.message.includes('not found')) {
     statusCode = 404;
   } else if (
-    err.message.includes("validation") ||
-    err.message.includes("required")
+    err.message.includes('validation') ||
+    err.message.includes('required')
   ) {
     statusCode = 400;
   } else if (
-    err.message.includes("duplicate") ||
-    err.message.includes("already exists")
+    err.message.includes('duplicate') ||
+    err.message.includes('already exists')
   ) {
     statusCode = 409;
   }
@@ -43,7 +43,7 @@ export const errorHandler = (
   res.status(statusCode).json({
     success: false,
     error: message,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
 

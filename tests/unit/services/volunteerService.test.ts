@@ -1,8 +1,8 @@
-import { volunteerService } from "../../../src/services/volunteerService";
-import { prisma } from "../../../src/config/database";
+import { volunteerService } from '../../../src/services/volunteerService';
+import { prisma } from '../../../src/config/database';
 
 // mock the database
-jest.mock("../../../src/config/database", () => ({
+jest.mock('../../../src/config/database', () => ({
   prisma: {
     volunteers: {
       findMany: jest.fn(),
@@ -28,10 +28,10 @@ jest.mock("../../../src/config/database", () => ({
 //   });
 // });
 
-describe("VolunteerService", () => {
-  it("should get all volunteers", async () => {
+describe('VolunteerService', () => {
+  it('should get all volunteers', async () => {
     // Arrange
-    const mockVolunteers = [{ id: "1", first_name: "John" }];
+    const mockVolunteers = [{ id: '1', first_name: 'John' }];
     (prisma.volunteers.findMany as jest.Mock).mockResolvedValue(mockVolunteers);
 
     // Act

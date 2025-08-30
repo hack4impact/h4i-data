@@ -1,14 +1,14 @@
-import express from "express";
-import cors from "cors";
-import { apiRoutes } from "./routes";
-import { errorHandler, notFoundHandler } from "./middleware";
-import { connectToDB, disconnectFromDB } from "../config/database";
+import express from 'express';
+import cors from 'cors';
+import { apiRoutes } from './routes';
+import { errorHandler, notFoundHandler } from './middleware';
+import { connectToDB, disconnectFromDB } from '../config/database';
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
@@ -18,16 +18,16 @@ app.use((req, res, next) => {
 });
 
 // API routes
-app.use("/api", apiRoutes);
+app.use('/api', apiRoutes);
 
 // Root endpoint
-app.get("/", (req, res) => {
+app.get('/', (req, res) => {
   res.json({
-    message: "Volunteer Management REST API",
-    version: "1.0.0",
+    message: 'Volunteer Management REST API',
+    version: '1.0.0',
     endpoints: {
-      volunteers: "/api/volunteers",
-      health: "/api/health",
+      volunteers: '/api/volunteers',
+      health: '/api/health',
     },
   });
 });
@@ -53,8 +53,8 @@ export async function startRestServer() {
     });
 
     // Graceful shutdown
-    process.on("SIGTERM", async () => {
-      console.log("SIGTERM received, shutting down REST server gracefully...");
+    process.on('SIGTERM', async () => {
+      console.log('SIGTERM received, shutting down REST server gracefully...');
       server.close(async () => {
         await disconnectFromDB();
         process.exit(0);
@@ -63,7 +63,7 @@ export async function startRestServer() {
 
     return server;
   } catch (error) {
-    console.error("Failed to start REST server:", error);
+    console.error('Failed to start REST server:', error);
     process.exit(1);
   }
 }

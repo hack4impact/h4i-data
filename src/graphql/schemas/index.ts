@@ -1,7 +1,7 @@
-import { volunteerTypeDefs } from "./volunteerSchema";
+import { volunteerTypeDefs } from './volunteerSchema';
 
 export const typeDefs = `
   ${volunteerTypeDefs}
 `;
 
-export * from "./volunteerSchema";
+export * from './volunteerSchema';

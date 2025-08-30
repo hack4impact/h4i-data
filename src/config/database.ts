@@ -1,6 +1,6 @@
-import dotenv from "dotenv";
-import { Pool } from "pg";
-import { PrismaClient } from "@prisma/client";
+import dotenv from 'dotenv';
+import { Pool } from 'pg';
+import { PrismaClient } from '@prisma/client';
 
 dotenv.config();
 
@@ -19,9 +19,9 @@ export const pool = new Pool({
 export async function connectToDB() {
   try {
     await prisma.$connect();
-    console.log("Database connected successfully");
+    console.log('Database connected successfully');
   } catch (err) {
-    console.error("Database connection error:", err);
+    console.error('Database connection error:', err);
     throw err;
   }
 }
@@ -30,9 +30,9 @@ export async function connectToDB() {
 export async function disconnectFromDB() {
   try {
     await prisma.$disconnect();
-    console.log("Database disconnected successfully");
+    console.log('Database disconnected successfully');
   } catch (err) {
-    console.error("Database disconnection error:", err);
+    console.error('Database disconnection error:', err);
     throw err;
   }
 }

@@ -1,4 +1,4 @@
-import { prisma } from "../src/config/database";
+import { prisma } from '../src/config/database';
 
 // global setup for all tests
 beforeAll(async () => {

@@ -1,5 +1,5 @@
-import { volunteerService } from "../../services";
-import { VolunteerInput, VolunteerUpdateInput } from "../../types";
+import { volunteerService } from '../../services';
+import { VolunteerInput, VolunteerUpdateInput } from '../../types';
 
 export const volunteerResolvers = {
   // new graphql resolver template

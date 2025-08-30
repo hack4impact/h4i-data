@@ -1,9 +1,9 @@
-import { GraphQLDate } from "graphql-iso-date";
-import express, { Application } from "express";
-import { graphqlHTTP } from "express-graphql";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import { addVolunteer, connectToDB, disconnectFromDB } from "./service";
-import { VolunteerStatus, VolunteerType } from "./legacy-enums";
+import { GraphQLDate } from 'graphql-iso-date';
+import express, { Application } from 'express';
+import { graphqlHTTP } from 'express-graphql';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { addVolunteer, connectToDB, disconnectFromDB } from './service';
+import { VolunteerStatus, VolunteerType } from './legacy-enums';
 
 export type VolunteerTypeTS = {
   first_name: string;
@@ -71,11 +71,11 @@ const schema = makeExecutableSchema({
 });
 
 app.use(
-  "/graphql",
+  '/graphql',
   graphqlHTTP({
     schema,
     graphiql: true,
-  }),
+  })
 );
 
 // only if we need to have a middleware
@@ -84,10 +84,10 @@ app.use(
 let server: ReturnType<typeof app.listen>;
 
 // need this if statement to prevent the server from starting in test environment
-if (process.env.NODE_ENV !== "test") {
+if (process.env.NODE_ENV !== 'test') {
   server = app.listen(3000, () => {
-    console.log("Server running at http://localhost:3000");
-    console.log("GraphQL: http://localhost:3000/graphql");
+    console.log('Server running at http://localhost:3000');
+    console.log('GraphQL: http://localhost:3000/graphql');
   });
 }
 
@@ -97,14 +97,14 @@ async function main() {
 
   // add a volunteer
   await addVolunteer({
-    first_name: "Sophia",
-    last_name: "C",
-    email: "test@gmail.com" + Math.floor(Math.random() * 1000).toString(),
-    graduation_date: new Date("2026-06-18"),
+    first_name: 'Sophia',
+    last_name: 'C',
+    email: 'test@gmail.com' + Math.floor(Math.random() * 1000).toString(),
+    graduation_date: new Date('2026-06-18'),
     volunteer_status: VolunteerStatus.STUDENT,
-    H4I_email: "sophia@hack4impact.org",
+    H4I_email: 'sophia@hack4impact.org',
     volunteer_type: VolunteerType.CHAPTER,
-    university_id: "860b69b4-a14e-41d9-a367-2632b342e549",
+    university_id: '860b69b4-a14e-41d9-a367-2632b342e549',
   });
 
   // disconnect from db when done with commands
@@ -113,7 +113,7 @@ async function main() {
   // uncomment the following lines to close the server after running commands
   // if you want to run graphql commands then comment this out
   if (server) {
-    server.close(() => console.log("Server closed!"));
+    server.close(() => console.log('Server closed!'));
   }
 }
 

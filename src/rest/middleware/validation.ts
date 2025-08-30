@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from "express";
-import { VolunteerStatus, VolunteerType } from "../../types";
+import { Request, Response, NextFunction } from 'express';
+import { VolunteerStatus, VolunteerType } from '../../types';
 
 export const validateVolunteerInput = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const {
     first_name,
@@ -18,20 +18,20 @@ export const validateVolunteerInput = (
 
   // check required fields
   const requiredFields = [
-    "first_name",
-    "last_name",
-    "email",
-    "graduation_date",
-    "volunteer_status",
-    "volunteer_type",
-    "university_id",
+    'first_name',
+    'last_name',
+    'email',
+    'graduation_date',
+    'volunteer_status',
+    'volunteer_type',
+    'university_id',
   ];
   const missingFields = requiredFields.filter((field) => !req.body[field]);
 
   if (missingFields.length > 0) {
     return res.status(400).json({
       success: false,
-      error: `Missing required fields: ${missingFields.join(", ")}`,
+      error: `Missing required fields: ${missingFields.join(', ')}`,
     });
   }
 
@@ -40,7 +40,7 @@ export const validateVolunteerInput = (
   if (!emailRegex.test(email)) {
     return res.status(400).json({
       success: false,
-      error: "Invalid email format",
+      error: 'Invalid email format',
     });
   }
 
@@ -49,8 +49,8 @@ export const validateVolunteerInput = (
     return res.status(400).json({
       success: false,
       error: `Invalid volunteer_status. Must be one of: ${Object.values(
-        VolunteerStatus,
-      ).join(", ")}`,
+        VolunteerStatus
+      ).join(', ')}`,
     });
   }
 
@@ -59,8 +59,8 @@ export const validateVolunteerInput = (
     return res.status(400).json({
       success: false,
       error: `Invalid volunteer_type. Must be one of: ${Object.values(
-        VolunteerType,
-      ).join(", ")}`,
+        VolunteerType
+      ).join(', ')}`,
     });
   }
 
@@ -69,7 +69,7 @@ export const validateVolunteerInput = (
   if (isNaN(graduationDate.getTime())) {
     return res.status(400).json({
       success: false,
-      error: "Invalid graduation_date format. Use ISO 8601 format (YYYY-MM-DD)",
+      error: 'Invalid graduation_date format. Use ISO 8601 format (YYYY-MM-DD)',
     });
   }
 
@@ -78,7 +78,7 @@ export const validateVolunteerInput = (
   if (graduationDate < today) {
     return res.status(400).json({
       success: false,
-      error: "Graduation date cannot be in the past",
+      error: 'Graduation date cannot be in the past',
     });
   }
 
@@ -88,7 +88,7 @@ export const validateVolunteerInput = (
 export const validateVolunteerUpdateInput = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const { email, volunteer_status, volunteer_type, graduation_date } = req.body;
 
@@ -98,7 +98,7 @@ export const validateVolunteerUpdateInput = (
     if (!emailRegex.test(email)) {
       return res.status(400).json({
         success: false,
-        error: "Invalid email format",
+        error: 'Invalid email format',
       });
     }
   }
@@ -111,8 +111,8 @@ export const validateVolunteerUpdateInput = (
     return res.status(400).json({
       success: false,
       error: `Invalid volunteer_status. Must be one of: ${Object.values(
-        VolunteerStatus,
-      ).join(", ")}`,
+        VolunteerStatus
+      ).join(', ')}`,
     });
   }
 
@@ -124,8 +124,8 @@ export const validateVolunteerUpdateInput = (
     return res.status(400).json({
       success: false,
       error: `Invalid volunteer_type. Must be one of: ${Object.values(
-        VolunteerType,
-      ).join(", ")}`,
+        VolunteerType
+      ).join(', ')}`,
     });
   }
 
@@ -136,7 +136,7 @@ export const validateVolunteerUpdateInput = (
       return res.status(400).json({
         success: false,
         error:
-          "Invalid graduation_date format. Use ISO 8601 format (YYYY-MM-DD)",
+          'Invalid graduation_date format. Use ISO 8601 format (YYYY-MM-DD)',
       });
     }
   }
@@ -147,14 +147,14 @@ export const validateVolunteerUpdateInput = (
 export const validateIdParam = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const { id } = req.params;
 
-  if (!id || id.trim() === "") {
+  if (!id || id.trim() === '') {
     return res.status(400).json({
       success: false,
-      error: "ID parameter is required",
+      error: 'ID parameter is required',
     });
   }
 
@@ -164,7 +164,7 @@ export const validateIdParam = (
   if (!uuidRegex.test(id)) {
     return res.status(400).json({
       success: false,
-      error: "Invalid ID format. Must be a valid UUID",
+      error: 'Invalid ID format. Must be a valid UUID',
     });
   }
 

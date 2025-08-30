@@ -1,9 +1,9 @@
-import request from "supertest";
-import { app } from "../../../src/graphql/server";
-import { prisma } from "../../../src/config/database";
-import { mockVolunteerData, cleanupTestData } from "../../fixtures/testData";
+import request from 'supertest';
+import { app } from '../../../src/graphql/server';
+import { prisma } from '../../../src/config/database';
+import { mockVolunteerData, cleanupTestData } from '../../fixtures/testData';
 
-describe("Volunteer GraphQL Integration", () => {
+describe('Volunteer GraphQL Integration', () => {
   beforeEach(async () => {
     await cleanupTestData();
   });
@@ -13,8 +13,8 @@ describe("Volunteer GraphQL Integration", () => {
     await prisma.$disconnect();
   });
 
-  describe("createVolunteer mutation", () => {
-    it("should create volunteer via GraphQL", async () => {
+  describe('createVolunteer mutation', () => {
+    it('should create volunteer via GraphQL', async () => {
       const mutation = `
         mutation CreateVolunteer($input: VolunteerInput!) {
           createVolunteer(input: $input) {
@@ -30,19 +30,19 @@ describe("Volunteer GraphQL Integration", () => {
 
       const variables = {
         input: {
-          first_name: "GraphQL",
-          last_name: "Test",
-          email: "graphql@test.com",
-          graduation_date: "2026-06-15",
-          volunteer_status: "STUDENT",
-          H4I_email: "graphql@hack4impact.org",
-          volunteer_type: "CHAPTER",
-          university_id: "860b69b4-a14e-41d9-a367-2632b342e549",
+          first_name: 'GraphQL',
+          last_name: 'Test',
+          email: 'graphql@test.com',
+          graduation_date: '2026-06-15',
+          volunteer_status: 'STUDENT',
+          H4I_email: 'graphql@hack4impact.org',
+          volunteer_type: 'CHAPTER',
+          university_id: '860b69b4-a14e-41d9-a367-2632b342e549',
         },
       };
 
       const response = await request(app)
-        .post("/graphql")
+        .post('/graphql')
         .send({ query: mutation, variables })
         .expect(200);
 
@@ -50,18 +50,18 @@ describe("Volunteer GraphQL Integration", () => {
       expect(response.body.errors).toBeUndefined();
 
       // check response data
-      expect(response.body.data.createVolunteer.first_name).toBe("GraphQL");
-      expect(response.body.data.createVolunteer.email).toBe("graphql@test.com");
+      expect(response.body.data.createVolunteer.first_name).toBe('GraphQL');
+      expect(response.body.data.createVolunteer.email).toBe('graphql@test.com');
 
       // verify in database
       const dbVolunteer = await prisma.volunteers.findFirst({
-        where: { email: "graphql@test.com" },
+        where: { email: 'graphql@test.com' },
       });
       expect(dbVolunteer).not.toBeNull();
-      expect(dbVolunteer.first_name).toBe("GraphQL");
+      expect(dbVolunteer.first_name).toBe('GraphQL');
     });
 
-    it("should return error for invalid input", async () => {
+    it('should return error for invalid input', async () => {
       const mutation = `
         mutation CreateVolunteer($input: VolunteerInput!) {
           createVolunteer(input: $input) {
@@ -72,13 +72,13 @@ describe("Volunteer GraphQL Integration", () => {
 
       const variables = {
         input: {
-          first_name: "", // empty name should fail
-          email: "invalid-email", // invalid email
+          first_name: '', // empty name should fail
+          email: 'invalid-email', // invalid email
         },
       };
 
       const response = await request(app)
-        .post("/graphql")
+        .post('/graphql')
         .send({ query: mutation, variables })
         .expect(200);
 
@@ -88,8 +88,8 @@ describe("Volunteer GraphQL Integration", () => {
     });
   });
 
-  describe("volunteers query", () => {
-    it("should fetch all volunteers", async () => {
+  describe('volunteers query', () => {
+    it('should fetch all volunteers', async () => {
       // create test volunteers
       await prisma.volunteers.createMany({
         data: [
@@ -111,7 +111,7 @@ describe("Volunteer GraphQL Integration", () => {
       `;
 
       const response = await request(app)
-        .post("/graphql")
+        .post('/graphql')
         .send({ query })
         .expect(200);
 
@@ -120,11 +120,11 @@ describe("Volunteer GraphQL Integration", () => {
 
       // check we got both test volunteers
       const firstNames = response.body.data.volunteers.map((v) => v.first_name);
-      expect(firstNames).toContain("John");
-      expect(firstNames).toContain("Jane");
+      expect(firstNames).toContain('John');
+      expect(firstNames).toContain('Jane');
     });
 
-    it("should return empty array when no volunteers exist", async () => {
+    it('should return empty array when no volunteers exist', async () => {
       const query = `
         query GetAllVolunteers {
           volunteers {
@@ -135,7 +135,7 @@ describe("Volunteer GraphQL Integration", () => {
       `;
 
       const response = await request(app)
-        .post("/graphql")
+        .post('/graphql')
         .send({ query })
         .expect(200);
 
@@ -144,8 +144,8 @@ describe("Volunteer GraphQL Integration", () => {
     });
   });
 
-  describe("volunteer query (by ID)", () => {
-    it("should fetch single volunteer by ID", async () => {
+  describe('volunteer query (by ID)', () => {
+    it('should fetch single volunteer by ID', async () => {
       // create test volunteer
       const volunteer = await prisma.volunteers.create({
         data: mockVolunteerData.validStudent,
@@ -165,18 +165,18 @@ describe("Volunteer GraphQL Integration", () => {
       const variables = { id: volunteer.volunteer_id };
 
       const response = await request(app)
-        .post("/graphql")
+        .post('/graphql')
         .send({ query, variables })
         .expect(200);
 
       expect(response.body.errors).toBeUndefined();
       expect(response.body.data.volunteer.volunteer_id).toBe(
-        volunteer.volunteer_id,
+        volunteer.volunteer_id
       );
-      expect(response.body.data.volunteer.first_name).toBe("John");
+      expect(response.body.data.volunteer.first_name).toBe('John');
     });
 
-    it("should return null for non-existent volunteer", async () => {
+    it('should return null for non-existent volunteer', async () => {
       const query = `
         query GetVolunteer($id: ID!) {
           volunteer(id: $id) {
@@ -186,10 +186,10 @@ describe("Volunteer GraphQL Integration", () => {
         }
       `;
 
-      const variables = { id: "999e9999-e99b-99d9-a999-999999999999" };
+      const variables = { id: '999e9999-e99b-99d9-a999-999999999999' };
 
       const response = await request(app)
-        .post("/graphql")
+        .post('/graphql')
         .send({ query, variables })
         .expect(200);
 
