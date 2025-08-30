@@ -1,12 +1,10 @@
-// tests/unit/services/volunteerService.test.ts
-
 import { volunteerService } from '../../../src/services/volunteerService';
 import { ValidationError } from '../../../src/utils/validators';
 import { VolunteerStatus, VolunteerType } from '../../../src/types';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../../src/config/database';
 
-// Mock the prisma client to isolate the service from the database layer.
+// Mock the prisma client module. The factory function provides the mock implementation.
 jest.mock('../../../src/config/database', () => ({
   prisma: {
     volunteers: {
@@ -17,8 +15,11 @@ jest.mock('../../../src/config/database', () => ({
   },
 }));
 
-// A typed mock of the prisma client for easier mocking of function return values.
-const mockedPrisma = prisma as jest.Mocked<typeof prisma>;
+// Cast the nested 'volunteers' object to its mocked type.
+// This is the key change that tells TypeScript that .findMany, .create, etc., are Jest mock functions.
+const mockedPrismaVolunteers = prisma.volunteers as jest.Mocked<
+  typeof prisma.volunteers
+>;
 
 describe('VolunteerService', () => {
   // Define reusable mock data for our tests to ensure consistency.
@@ -49,13 +50,13 @@ describe('VolunteerService', () => {
     it('should fetch all volunteers and order them by creation date', async () => {
       // Arrange: mock the database response.
       const mockVolunteers = [mockVolunteerRecord];
-      mockedPrisma.volunteers.findMany.mockResolvedValue(mockVolunteers);
+      mockedPrismaVolunteers.findMany.mockResolvedValue(mockVolunteers);
 
       // Act: call the service method.
       const result = await volunteerService.getAllVolunteers();
 
       // Assert: verify the database was called correctly and the data is returned.
-      expect(mockedPrisma.volunteers.findMany).toHaveBeenCalledWith({
+      expect(mockedPrismaVolunteers.findMany).toHaveBeenCalledWith({
         orderBy: { created_at: 'desc' },
       });
       expect(result).toEqual(mockVolunteers);
@@ -63,7 +64,7 @@ describe('VolunteerService', () => {
 
     it('should throw a user-friendly error if the database query fails', async () => {
       // Arrange: mock a database failure.
-      mockedPrisma.volunteers.findMany.mockRejectedValue(
+      mockedPrismaVolunteers.findMany.mockRejectedValue(
         new Error('Database error')
       );
 
@@ -77,14 +78,14 @@ describe('VolunteerService', () => {
   describe('createVolunteer', () => {
     it('should successfully create a volunteer with valid data', async () => {
       // Arrange: mock the database creation call.
-      mockedPrisma.volunteers.create.mockResolvedValue(mockVolunteerRecord);
+      mockedPrismaVolunteers.create.mockResolvedValue(mockVolunteerRecord);
 
       // Act: call the service method with valid input.
       const result =
         await volunteerService.createVolunteer(validVolunteerInput);
 
       // Assert: verify the database was called with the correct data and the result is returned.
-      expect(mockedPrisma.volunteers.create).toHaveBeenCalledWith({
+      expect(mockedPrismaVolunteers.create).toHaveBeenCalledWith({
         data: {
           ...validVolunteerInput,
           graduation_date: new Date(validVolunteerInput.graduation_date),
@@ -112,7 +113,7 @@ describe('VolunteerService', () => {
           clientVersion: '5.0.0',
         }
       );
-      mockedPrisma.volunteers.create.mockRejectedValue(prismaError);
+      mockedPrismaVolunteers.create.mockRejectedValue(prismaError);
 
       // Act & Assert: expect a user-friendly "already exists" error message.
       await expect(
@@ -126,13 +127,13 @@ describe('VolunteerService', () => {
 
     it('should successfully return a volunteer when a valid ID is found', async () => {
       // Arrange: mock the database response for a found volunteer.
-      mockedPrisma.volunteers.findUnique.mockResolvedValue(mockVolunteerRecord);
+      mockedPrismaVolunteers.findUnique.mockResolvedValue(mockVolunteerRecord);
 
       // Act: call the service method.
       const result = await volunteerService.getVolunteerById(validId);
 
       // Assert: verify the database was called correctly and the record is returned.
-      expect(mockedPrisma.volunteers.findUnique).toHaveBeenCalledWith({
+      expect(mockedPrismaVolunteers.findUnique).toHaveBeenCalledWith({
         where: { volunteer_id: validId },
       });
       expect(result).toEqual(mockVolunteerRecord);
@@ -140,7 +141,7 @@ describe('VolunteerService', () => {
 
     it('should throw an error when no volunteer is found', async () => {
       // Arrange: mock the database response for a not-found volunteer.
-      mockedPrisma.volunteers.findUnique.mockResolvedValue(null);
+      mockedPrismaVolunteers.findUnique.mockResolvedValue(null);
 
       // Act & Assert: expect a "not found" error.
       await expect(volunteerService.getVolunteerById(validId)).rejects.toThrow(
