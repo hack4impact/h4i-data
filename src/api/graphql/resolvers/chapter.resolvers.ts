@@ -8,34 +8,50 @@ import {
   updateChapterSchema,
 } from '../../../core';
 import { GraphQLError } from 'graphql';
+import { z } from 'zod';
+
+// Infer TypeScript types directly from your Zod schemas
+type CreateChapterInput = z.infer<typeof createChapterSchema>;
+type UpdateChapterInput = z.infer<typeof updateChapterSchema>;
 
 export const chapterResolvers = {
   Query: {
     chapters: () => getAllChapters(),
-    chapter: async (_: any, { id }: { id: string }) => {
+    chapter: async (_parent: unknown, { id }: { id: string }) => {
       const chapter = await getChapterById(id);
       if (!chapter) {
-        throw new GraphQLError('Chapter not found', {
-          extensions: { code: 'NOT_FOUND' },
-        });
+        // This is the version-compatible way to create the error
+        throw new GraphQLError(
+          'Chapter not found',
+          undefined, // nodes
+          undefined, // source
+          undefined, // positions
+          undefined, // path
+          undefined, // originalError
+          { code: 'NOT_FOUND' } // extensions
+        );
       }
       return chapter;
     },
   },
   Mutation: {
-    createChapter: (_: any, { input }: { input: any }) => {
-      // Zod validation works here too!
+    createChapter: (
+      _parent: unknown,
+      { input }: { input: CreateChapterInput }
+    ) => {
+      // Zod validation is still important for runtime safety
       const validatedInput = createChapterSchema.parse(input);
       return createChapter(validatedInput);
     },
-    updateChapter: (_: any, { id, input }: { id: string; input: any }) => {
+    updateChapter: (
+      _parent: unknown,
+      { id, input }: { id: string; input: UpdateChapterInput }
+    ) => {
       const validatedInput = updateChapterSchema.parse(input);
       return updateChapter(id, validatedInput);
     },
-    deleteChapter: (_: any, { id }: { id: string }) => {
+    deleteChapter: (_parent: unknown, { id }: { id: string }) => {
       return deleteChapter(id);
     },
   },
-  // If your date fields need special formatting, you can add scalar resolvers.
-  // For simplicity, we'll let them be strings as returned by Prisma.
 };
