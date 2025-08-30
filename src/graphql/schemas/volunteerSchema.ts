@@ -1,4 +1,6 @@
 export const volunteerTypeDefs = `
+  scalar Date
+  
   type Volunteer {
     volunteer_id: ID!
     first_name: String!
