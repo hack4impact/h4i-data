@@ -1,4 +1,5 @@
 import { prisma } from '../../src/config/database';
+import { VolunteerStatus, VolunteerType } from '../../src/types/enums';
 
 export const mockVolunteerData = {
   // standard student volunteer for testing
@@ -7,9 +8,9 @@ export const mockVolunteerData = {
     last_name: 'Student',
     email: 'john.student@test.com', // make sure email includes test.com in order to delete with helper
     graduation_date: new Date('2026-06-15'),
-    volunteer_status: 'STUDENT',
+    volunteer_status: VolunteerStatus.STUDENT,
     H4I_email: 'john@hack4impact.org',
-    volunteer_type: 'CHAPTER',
+    volunteer_type: VolunteerType.BOTH,
     university_id: '860b69b4-a14e-41d9-a367-2632b342e549',
   },
 
@@ -19,9 +20,9 @@ export const mockVolunteerData = {
     last_name: 'Professional',
     email: 'jane.pro@test.com',
     graduation_date: new Date('2022-05-20'),
-    volunteer_status: 'PROFESSIONAL',
+    volunteer_status: VolunteerStatus.PROFESSIONAL,
     H4I_email: 'jane@hack4impact.org',
-    volunteer_type: 'NATIONALS',
+    volunteer_type: VolunteerType.NATIONALS,
     university_id: '860b69b4-a14e-41d9-a367-2632b342e549',
   },
 

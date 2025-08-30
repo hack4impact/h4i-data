@@ -31,7 +31,7 @@ describe('Volunteer REST API Integration', () => {
         where: { volunteer_id: response.body.data.volunteer_id },
       });
       expect(dbVolunteer).not.toBeNull();
-      expect(dbVolunteer.first_name).toBe('John');
+      expect(dbVolunteer?.first_name).toBe('John');
     });
 
     it('should return 400 for invalid data', async () => {

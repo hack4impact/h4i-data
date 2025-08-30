@@ -2,6 +2,7 @@ import request from 'supertest';
 import { app } from '../../../src/graphql/server';
 import { prisma } from '../../../src/config/database';
 import { mockVolunteerData, cleanupTestData } from '../../fixtures/testData';
+import { Volunteer } from '../../../src/types';
 
 describe('Volunteer GraphQL Integration', () => {
   beforeEach(async () => {
@@ -58,7 +59,7 @@ describe('Volunteer GraphQL Integration', () => {
         where: { email: 'graphql@test.com' },
       });
       expect(dbVolunteer).not.toBeNull();
-      expect(dbVolunteer.first_name).toBe('GraphQL');
+      expect(dbVolunteer?.first_name).toBe('GraphQL');
     });
 
     it('should return error for invalid input', async () => {
@@ -119,7 +120,9 @@ describe('Volunteer GraphQL Integration', () => {
       expect(response.body.data.volunteers).toHaveLength(2);
 
       // check we got both test volunteers
-      const firstNames = response.body.data.volunteers.map((v) => v.first_name);
+      const firstNames = response.body.data.volunteers.map(
+        (v: Volunteer) => v.first_name
+      );
       expect(firstNames).toContain('John');
       expect(firstNames).toContain('Jane');
     });
