@@ -10,11 +10,11 @@ import {
 } from '../../../core';
 
 export const chapterController = {
-  getAllChapters: async (req: Request, res: Response) => {
+  getAllChapters: async (_req: Request, res: Response) => {
     try {
       const chapters = await getAllChapters();
       res.json(chapters);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to retrieve chapters' });
     }
   },
@@ -27,7 +27,7 @@ export const chapterController = {
       } else {
         res.status(404).json({ error: 'Chapter not found' });
       }
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to retrieve chapter' });
     }
   },
@@ -56,7 +56,7 @@ export const chapterController = {
     try {
       await deleteChapter(req.params.id);
       res.status(204).send();
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Failed to delete chapter' });
     }
   },
