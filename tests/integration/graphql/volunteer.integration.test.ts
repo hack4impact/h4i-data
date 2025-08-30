@@ -121,10 +121,17 @@ describe('Volunteer GraphQL Integration', () => {
 
       // check we got both test volunteers
       const firstNames = response.body.data.volunteers.map(
+<<<<<<< HEAD
         (v: Volunteer) => v.first_name
       );
       expect(firstNames).toContain('John');
       expect(firstNames).toContain('Jane');
+=======
+        (v: any) => v.first_name,
+      );
+      expect(firstNames).toContain("John");
+      expect(firstNames).toContain("Jane");
+>>>>>>> b0f3101 (feat: volunteer fix)
     });
 
     it('should return empty array when no volunteers exist', async () => {
