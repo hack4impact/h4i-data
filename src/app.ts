@@ -1,36 +1,49 @@
 import express from 'express';
-import { graphqlHTTP } from 'express-graphql';
 import { createRestApp } from './api/rest/server';
-import { graphqlSchema } from './api/graphql/server';
+import { createGraphqlApp } from './api/graphql/server';
 import { env } from './config/server';
-import { connectDB } from './config/database';
+import { connectDB, disconnectDB } from './config/database'; // Import disconnectDB
 
 const startServer = async () => {
-  // Connect to the database
   await connectDB();
 
   const app = express();
 
-  // Mount REST API
+  // Mount the REST API
   const restApp = createRestApp();
   app.use('/api/rest', restApp);
 
-  // Mount GraphQL API
-  app.use(
-    '/api/graphql',
-    graphqlHTTP({
-      schema: graphqlSchema,
-      graphiql: env.NODE_ENV === 'development', // Enable GraphiQL in development
-    })
-  );
+  // Mount the GraphQL API
+  const graphqlApp = createGraphqlApp();
+  app.use('/api/graphql', graphqlApp);
 
-  app.listen(env.PORT, () => {
-    console.log(`Server ready at http://localhost:${env.PORT}`);
+  const server = app.listen(env.PORT, () => {
+    console.log(`Integrated server ready at http://localhost:${env.PORT}`);
     console.log(`REST API available at http://localhost:${env.PORT}/api/rest`);
     console.log(
-      ` GraphQL API available at http://localhost:${env.PORT}/api/graphql`
+      `GraphQL API available at http://localhost:${env.PORT}/api/graphql`
     );
   });
+
+  // --- Graceful shutdown logic ---
+  const gracefulShutdown = async (signal: string) => {
+    console.log(`\nReceived ${signal}, shutting down gracefully...`);
+
+    // 1. Stop the server from accepting new connections
+    server.close(async () => {
+      console.log('HTTP server closed.');
+
+      // 2. Disconnect from the database
+      await disconnectDB();
+
+      // 3. Exit the process
+      process.exit(0);
+    });
+  };
+
+  // Listen for termination signals
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 };
 
 startServer();
