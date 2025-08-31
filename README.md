@@ -170,7 +170,7 @@ See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 ### Adding New Endpoints
 
@@ -200,7 +200,7 @@ See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md
 
 ---
 
-## 🔗 Useful Resources
+## Useful Resources
 
 - [Prisma Client CRUD Operations](https://www.prisma.io/docs/orm/prisma-client/queries/crud)
 - [Jest Documentation](https://jestjs.io/docs/getting-started)
