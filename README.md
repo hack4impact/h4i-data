@@ -4,7 +4,7 @@ A comprehensive backend API for managing volunteers, chapters, nonprofits, proje
 
 ---
 
-## 🛠 Technology Stack
+## Technology Stack
 
 - **Language** - TypeScript
 - **Framework** - Express.js
@@ -17,13 +17,13 @@ A comprehensive backend API for managing volunteers, chapters, nonprofits, proje
 
 ---
 
-## 🏗 Project Structure
+## Project Structure
 
 ```
 src/
 ├── api/
 │   ├── rest/           # REST API endpoints
-│   └── graphql/        # GraphQL schema and resolvers  
+│   └── graphql/        # GraphQL schema and resolvers
 ├── core/
 │   ├── services/       # Business logic
 │   └── validators/     # Input validation
@@ -41,14 +41,16 @@ prisma/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 2. Environment Setup
+
 Create a `.env` file in the root directory and copy fields from `.env.example`:
 
 ```env
@@ -56,19 +58,21 @@ Create a `.env` file in the root directory and copy fields from `.env.example`:
 DATABASE_URL=your_database_url_here
 DIRECT_URL=your_direct_url_here
 
-# Server Configuration  
+# Server Configuration
 PORT=3000
 REST_PORT=3001
 GRAPHQL_PORT=3002
 ```
 
 ### 3. Database Setup
+
 ```bash
 npx prisma db pull     # Sync schema with database
 npx prisma generate    # Generate Prisma client
 ```
 
 ### 4. Start Development Server
+
 ```bash
 # Start integrated server (both REST & GraphQL)
 npm run dev
@@ -80,13 +84,14 @@ npm run dev:both       # Both servers concurrently
 ```
 
 The servers will be available at:
-- **Integrated**: http://localhost:3000
-- **REST API**: http://localhost:3000/api/rest  
-- **GraphQL API**: http://localhost:3000/api/graphql
+
+- **Integrated**: <http://localhost:3000>
+- **REST API**: <http://localhost:3000/api/rest>
+- **GraphQL API**: <http://localhost:3000/api/graphql>
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
 npm test                    # Run all tests
@@ -98,11 +103,12 @@ npm run test:watch         # Watch mode for unit tests
 
 ---
 
-## 🗄 Database Schema
+## Database Schema
 
 The database includes the following main entities:
+
 - **Volunteers** - Student and professional volunteers
-- **Chapters** - Local H4I chapters  
+- **Chapters** - Local H4I chapters
 - **Nonprofits** - Partner nonprofit organizations
 - **Projects** - Development projects for nonprofits
 - **Sponsors** - Corporate sponsors
@@ -111,27 +117,32 @@ The database includes the following main entities:
 
 ---
 
-## 🔧 Development Guidelines
+## Development Guidelines
 
 ### Database Management
+
 - **DO NOT** edit `schema.prisma` directly in production
 - Use Supabase Table Editor for schema changes in production
 - Always run `npx prisma db pull` and `npx prisma generate` after database changes
 - This ensures code stays synchronized with the database
 
 ### Branch Naming Convention
+
 Follow the pattern: `feature/issue-number-description`
+
 - Example: `feature/1-add-volunteer-endpoints`
 - This automatically links branches to GitHub issues
 
 ---
 
-## 📚 API Documentation
+## API Documentation
 
 ### GraphQL API
+
 GraphQL endpoint available at `/api/graphql` with interactive playground.
 
 Example mutation:
+
 ```graphql
 mutation {
   addVolunteer(
@@ -152,6 +163,7 @@ mutation {
 More examples available in [`docs/graphqlExamples.md`](docs/graphqlExamples.md)
 
 ### REST API
+
 REST endpoints available at `/api/rest` following RESTful conventions.
 
 See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md`](docs/api/graphql-api.md) for complete API documentation.
@@ -179,6 +191,7 @@ See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md
    - Apply validation using Zod validators
 
 ### Testing Best Practices
+
 - Mock services before importing in tests
 - Use `describe()` blocks for organizing related tests
 - Write async test functions
