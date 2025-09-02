@@ -1,1 +1,1 @@
-export * from './chapter.resolvers';
+export * from './chapters.resolvers';

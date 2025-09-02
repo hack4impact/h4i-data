@@ -1,4 +1,4 @@
-import { chapterResolvers } from './resolvers/chapter.resolvers';
+import { chapterResolvers } from './resolvers/chapters.resolvers';
 
 // Merge multiple resolver objects here
 export const resolvers = chapterResolvers;

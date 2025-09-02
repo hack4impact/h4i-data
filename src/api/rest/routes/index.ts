@@ -1,1 +1,1 @@
-export * from './chapter.routes';
+export * from './chapters.routes';

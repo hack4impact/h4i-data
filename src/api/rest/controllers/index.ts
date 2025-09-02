@@ -1,1 +1,1 @@
-export * from './chapter.controller';
+export * from './chapters.controller';

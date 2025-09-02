@@ -1,1 +1,1 @@
-export * from './chapter.schema';
+export * from './chapters.schema';
