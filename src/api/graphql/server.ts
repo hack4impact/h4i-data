@@ -1,10 +1,12 @@
 import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { makeExecutableSchema } from '@graphql-tools/schema';
+import cors from 'cors';
 import { typeDefs } from './schemas';
 import { resolvers } from './resolvers';
 import { env } from '../../config/server';
 import { connectDB } from '../../config/database';
+import { corsConfig } from '../../config/cors';
 import {
   rateLimiter,
   helmetConfig,
@@ -26,6 +28,7 @@ export const createGraphqlApp = () => {
   app.use(rateLimiter);
 
   // Basic middleware
+  app.use(cors(corsConfig));
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
 

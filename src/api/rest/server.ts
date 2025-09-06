@@ -3,6 +3,7 @@ import cors from 'cors';
 import router from './routes'; // This now correctly imports your main router
 import { env } from '../../config/server';
 import { connectDB } from '../../config/database';
+import { corsConfig } from '../../config/cors';
 import {
   requestLogger,
   errorHandler,
@@ -20,7 +21,7 @@ export const createRestApp = () => {
   app.use(rateLimiter);
 
   // Basic middleware
-  app.use(cors());
+  app.use(cors(corsConfig));
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
 

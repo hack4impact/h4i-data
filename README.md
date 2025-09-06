@@ -86,9 +86,9 @@ npm run dev:both       # Both servers concurrently
 
 The servers will be available at:
 
-- **Integrated**: <http://localhost:3000>
-- **REST API**: <http://localhost:3001>
-- **GraphQL API**: <http://localhost:3002>
+- **Integrated**: <http://localhost:3001>
+- **REST API**: <http://localhost:3002>
+- **GraphQL API**: <http://localhost:3003>
 
 ---
 
