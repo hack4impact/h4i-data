@@ -28,6 +28,7 @@ src/
 │ ├── services/    # Business logic
 │ └── validators/  # Input validation
 ├── config/        # Database and server configuration
+├── middleware/    # Logging, security, and errors
 └── app.ts         # Main application entry point
 
 tests/
