@@ -22,21 +22,21 @@ A comprehensive backend API for managing volunteers, chapters, nonprofits, proje
 ```markdown
 src/
 ├── api/
-│ ├── rest/ # REST API endpoints
-│ └── graphql/ # GraphQL schema and resolvers
+│ ├── rest/        # REST API endpoints
+│ └── graphql/     # GraphQL schema and resolvers
 ├── core/
-│ ├── services/ # Business logic
-│ └── validators/ # Input validation
-├── config/ # Database and server configuration
-└── app.ts # Main application entry point
+│ ├── services/    # Business logic
+│ └── validators/  # Input validation
+├── config/        # Database and server configuration
+└── app.ts         # Main application entry point
 
 tests/
-├── unit/ # Unit tests
-└── integration/ # Integration tests
+├── unit/          # Unit tests
+└── integration/   # Integration tests
 
 prisma/
-├── schema.prisma # Database schema
-└── migrations/ # Database migrations
+├── schema.prisma  # Database schema
+└── migrations/    # Database migrations
 ```
 
 ---

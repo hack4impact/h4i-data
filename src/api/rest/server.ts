@@ -3,15 +3,13 @@ import cors from 'cors';
 import router from './routes'; // This now correctly imports your main router
 import { env } from '../../config/server';
 import { connectDB } from '../../config/database';
-import { requestLogger } from '../../middleware/logging.middleware';
 import {
+  requestLogger,
   errorHandler,
   notFoundHandler,
-} from '../../middleware/error.middleware';
-import {
   rateLimiter,
   helmetConfig,
-} from '../../middleware/security.middleware';
+} from '../../middleware';
 import { logger } from '../../config/logger';
 
 export const createRestApp = () => {

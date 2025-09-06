@@ -13,7 +13,7 @@ import {
   createChapterSchema,
   updateChapterSchema,
 } from '../../../core';
-import { asyncHandler } from '../../../middleware/error.middleware';
+import { asyncHandler } from '../../../middleware';
 import { logger } from '../../../config/logger';
 
 export const chapterController = {

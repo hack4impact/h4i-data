@@ -8,12 +8,10 @@ import { connectDB } from '../../config/database';
 import {
   rateLimiter,
   helmetConfig,
-} from '../../middleware/security.middleware';
-import { requestLogger } from '../../middleware/logging.middleware';
-import {
+  requestLogger,
   errorHandler,
   notFoundHandler,
-} from '../../middleware/error.middleware';
+} from '../../middleware';
 import { logger } from '../../config/logger';
 
 // Keep the schema export for use in tests or other modules
