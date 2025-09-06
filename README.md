@@ -103,6 +103,8 @@ npm run test:watch         # Watch mode for unit tests
 
 ---
 
+<D-Ruuu
+
 ## Database Schema
 
 The database includes the following main entities:

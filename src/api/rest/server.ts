@@ -8,10 +8,18 @@ import {
   errorHandler,
   notFoundHandler,
 } from '../../middleware/error.middleware';
+import {
+  rateLimiter,
+  helmetConfig,
+} from '../../middleware/security.middleware';
 import { logger } from '../../config/logger';
 
 export const createRestApp = () => {
   const app = express();
+
+  // Security middleware (apply first)
+  app.use(helmetConfig);
+  app.use(rateLimiter);
 
   // Basic middleware
   app.use(cors());
