@@ -16,6 +16,9 @@ const envSchema = z.object({
     .enum(['development', 'production', 'test'])
     .default('development'),
   DATABASE_URL: z.string().min(1, { message: 'DATABASE_URL must be defined' }),
+  // Database connection pool settings (optional)
+  DB_CONNECTION_LIMIT: z.coerce.number().default(10),
+  DB_POOL_TIMEOUT: z.coerce.number().default(30000),
 });
 
 // Parse the environment variables.
