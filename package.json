@@ -52,7 +52,8 @@
     "express": "^5.1.0",
     "express-graphql": "^0.12.0",
     "graphql-scalars": "^1.24.2",
-    "pg": "^8.15.6"
+    "pg": "^8.15.6",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

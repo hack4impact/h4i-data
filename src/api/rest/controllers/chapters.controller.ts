@@ -1,4 +1,9 @@
 import { Request, Response } from 'express';
+
+// Add request ID to Express Request type
+interface RequestWithId extends Request {
+  requestId?: string;
+}
 import {
   getAllChapters,
   getChapterById,
@@ -8,56 +13,54 @@ import {
   createChapterSchema,
   updateChapterSchema,
 } from '../../../core';
+import { asyncHandler } from '../../../middleware/error.middleware';
+import { logger } from '../../../config/logger';
 
 export const chapterController = {
-  getAllChapters: async (_req: Request, res: Response) => {
-    try {
-      const chapters = await getAllChapters();
-      res.json(chapters);
-    } catch {
-      res.status(500).json({ error: 'Failed to retrieve chapters' });
-    }
-  },
+  getAllChapters: asyncHandler(async (_req: RequestWithId, res: Response) => {
+    const chapters = await getAllChapters();
+    res.json(chapters);
+  }),
 
-  getChapterById: async (req: Request, res: Response) => {
-    try {
-      const chapter = await getChapterById(req.params.id);
-      if (chapter) {
-        res.json(chapter);
-      } else {
-        res.status(404).json({ error: 'Chapter not found' });
-      }
-    } catch {
-      res.status(500).json({ error: 'Failed to retrieve chapter' });
-    }
-  },
+  getChapterById: asyncHandler(async (req: RequestWithId, res: Response) => {
+    const chapter = await getChapterById(req.params.id);
+    res.json(chapter);
+  }),
 
-  createChapter: async (req: Request, res: Response) => {
-    try {
-      const validatedData = createChapterSchema.parse(req.body);
-      const newChapter = await createChapter(validatedData);
-      res.status(201).json(newChapter);
-    } catch (error) {
-      res.status(400).json({ error: 'Invalid data', details: error });
-    }
-  },
+  createChapter: asyncHandler(async (req: RequestWithId, res: Response) => {
+    // Validate input data
+    const validatedData = createChapterSchema.parse(req.body);
 
-  updateChapter: async (req: Request, res: Response) => {
-    try {
-      const validatedData = updateChapterSchema.parse(req.body);
-      const updatedChapter = await updateChapter(req.params.id, validatedData);
-      res.json(updatedChapter);
-    } catch (error) {
-      res.status(400).json({ error: 'Invalid data', details: error });
-    }
-  },
+    logger.info('Creating chapter via REST API', {
+      requestId: req.requestId,
+      chapterData: validatedData,
+    });
 
-  deleteChapter: async (req: Request, res: Response) => {
-    try {
-      await deleteChapter(req.params.id);
-      res.status(204).send();
-    } catch {
-      res.status(500).json({ error: 'Failed to delete chapter' });
-    }
-  },
+    const newChapter = await createChapter(validatedData);
+    res.status(201).json(newChapter);
+  }),
+
+  updateChapter: asyncHandler(async (req: RequestWithId, res: Response) => {
+    // Validate input data
+    const validatedData = updateChapterSchema.parse(req.body);
+
+    logger.info('Updating chapter via REST API', {
+      requestId: req.requestId,
+      chapterId: req.params.id,
+      updateData: validatedData,
+    });
+
+    const updatedChapter = await updateChapter(req.params.id, validatedData);
+    res.json(updatedChapter);
+  }),
+
+  deleteChapter: asyncHandler(async (req: RequestWithId, res: Response) => {
+    logger.info('Deleting chapter via REST API', {
+      requestId: req.requestId,
+      chapterId: req.params.id,
+    });
+
+    await deleteChapter(req.params.id);
+    res.status(204).send();
+  }),
 };

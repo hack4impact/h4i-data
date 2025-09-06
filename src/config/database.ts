@@ -30,10 +30,17 @@ export const prisma = new PrismaClient({
 
 // Query performance monitoring (only in development)
 if (process.env.NODE_ENV === 'development') {
+  // Import logger dynamically to avoid circular dependency
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { logger } = require('./logger');
+
   prisma.$on('query', (e) => {
     if (e.duration > 1000) {
-      // Log slow queries (>1 second)
-      console.warn(`Slow Query (${e.duration}ms): ${e.query}`);
+      logger.warn('Slow database query detected', {
+        duration: `${e.duration}ms`,
+        query: e.query.substring(0, 200) + (e.query.length > 200 ? '...' : ''),
+        target: e.target,
+      });
     }
   });
 }
@@ -66,10 +73,19 @@ export const connectDB = async () => {
 
     // Test the connection
     const health = await checkDatabaseHealth();
-    console.log(`Database connected successfully (${health.responseTime}ms)`);
-    console.log(
-      `Connection pool configured: ${env.DB_CONNECTION_LIMIT} connections, ${env.DB_POOL_TIMEOUT}ms timeout`
-    );
+
+    // Import logger dynamically to avoid circular dependency
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { logger } = require('./logger');
+
+    logger.info('Database connected successfully', {
+      responseTime: `${health.responseTime}ms`,
+      connectionPool: {
+        limit: env.DB_CONNECTION_LIMIT,
+        timeout: `${env.DB_POOL_TIMEOUT}ms`,
+      },
+      environment: env.NODE_ENV,
+    });
   } catch (error) {
     console.error('Failed to connect to the database', error);
     process.exit(1);

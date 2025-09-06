@@ -78,16 +78,15 @@ describe('Chapter Service', () => {
       });
     });
 
-    it('should return null if no chapter is found', async () => {
+    it('should throw NotFoundError if no chapter is found', async () => {
       // Arrange
       const chapterId = 'non-existent-id';
       (prisma.chapters.findUnique as jest.Mock).mockResolvedValue(null);
 
-      // Act
-      const result = await getChapterById(chapterId);
-
-      // Assert
-      expect(result).toBeNull();
+      // Act & Assert
+      await expect(getChapterById(chapterId)).rejects.toThrow(
+        "Chapter with id 'non-existent-id' not found"
+      );
     });
   });
 

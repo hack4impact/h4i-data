@@ -7,11 +7,13 @@ This guide demonstrates how to create GraphQL endpoints using Test-Driven Develo
 ## TDD Flow Overview
 
 ### 1. Red → Green → Refactor Cycle
+
 1. **Red**: Write a failing test first
-2. **Green**: Write minimal code to make the test pass  
+2. **Green**: Write minimal code to make the test pass
 3. **Refactor**: Improve code while keeping tests passing
 
 ### 2. Test Pyramid in This Project
+
 - **Unit Tests**: `tests/unit/services/` - Test business logic in isolation
 - **Integration Tests**: `tests/integration/graphql/` - Test GraphQL endpoints end-to-end
 - **Validation**: Zod schemas ensure type safety at runtime
@@ -45,7 +47,9 @@ beforeAll(() => {
 
 afterAll(async () => {
   if (createdVolunteerId) {
-    await prisma.volunteers.delete({ where: { volunteer_id: createdVolunteerId } });
+    await prisma.volunteers.delete({
+      where: { volunteer_id: createdVolunteerId },
+    });
   }
   server.close();
   await disconnectDB();
@@ -64,13 +68,13 @@ describe('GraphQL API - Volunteers', () => {
         }
       }
     `;
-    
+
     const variables = {
       input: {
         first_name: 'Jane',
         last_name: 'Doe',
         email: 'jane.doe@example.com',
-        volunteer_status: 'STUDENT'
+        volunteer_status: 'STUDENT',
       },
     };
 
@@ -101,9 +105,7 @@ describe('GraphQL API - Volunteers', () => {
       }
     `;
 
-    const response = await request(server)
-      .post('/')
-      .send({ query });
+    const response = await request(server).post('/').send({ query });
 
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
@@ -113,6 +115,7 @@ describe('GraphQL API - Volunteers', () => {
 ```
 
 **Run the test** (it will fail):
+
 ```bash
 npm run test:integration
 ```
@@ -152,7 +155,7 @@ describe('Volunteer Service', () => {
         email: 'jane.doe@example.com',
         volunteer_status: 'STUDENT' as const,
       };
-      
+
       const createdVolunteer = {
         volunteer_id: 'new-id-123',
         first_name: 'Jane',
@@ -162,13 +165,17 @@ describe('Volunteer Service', () => {
         created_at: new Date(),
         updated_at: new Date(),
       };
-      
-      (prisma.volunteers.create as jest.Mock).mockResolvedValue(createdVolunteer);
+
+      (prisma.volunteers.create as jest.Mock).mockResolvedValue(
+        createdVolunteer
+      );
 
       const result = await createVolunteer(inputData);
 
       expect(result).toEqual(createdVolunteer);
-      expect(prisma.volunteers.create).toHaveBeenCalledWith({ data: inputData });
+      expect(prisma.volunteers.create).toHaveBeenCalledWith({
+        data: inputData,
+      });
     });
   });
 
@@ -183,8 +190,10 @@ describe('Volunteer Service', () => {
           volunteer_status: 'STUDENT',
         },
       ];
-      
-      (prisma.volunteers.findMany as jest.Mock).mockResolvedValue(mockVolunteers);
+
+      (prisma.volunteers.findMany as jest.Mock).mockResolvedValue(
+        mockVolunteers
+      );
 
       const result = await getAllVolunteers();
 
@@ -367,18 +376,21 @@ export const volunteerResolvers = {
 Update the index files to export your new components:
 
 **File**: `src/core/validators/index.ts`
+
 ```typescript
 export * from './chapter.validator';
 export * from './volunteer.validator'; // Add this line
 ```
 
 **File**: `src/core/services/index.ts`
+
 ```typescript
 export * from './chapter.service';
 export * from './volunteer.service'; // Add this line
 ```
 
 **File**: `src/api/graphql/schemas/index.ts`
+
 ```typescript
 import { chapterSchemaString } from './chapter.schema';
 import { volunteerSchemaString } from './volunteer.schema'; // Add this
@@ -390,6 +402,7 @@ export const typeDefs = [
 ```
 
 **File**: `src/api/graphql/resolvers/index.ts`
+
 ```typescript
 import { chapterResolvers } from './chapter.resolvers';
 import { volunteerResolvers } from './volunteer.resolvers'; // Add this
@@ -412,7 +425,7 @@ export const resolvers = {
 # Run unit tests
 npm run test:unit
 
-# Run integration tests  
+# Run integration tests
 npm run test:integration
 
 # Run all tests
@@ -480,7 +493,7 @@ mutation CreateVolunteer($input: CreateVolunteerInput!) {
 {
   "input": {
     "first_name": "Alice",
-    "last_name": "Johnson", 
+    "last_name": "Johnson",
     "email": "alice.johnson@example.com",
     "volunteer_status": "STUDENT"
   }
@@ -519,22 +532,27 @@ query {
 ## Best Practices
 
 ### 1. Test Organization
+
 - **Unit tests** for business logic (services)
 - **Integration tests** for GraphQL endpoints
 - **Mock external dependencies** in unit tests
 - **Use real database** in integration tests
 
 ### 2. Error Handling
+
 - Use `GraphQLError` for consistent error responses
 - Add error codes in extensions for client handling
 - Validate input with Zod schemas
 
 ### 3. Type Safety
+
 - Define TypeScript types from Zod schemas
 - Use `z.infer<typeof schema>` for type inference
 - Validate all inputs at resolver level
 
 ### 4. Database Best Practices
+
 - Use transactions for multi-table operations
 - Clean up test data in `afterAll`/`afterEach`
 - Use connection pooling for better performance
+

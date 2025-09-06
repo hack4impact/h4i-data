@@ -19,24 +19,24 @@ A comprehensive backend API for managing volunteers, chapters, nonprofits, proje
 
 ## Project Structure
 
-```
+```markdown
 src/
 ├── api/
-│   ├── rest/           # REST API endpoints
-│   └── graphql/        # GraphQL schema and resolvers
+│ ├── rest/ # REST API endpoints
+│ └── graphql/ # GraphQL schema and resolvers
 ├── core/
-│   ├── services/       # Business logic
-│   └── validators/     # Input validation
-├── config/             # Database and server configuration
-└── app.ts             # Main application entry point
+│ ├── services/ # Business logic
+│ └── validators/ # Input validation
+├── config/ # Database and server configuration
+└── app.ts # Main application entry point
 
 tests/
-├── unit/              # Unit tests
-└── integration/       # Integration tests
+├── unit/ # Unit tests
+└── integration/ # Integration tests
 
 prisma/
-├── schema.prisma      # Database schema
-└── migrations/        # Database migrations
+├── schema.prisma # Database schema
+└── migrations/ # Database migrations
 ```
 
 ---
@@ -86,8 +86,8 @@ npm run dev:both       # Both servers concurrently
 The servers will be available at:
 
 - **Integrated**: <http://localhost:3000>
-- **REST API**: <http://localhost:3000/api/rest>
-- **GraphQL API**: <http://localhost:3000/api/graphql>
+- **REST API**: <http://localhost:3001>
+- **GraphQL API**: <http://localhost:3002>
 
 ---
 
@@ -160,7 +160,7 @@ mutation {
 }
 ```
 
-More examples available in [`docs/graphqlExamples.md`](docs/graphqlExamples.md)
+More examples available in [`docs/examples/graphql-examples.md`](docs/examples/graphql-examples.md)
 
 ### REST API
 
