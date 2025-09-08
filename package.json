@@ -11,6 +11,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:integration": "cross-env NODE_ENV=test jest --testMatch=\"**/tests/integration/**/*.test.ts\" --runInBand",
+    "test:runInBand": "jest --runInBand",
     "test:unit": "jest tests/unit",
     "test:watch": "jest --watch tests/unit",
     "prepare": "husky",
