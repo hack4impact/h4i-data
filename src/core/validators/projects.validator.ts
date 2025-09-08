@@ -1,4 +1,3 @@
-// src/core/validators/project.validator.ts
 import { z } from 'zod';
 
 export const createProjectSchema = z.object({

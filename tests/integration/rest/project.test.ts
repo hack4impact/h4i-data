@@ -1,25 +1,25 @@
 import request from 'supertest';
-import { server } from './testServer';
-import { startTestServer, closeTestServer } from './testServer';
-import { prisma } from '../../../src/config/database';
+import express from 'express';
+import { Server } from 'http';
+import { createRestApp } from '../../../src/api/rest/server';
+import { env } from '../../../src/config/server';
 
-// beforeAll runs once before all tests
+// Hold the server instance to close it after tests
+let server: Server;
+let app: express.Application;
+
+// beforeAll runs once before all tests in this file
 beforeAll(() => {
-  startTestServer();
+  app = createRestApp();
+  // Start the server on the port defined in .env.test
+  server = app.listen(env.REST_PORT);
 });
 
-// afterAll runs once after all tests
-afterAll(async () => {
-  // Clean up the database by deleting the created project
-  if (createdProjectId) {
-    await prisma.projects.delete({ where: { project_id: createdProjectId } });
-  }
-
-  await closeTestServer();
+// afterAll runs once after all tests in this file
+afterAll(() => {
+  // Close the server
+  server.close();
 });
-
-// Hold the ID of the project we create, so we can clean it up
-let createdProjectId: string;
 
 describe('REST API - /projects', () => {
   it('should create a new project via POST', async () => {
@@ -33,20 +33,24 @@ describe('REST API - /projects', () => {
     expect(response.body).toHaveProperty('project_id');
     expect(response.body.name).toBe('REST Integration Test Project');
     expect(response.body.repo).toBe('REPO URL');
-
-    // Store the ID for cleanup and for the next test
-    createdProjectId = response.body.project_id;
   });
 
-  it('should fetch a project by its ID via GET', async () => {
-    // This test relies on the project created in the previous test
-    expect(createdProjectId).toBeDefined();
+  it('should create and fetch a project by its ID via GET', async () => {
+    // Create a project for this test
+    const createResponse = await request(server).post('/projects').send({
+      name: 'REST Integration Test Project',
+      repo: 'REPO URL',
+    });
 
-    const response = await request(server).get(`/projects/${createdProjectId}`);
+    expect(createResponse.status).toBe(201);
+    const projectId = createResponse.body.project_id;
+
+    // Fetch project
+    const response = await request(server).get(`/projects/${projectId}`);
 
     // Assertions
     expect(response.status).toBe(200);
-    expect(response.body.project_id).toBe(createdProjectId);
+    expect(response.body.project_id).toBe(projectId);
     expect(response.body.name).toBe('REST Integration Test Project');
   });
 

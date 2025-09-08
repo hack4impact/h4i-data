@@ -23,8 +23,8 @@ export const projectController = {
   }),
 
   getProjectById: asyncHandler(async (req: RequestWithId, res: Response) => {
-    const projects = await getProjectById(req.params.id);
-    res.json(projects);
+    const project = await getProjectById(req.params.id);
+    res.json(project);
   }),
 
   createProject: asyncHandler(async (req: RequestWithId, res: Response) => {

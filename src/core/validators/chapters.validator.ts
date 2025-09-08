@@ -1,4 +1,3 @@
-// src/core/validators/chapter.validator.ts
 import { z } from 'zod';
 
 export const createChapterSchema = z.object({
