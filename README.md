@@ -197,6 +197,7 @@ See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md
 - Use `describe()` blocks for organizing related tests
 - Write async test functions
 - Follow AAA pattern: Arrange, Act, Assert
+- **Integration tests should be completely self-contained** - each test creates its own data and doesn't depend on other tests
 - Examples available in `tests/` directory
 
 ---
