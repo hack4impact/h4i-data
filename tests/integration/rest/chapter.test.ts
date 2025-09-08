@@ -1,25 +1,25 @@
 import request from 'supertest';
-import { server } from './testServer';
-import { prisma } from '../../../src/config/database';
-import { startTestServer, closeTestServer } from './testServer';
+import express from 'express';
+import { Server } from 'http';
+import { createRestApp } from '../../../src/api/rest/server';
+import { env } from '../../../src/config/server';
 
-// beforeAll runs once before all tests
+// Hold the server instance to close it after tests
+let server: Server;
+let app: express.Application;
+
+// beforeAll runs once before all tests in this file
 beforeAll(() => {
-  startTestServer();
+  app = createRestApp();
+  // Start the server on the port defined in .env.test
+  server = app.listen(env.REST_PORT);
 });
 
-// afterAll runs once after all tests
-afterAll(async () => {
-  // Clean up the database by deleting the created chapter
-  if (createdChapterId) {
-    await prisma.chapters.delete({ where: { chapter_id: createdChapterId } });
-  }
-
-  await closeTestServer();
+// afterAll runs once after all tests in this file
+afterAll(() => {
+  // Close the server
+  server.close();
 });
-
-// Hold the ID of the chapter we create, so we can clean it up
-let createdChapterId: string;
 
 describe('REST API - /chapters', () => {
   it('should create a new chapter via POST', async () => {
