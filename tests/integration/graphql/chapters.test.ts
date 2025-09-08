@@ -2,24 +2,18 @@ import request from 'supertest';
 import express from 'express';
 import { Server } from 'http';
 import { createGraphqlApp } from '../../../src/api/graphql/server';
-import { disconnectDB, prisma } from '../../../src/config/database';
 import { env } from '../../../src/config/server';
 
 let server: Server;
 let app: express.Application;
-let createdChapterId: string;
 
 beforeAll(() => {
   app = createGraphqlApp();
   server = app.listen(env.GRAPHQL_PORT);
 });
 
-afterAll(async () => {
-  if (createdChapterId) {
-    await prisma.chapters.delete({ where: { chapter_id: createdChapterId } });
-  }
+afterAll(() => {
   server.close();
-  await disconnectDB();
 });
 
 describe('GraphQL API - Chapters', () => {
@@ -41,7 +35,7 @@ describe('GraphQL API - Chapters', () => {
       },
     };
 
-    const response = await request(server) // CHANGE: Use server, not app
+    const response = await request(server)
       .post('/') // GraphQL server is at the root
       .send({ query: mutation, variables });
 
@@ -51,13 +45,36 @@ describe('GraphQL API - Chapters', () => {
     const chapter = response.body.data.createChapter;
     expect(chapter).toHaveProperty('chapter_id');
     expect(chapter.name).toBe('GraphQL Integration Test Chapter');
-
-    createdChapterId = chapter.chapter_id;
   });
 
-  it('should fetch a chapter by its ID via query', async () => {
-    expect(createdChapterId).toBeDefined();
+  it('should create and fetch a chapter by its ID via query', async () => {
+    // Create a chapter for this specific test
+    const createMutation = `
+      mutation CreateChapter($input: CreateChapterInput!) {
+        createChapter(input: $input) {
+          chapter_id
+          name
+          status_type
+        }
+      }
+    `;
+    const createVariables = {
+      input: {
+        name: 'Test Chapter for Query',
+        founded_date: '2025-08-30T12:00:00.000Z',
+        status_type: 'ACTIVE',
+      },
+    };
 
+    const createResponse = await request(server)
+      .post('/')
+      .send({ query: createMutation, variables: createVariables });
+
+    expect(createResponse.status).toBe(200);
+    expect(createResponse.body.errors).toBeUndefined();
+    const chapterId = createResponse.body.data.createChapter.chapter_id;
+
+    // Now fetch it
     const query = `
       query Chapter($id: ID!) {
         chapter(id: $id) {
@@ -66,16 +83,15 @@ describe('GraphQL API - Chapters', () => {
         }
       }
     `;
-    const variables = { id: createdChapterId };
+    const variables = { id: chapterId };
 
-    const response = await request(server) // CHANGE: Use server, not app
-      .post('/')
-      .send({ query, variables });
+    const response = await request(server).post('/').send({ query, variables });
 
     // Assertions
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const chapter = response.body.data.chapter;
-    expect(chapter.chapter_id).toBe(createdChapterId);
+    expect(chapter.chapter_id).toBe(chapterId);
+    expect(chapter.name).toBe('Test Chapter for Query');
   });
 });
