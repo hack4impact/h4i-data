@@ -8,7 +8,7 @@
     "dev:both": "concurrently \"npm run dev:graphql\" \"npm run dev:rest\"",
     "dev:graphql": "ts-node src/api/graphql/server.ts",
     "dev:rest": "ts-node src/api/rest/server.ts",
-    "test": "jest",
+    "test": "jest --runInBand",
     "test:coverage": "jest --coverage",
     "test:integration": "cross-env NODE_ENV=test jest --testMatch=\"**/tests/integration/**/*.test.ts\" --runInBand",
     "test:unit": "jest tests/unit",
