@@ -23,37 +23,40 @@ let createdChapterId: string;
 
 describe('REST API - /chapters', () => {
   it('should create a new chapter via POST', async () => {
-    const response = await request(server) // CHANGE: Use server, not app
-      .post('/chapters')
-      .send({
-        name: 'REST Integration Test Chapter',
-        founded_date: '2025-08-30T12:00:00.000Z',
-      });
+    const response = await request(server).post('/chapters').send({
+      name: 'REST Integration Test Chapter',
+      founded_date: '2025-08-30T12:00:00.000Z',
+    });
 
     // Assertions
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('chapter_id');
     expect(response.body.name).toBe('REST Integration Test Chapter');
-
-    // Store the ID for cleanup and for the next test
-    createdChapterId = response.body.chapter_id;
   });
 
-  it('should fetch a chapter by its ID via GET', async () => {
-    // This test relies on the chapter created in the previous test
-    expect(createdChapterId).toBeDefined();
+  it('should create and fetch a chapter by its ID via GET', async () => {
+    // Create a chapter for this specific test
+    const createResponse = await request(server).post('/chapters').send({
+      name: 'Test Chapter for Fetch',
+      founded_date: '2025-08-30T12:00:00.000Z',
+    });
 
-    const response = await request(server).get(`/chapters/${createdChapterId}`); // CHANGE: Use server, not app
+    expect(createResponse.status).toBe(201);
+    const chapterId = createResponse.body.chapter_id;
+
+    // Now fetch it
+    const response = await request(server).get(`/chapters/${chapterId}`);
 
     // Assertions
     expect(response.status).toBe(200);
-    expect(response.body.chapter_id).toBe(createdChapterId);
-    expect(response.body.name).toBe('REST Integration Test Chapter');
+    expect(response.body.chapter_id).toBe(chapterId);
+    expect(response.body.name).toBe('Test Chapter for Fetch');
   });
 
   it('should return 404 for a non-existent chapter ID', async () => {
-    const response = await request(server) // CHANGE: Use server, not app
-      .get('/chapters/00000000-0000-0000-0000-000000000000');
+    const response = await request(server).get(
+      '/chapters/00000000-0000-0000-0000-000000000000'
+    );
     expect(response.status).toBe(404);
   });
 });
