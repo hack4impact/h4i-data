@@ -30,6 +30,7 @@ beforeEach(async () => {
     if (!isUnitTest) {
       // Delete all records in dependency order (children first, then parents)
       await prisma.chapters.deleteMany({});
+      await prisma.projects.deleteMany({});
       // Add other models as needed:
       // await prisma.users.deleteMany({});
       // await prisma.events.deleteMany({});
