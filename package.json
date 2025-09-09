@@ -12,7 +12,6 @@
     "test:coverage": "jest --coverage --testPathIgnorePatterns=tests/integration",
     "test:integration": "cross-env NODE_ENV=test jest --testMatch=\"**/tests/integration/**/*.test.ts\" --runInBand",
     "test:all": "npm run test:unit && npm run test:integration",
-    "test:runInBand": "jest --runInBand",
     "test:unit": "jest tests/unit",
     "test:watch": "jest --watch tests/unit",
     "prepare": "husky",
