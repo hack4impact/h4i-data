@@ -12,9 +12,9 @@ This guide demonstrates how to create REST endpoints using Test-Driven Developme
 3. **Refactor**: Improve code while maintaining green tests
 
 ### 2. REST Testing Strategy
+- **Controller Tests**: Test request/response handling and validation
 - **Integration Tests**: `tests/integration/rest/` - Full HTTP request/response testing
 - **Unit Tests**: `tests/unit/services/` - Business logic testing
-- **Controller Tests**: Test request/response handling and validation
 
 ---
 
@@ -27,250 +27,44 @@ Let's create volunteer endpoints using TDD methodology.
 **File**: `tests/integration/rest/volunteer.test.ts`
 
 ```typescript
-import request from 'supertest';
-import express from 'express';
-import { Server } from 'http';
-import { createRestApp } from '../../../src/api/rest/server';
-import { disconnectDB, prisma } from '../../../src/config/database';
-import { env } from '../../../src/config/server';
+describe('POST /volunteers', () => {
+  it('should create a new volunteer', async () => {
+    const volunteerData = {
+      first_name: 'John',
+      last_name: 'Doe',
+      email: 'john.doe@example.com',
+      graduation_date: new Date('2026-06-18').toISOString(),
+      volunteer_status: 'STUDENT',
+      volunteer_type: 'BOTH',
+      university_id: '07608837-420f-4697-bda2-701506079a9d', // Test UUID from Supabase
+    };
 
-let server: Server;
-let app: express.Application;
-let createdVolunteerId: string;
+    const response = await request(server)
+      .post('/volunteers')
+      .send(volunteerData);
 
-beforeAll(() => {
-  app = createRestApp();
-  server = app.listen(env.REST_PORT);
-});
+    // This will fail initially - RED phase
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty('volunteer_id');
+    expect(response.body.first_name).toBe('John');
+    expect(response.body.last_name).toBe('Doe');
+    expect(response.body.email).toBe('john.doe@example.com');
+    expect(response.body.volunteer_status).toBe('STUDENT');
 
-afterAll(async () => {
-  if (createdVolunteerId) {
-    await prisma.volunteers.delete({ where: { volunteer_id: createdVolunteerId } });
-  }
-  server.close();
-  await disconnectDB();
-});
-
-describe('REST API - /volunteers', () => {
-  describe('POST /volunteers', () => {
-    it('should create a new volunteer', async () => {
-      const volunteerData = {
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'john.doe@example.com',
-        volunteer_status: 'STUDENT'
-      };
-
-      const response = await request(server)
-        .post('/volunteers')
-        .send(volunteerData);
-
-      // This will fail initially - RED phase
-      expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('volunteer_id');
-      expect(response.body.first_name).toBe('John');
-      expect(response.body.last_name).toBe('Doe');
-      expect(response.body.email).toBe('john.doe@example.com');
-      expect(response.body.volunteer_status).toBe('STUDENT');
-
-      createdVolunteerId = response.body.volunteer_id;
-    });
-
-    it('should return 400 for invalid data', async () => {
-      const invalidData = {
-        first_name: 'A', // Too short
-        email: 'invalid-email', // Invalid format
-      };
-
-      const response = await request(server)
-        .post('/volunteers')
-        .send(invalidData);
-
-      expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty('error');
-    });
+    createdVolunteerId = response.body.volunteer_id;
   });
+})
 
-  describe('GET /volunteers', () => {
-    it('should fetch all volunteers', async () => {
-      const response = await request(server)
-        .get('/volunteers');
-
-      expect(response.status).toBe(200);
-      expect(Array.isArray(response.body)).toBe(true);
-    });
-  });
-
-  describe('GET /volunteers/:id', () => {
-    it('should fetch a volunteer by ID', async () => {
-      expect(createdVolunteerId).toBeDefined();
-
-      const response = await request(server)
-        .get(`/volunteers/${createdVolunteerId}`);
-
-      expect(response.status).toBe(200);
-      expect(response.body.volunteer_id).toBe(createdVolunteerId);
-      expect(response.body.first_name).toBe('John');
-    });
-
-    it('should return 404 for non-existent volunteer', async () => {
-      const fakeId = '00000000-0000-0000-0000-000000000000';
-      
-      const response = await request(server)
-        .get(`/volunteers/${fakeId}`);
-
-      expect(response.status).toBe(404);
-      expect(response.body.error).toContain('not found');
-    });
-  });
-
-  describe('PATCH /volunteers/:id', () => {
-    it('should update a volunteer', async () => {
-      expect(createdVolunteerId).toBeDefined();
-
-      const updateData = {
-        first_name: 'Jane',
-        volunteer_status: 'PROFESSIONAL'
-      };
-
-      const response = await request(server)
-        .patch(`/volunteers/${createdVolunteerId}`)
-        .send(updateData);
-
-      expect(response.status).toBe(200);
-      expect(response.body.first_name).toBe('Jane');
-      expect(response.body.volunteer_status).toBe('PROFESSIONAL');
-      expect(response.body.last_name).toBe('Doe'); // Unchanged
-    });
-  });
-
-  describe('DELETE /volunteers/:id', () => {
-    it('should delete a volunteer', async () => {
-      expect(createdVolunteerId).toBeDefined();
-
-      const response = await request(server)
-        .delete(`/volunteers/${createdVolunteerId}`);
-
-      expect(response.status).toBe(204);
-
-      // Verify deletion
-      const getResponse = await request(server)
-        .get(`/volunteers/${createdVolunteerId}`);
-      
-      expect(getResponse.status).toBe(404);
-      
-      // Prevent cleanup attempt
-      createdVolunteerId = '';
-    });
-  });
-});
 ```
+### Step 1: Run tests (they will fail) (RED)
 
-**Run tests** (they will fail):
 ```bash
 npm run test:integration
 ```
 
-### Step 2: Write Unit Tests for Controller (RED)
-
-**File**: `tests/unit/controllers/volunteer.controller.test.ts`
-
-```typescript
-import { Request, Response } from 'express';
-import { volunteerController } from '../../../src/api/rest/controllers/volunteer.controller';
-import * as volunteerService from '../../../src/core/services/volunteer.service';
-
-// Mock the service layer
-jest.mock('../../../src/core/services/volunteer.service');
-
-describe('Volunteer Controller', () => {
-  let mockRequest: Partial<Request>;
-  let mockResponse: Partial<Response>;
-  let mockJson: jest.Mock;
-  let mockStatus: jest.Mock;
-  let mockSend: jest.Mock;
-
-  beforeEach(() => {
-    mockJson = jest.fn();
-    mockStatus = jest.fn().mockReturnValue({ json: mockJson, send: jest.fn() });
-    mockSend = jest.fn();
-
-    mockResponse = {
-      json: mockJson,
-      status: mockStatus,
-      send: mockSend,
-    };
-
-    jest.clearAllMocks();
-  });
-
-  describe('createVolunteer', () => {
-    it('should create a volunteer and return 201', async () => {
-      const volunteerData = {
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'john@example.com',
-        volunteer_status: 'STUDENT' as const,
-      };
-
-      const createdVolunteer = {
-        volunteer_id: '123',
-        ...volunteerData,
-        created_at: new Date(),
-        updated_at: new Date(),
-      };
-
-      mockRequest = {
-        body: volunteerData,
-      };
-
-      (volunteerService.createVolunteer as jest.Mock).mockResolvedValue(createdVolunteer);
-
-      await volunteerController.createVolunteer(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(201);
-      expect(mockJson).toHaveBeenCalledWith(createdVolunteer);
-    });
-
-    it('should return 400 for validation error', async () => {
-      const invalidData = { first_name: 'A' }; // Too short
-
-      mockRequest = {
-        body: invalidData,
-      };
-
-      // Mock validation error
-      const validationError = new Error('Validation failed');
-      (volunteerService.createVolunteer as jest.Mock).mockRejectedValue(validationError);
-
-      await volunteerController.createVolunteer(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(400);
-    });
-  });
-
-  describe('getAllVolunteers', () => {
-    it('should return all volunteers', async () => {
-      const volunteers = [
-        { volunteer_id: '1', first_name: 'John', last_name: 'Doe' },
-        { volunteer_id: '2', first_name: 'Jane', last_name: 'Smith' },
-      ];
-
-      mockRequest = {};
-
-      (volunteerService.getAllVolunteers as jest.Mock).mockResolvedValue(volunteers);
-
-      await volunteerController.getAllVolunteers(mockRequest as Request, mockResponse as Response);
-
-      expect(mockJson).toHaveBeenCalledWith(volunteers);
-    });
-  });
-});
-```
-
 ### Step 3: Create Validator (GREEN)
 
-**File**: `src/core/validators/volunteer.validator.ts`
+**File**: `src/core/validators/volunteers.validator.ts`
 
 ```typescript
 import { z } from 'zod';
@@ -278,13 +72,23 @@ import { z } from 'zod';
 export const createVolunteerSchema = z.object({
   first_name: z.string().min(2, 'First name must be at least 2 characters'),
   last_name: z.string().min(2, 'Last name must be at least 2 characters'),
-  email: z.string().email('Must be a valid email address'),
+  email: z.email('Must be a valid email address'),
+  graduation_date: z.date(),
   volunteer_status: z.enum(['STUDENT', 'PROFESSIONAL']),
-  phone: z.string().optional(),
-  university_id: z.uuid().optional(),
+  h4i_email: z.email('Must be a valid H4I email address').optional(),
+  volunteer_type: z.enum(['CHAPTER', 'BOTH', 'NATIONALS']),
+  university_id: z.uuid(),
+  chapter_id: z.uuid().optional(),
+  company_id: z.uuid().optional(),
 });
 
 export const updateVolunteerSchema = createVolunteerSchema.partial();
+```
+
+**File**: `src/core/validators/index.ts`
+
+```typescript
+export * from './volunteers.validator';
 ```
 
 ### Step 4: Create Service Layer (GREEN)
@@ -292,59 +96,35 @@ export const updateVolunteerSchema = createVolunteerSchema.partial();
 **File**: `src/core/services/volunteer.service.ts`
 
 ```typescript
-import { prisma } from '../../config/database';
-import { createVolunteerSchema, updateVolunteerSchema } from '../validators';
-import { z } from 'zod';
-
-type CreateVolunteerInput = z.infer<typeof createVolunteerSchema>;
-type UpdateVolunteerInput = z.infer<typeof updateVolunteerSchema>;
-
-export const getAllVolunteers = async () => {
-  try {
-    return await prisma.volunteers.findMany();
-  } catch (error) {
-    throw new Error('Failed to fetch volunteers');
-  }
-};
-
-export const getVolunteerById = async (id: string) => {
-  try {
-    return await prisma.volunteers.findUnique({ 
-      where: { volunteer_id: id } 
-    });
-  } catch (error) {
-    throw new Error('Failed to fetch volunteer');
-  }
-};
-
 export const createVolunteer = async (data: CreateVolunteerInput) => {
   try {
-    return await prisma.volunteers.create({ data });
-  } catch (error) {
-    throw new Error('Failed to create volunteer');
-  }
-};
-
-export const updateVolunteer = async (id: string, data: UpdateVolunteerInput) => {
-  try {
-    return await prisma.volunteers.update({ 
-      where: { volunteer_id: id }, 
-      data 
+    logger.info('Creating new volunteer', {
+      volunteerName: data.first_name + ' ' + data.last_name,
+      volunteerData: data,
     });
-  } catch (error) {
-    throw new Error('Failed to update volunteer');
-  }
-};
 
-export const deleteVolunteer = async (id: string) => {
-  try {
-    return await prisma.volunteers.delete({ 
-      where: { volunteer_id: id } 
+    const volunteer = await prisma.volunteers.create({ data });
+
+    logger.info('Successfully created volunteer', {
+      volunteerId: volunteer.volunteer_id,
+      volunteerName: volunteer.first_name + ' ' + volunteer.last_name,
     });
+
+    return volunteer;
   } catch (error) {
-    throw new Error('Failed to delete volunteer');
+    logger.error('Failed to create volunteer', {
+      volunteerData: data,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    throw new DatabaseError('Failed to create volunteer');
   }
 };
+```
+
+**File**: `src/core/services/index.ts`
+
+```typescript
+export * from './volunteer.service';
 ```
 
 ### Step 5: Create Controller (GREEN)
@@ -352,104 +132,26 @@ export const deleteVolunteer = async (id: string) => {
 **File**: `src/api/rest/controllers/volunteer.controller.ts`
 
 ```typescript
-import { Request, Response } from 'express';
-import {
-  getAllVolunteers,
-  getVolunteerById,
-  createVolunteer,
-  updateVolunteer,
-  deleteVolunteer,
-  createVolunteerSchema,
-  updateVolunteerSchema,
-} from '../../../core';
-
 export const volunteerController = {
-  getAllVolunteers: async (_req: Request, res: Response) => {
-    try {
-      const volunteers = await getAllVolunteers();
-      res.json(volunteers);
-    } catch (error) {
-      res.status(500).json({ 
-        error: 'Failed to retrieve volunteers',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  },
-
-  getVolunteerById: async (req: Request, res: Response) => {
-    try {
-      const volunteer = await getVolunteerById(req.params.id);
-      if (volunteer) {
-        res.json(volunteer);
-      } else {
-        res.status(404).json({ error: 'Volunteer not found' });
-      }
-    } catch (error) {
-      res.status(500).json({ 
-        error: 'Failed to retrieve volunteer',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  },
-
-  createVolunteer: async (req: Request, res: Response) => {
-    try {
+  createVolunteer: asyncHandler(async (req: RequestWithId, res: Response) => {
+      // Validate input data
       const validatedData = createVolunteerSchema.parse(req.body);
+
+      logger.info('Creating volunteer via REST API', {
+        requestId: req.requestId,
+        volunteerData: validatedData,
+      });
+
       const newVolunteer = await createVolunteer(validatedData);
       res.status(201).json(newVolunteer);
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('validation')) {
-        res.status(400).json({ 
-          error: 'Invalid data', 
-          details: error.message 
-        });
-      } else {
-        res.status(500).json({ 
-          error: 'Failed to create volunteer',
-          details: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
-    }
-  },
+    }),
+}
+```
 
-  updateVolunteer: async (req: Request, res: Response) => {
-    try {
-      const validatedData = updateVolunteerSchema.parse(req.body);
-      const updatedVolunteer = await updateVolunteer(req.params.id, validatedData);
-      res.json(updatedVolunteer);
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('validation')) {
-        res.status(400).json({ 
-          error: 'Invalid data', 
-          details: error.message 
-        });
-      } else if (error instanceof Error && error.message.includes('not found')) {
-        res.status(404).json({ error: 'Volunteer not found' });
-      } else {
-        res.status(500).json({ 
-          error: 'Failed to update volunteer',
-          details: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
-    }
-  },
+**File**: `src/api/rest/controllers/index.ts`
 
-  deleteVolunteer: async (req: Request, res: Response) => {
-    try {
-      await deleteVolunteer(req.params.id);
-      res.status(204).send();
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('not found')) {
-        res.status(404).json({ error: 'Volunteer not found' });
-      } else {
-        res.status(500).json({ 
-          error: 'Failed to delete volunteer',
-          details: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
-    }
-  },
-};
+```typescript
+export * from './volunteers.controller';
 ```
 
 ### Step 6: Create Routes (GREEN)
@@ -458,7 +160,7 @@ export const volunteerController = {
 
 ```typescript
 import { Router } from 'express';
-import { volunteerController } from '../controllers/volunteer.controller';
+import { volunteerController } from '../controllers/volunteers.controller';
 
 const router = Router();
 
@@ -471,47 +173,25 @@ router.delete('/:id', volunteerController.deleteVolunteer);
 export const volunteerRoutes = router;
 ```
 
-### Step 7: Wire Routes into Main Server (GREEN)
-
 **File**: `src/api/rest/routes/index.ts`
 
 ```typescript
-import { Router } from 'express';
-import { chapterRoutes } from './chapter.routes';
-import { volunteerRoutes } from './volunteer.routes'; // Add this
-
-const router = Router();
-
-router.use('/chapters', chapterRoutes);
-router.use('/volunteers', volunteerRoutes); // Add this
-
-export default router;
+export * from './volunteers.route';
 ```
 
-### Step 8: Update Exports (GREEN)
+### Step 7: Add Wire Routes into Main Server (GREEN)
 
-**File**: `src/core/index.ts`
+**File**: `src/api/rest/routes.ts`
+
 ```typescript
-// Services
-export * from './services/chapter.service';
-export * from './services/volunteer.service'; // Add this
-
-// Validators  
-export * from './validators/chapter.validator';
-export * from './validators/volunteer.validator'; // Add this
+import { volunteerRoutes } from './volunteer.routes';
+router.use('/volunteers', volunteerRoutes);
 ```
 
-### Step 9: Run Tests (GREEN)
+### Step 8: Run All Tests (GREEN)
 
 ```bash
-# Run unit tests
-npm run test:unit
-
-# Run integration tests
-npm run test:integration
-
-# Run all tests
-npm test
+npm run test
 ```
 
 ### Step 10: Refactor (REFACTOR)
@@ -579,7 +259,7 @@ export const validateBody = (schema: z.ZodSchema) => {
 
 ```bash
 # Create a volunteer
-curl -X POST http://localhost:3000/api/rest/volunteers \
+curl -X POST http://localhost:3002/api/rest/volunteers \
   -H "Content-Type: application/json" \
   -d '{
     "first_name": "Alice",
