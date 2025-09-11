@@ -1,8 +1,20 @@
-# Styling Guidelines to Follow
+# Styling Guidelines
+
+### Recommended IDE - Visual Studio Code
 
 ### Commits Messages
 
-Let's follow Conventional Commits: <https://www.conventionalcommits.org/en/v1.0.0/>
+Let's follow Conventional Commits when writing our commit messages: <https://www.conventionalcommits.org/en/v1.0.0/>
+
+Structure:
+
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+
+Example: feature(core): add submit functionality in Button.tsx
 
 ### ESLint
 
@@ -34,7 +46,7 @@ npm uninstall <dependency-name>
 
 ### package.json
 
-- Make sure to order the scripts alphabetically (A - Z)
+Make sure to order the scripts alphabetically (A - Z)
 
 ### Prettier
 

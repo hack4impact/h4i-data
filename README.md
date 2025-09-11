@@ -95,10 +95,10 @@ The servers will be available at:
 ## Testing
 
 ```bash
-npm test                    # Run all tests
-npm run test:unit          # Unit tests only
+npm run test               # Run all tests (Unit &  Integration)
+npm run test:coverage      # Generate coverage report for Unit tests only
 npm run test:integration   # Integration tests only
-npm run test:coverage      # Generate coverage report
+npm run test:unit          # Unit tests only
 npm run test:watch         # Watch mode for unit tests
 ```
 
@@ -108,13 +108,24 @@ npm run test:watch         # Watch mode for unit tests
 
 The database includes the following main entities:
 
-- **Volunteers** - Student and professional volunteers
-- **Chapters** - Local H4I chapters
-- **Nonprofits** - Partner nonprofit organizations
-- **Projects** - Development projects for nonprofits
-- **Sponsors** - Corporate sponsors
-- **Locations** - Geographic locations
-- **Contacts** - Contact information
+- **chapters** - Local H4I chapters
+- **companies** - Companies associated with volunteers, sponsors, & nonprofits
+- **contacts** - Contact information
+- **locations** - Geographic locations
+- **national_branches** - H4I Branches of the National Board
+- **nonprofits** - Partner nonprofit organizations
+- **roles** - All existing roles within the organization
+- **projects** - Development projects for nonprofits
+- **sponsors** - Corporate sponsors
+- **volunteers** - Student and professional volunteers
+
+The database includes the following main relationship tables:
+
+- **nonprofit_chapter_project**
+- **sponsor_chapter**
+- **volunteer_assignment**
+- **volunteer_history**
+- **volunteer_role_project**
 
 ---
 
@@ -180,16 +191,20 @@ See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md
    - Use async/await pattern
    - Implement proper error handling with try/catch
    - Follow existing naming conventions
+   - Use function declarations and not arrow functions
 
 2. **GraphQL** (`src/api/graphql/`)
    - Add schema definitions in `schemas/`
    - Implement resolvers in `resolvers/`
    - Export from respective index files
+   - Update `graphql/resolvers.ts` and `graphql/schemas.ts` after schema and resolver implementations
 
 3. **REST** (`src/api/rest/`)
    - Add controllers in `controllers/`
    - Define routes in `routes/`
-   - Apply validation using Zod validators
+   - Export from respective index files
+   - Apply validation using Zod validators from `core/validators`
+   - Add route in `rest/routes.ts`
 
 ### Testing Best Practices
 
