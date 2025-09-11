@@ -1,3 +1,4 @@
 export * from './chapters.validator';
 export * from './projects.validator';
 export * from './volunteers.validator';
+export * from './companies.validator';
