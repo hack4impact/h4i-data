@@ -28,7 +28,9 @@ Let's create volunteer endpoints using TDD methodology.
 
 ```typescript
 describe('POST /volunteers', () => {
+  // describe what you want to test
   it('should create a new volunteer', async () => {
+    // define data
     const volunteerData = {
       first_name: 'John',
       last_name: 'Doe',
@@ -39,11 +41,12 @@ describe('POST /volunteers', () => {
       university_id: '07608837-420f-4697-bda2-701506079a9d', // Test UUID from Supabase
     };
 
+    // make a request to the server with data if needed
     const response = await request(server)
       .post('/volunteers')
       .send(volunteerData);
 
-    // This will fail initially - RED phase
+    // verify the responses
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('volunteer_id');
     expect(response.body.first_name).toBe('John');
@@ -73,7 +76,7 @@ export const createVolunteerSchema = z.object({
   first_name: z.string().min(2, 'First name must be at least 2 characters'),
   last_name: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.email('Must be a valid email address'),
-  graduation_date: z.date(),
+  graduation_date: z.date().isodate(),
   volunteer_status: z.enum(['STUDENT', 'PROFESSIONAL']),
   h4i_email: z.email('Must be a valid H4I email address').optional(),
   volunteer_type: z.enum(['CHAPTER', 'BOTH', 'NATIONALS']),
@@ -96,6 +99,7 @@ export * from './volunteers.validator';
 **File**: `src/core/services/volunteer.service.ts`
 
 ```typescript
+// create the actual service that will connect to the database and update/create data
 export const createVolunteer = async (data: CreateVolunteerInput) => {
   try {
     logger.info('Creating new volunteer', {
@@ -194,62 +198,9 @@ router.use('/volunteers', volunteerRoutes);
 npm run test
 ```
 
-### Step 10: Refactor (REFACTOR)
+### Step 10: Refactor & Add Improvements (REFACTOR)
 
-Now that tests are passing, consider improvements:
-
-1. **Error Handling Middleware**:
-```typescript
-// src/api/rest/middleware/errorHandler.ts
-import { Request, Response, NextFunction } from 'express';
-
-export const errorHandler = (
-  error: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  console.error('Error:', error);
-
-  if (error.name === 'ZodError') {
-    return res.status(400).json({
-      error: 'Validation failed',
-      details: error.message
-    });
-  }
-
-  if (error.message.includes('not found')) {
-    return res.status(404).json({
-      error: 'Resource not found'
-    });
-  }
-
-  res.status(500).json({
-    error: 'Internal server error'
-  });
-};
-```
-
-2. **Request Validation Middleware**:
-```typescript
-// src/api/rest/middleware/validation.ts
-import { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-
-export const validateBody = (schema: z.ZodSchema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    try {
-      req.body = schema.parse(req.body);
-      next();
-    } catch (error) {
-      res.status(400).json({
-        error: 'Validation failed',
-        details: error
-      });
-    }
-  };
-};
-```
+Refer to `src/middleware/error.middleware.ts` for what you can use
 
 ---
 
@@ -363,31 +314,3 @@ jobs:
       env:
         DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
 ```
-
----
-
-## Best Practices Summary
-
-### 1. Test Structure
-- **Integration tests** verify full request/response cycle
-- **Unit tests** test business logic in isolation
-- **Clean up data** in test teardown
-- **Use descriptive test names** that explain behavior
-
-### 2. Error Handling
-- **Return appropriate HTTP status codes**
-- **Include error details** for debugging
-- **Log errors** for monitoring
-- **Handle validation errors** separately from server errors
-
-### 3. Code Organization
-- **Separation of concerns**: Controller → Service → Database
-- **Input validation** at controller level
-- **Business logic** in service layer
-- **Consistent error responses** across endpoints
-
-### 4. Development Workflow
-- **Write tests first** (TDD)
-- **Run tests frequently** during development
-- **Use hot reloading** for fast feedback
-- **Implement CI/CD** for automated testing
