@@ -12,7 +12,7 @@ import { z } from 'zod';
 type CreateProjectInput = z.infer<typeof createProjectSchema>;
 type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 
-export const getAllProjects = async () => {
+export async function getAllProjects() {
   try {
     logger.info('Fetching all projects');
     const projects = await prisma.projects.findMany({
@@ -30,9 +30,9 @@ export const getAllProjects = async () => {
     });
     throw new DatabaseError('Failed to retrieve projects');
   }
-};
+}
 
-export const getProjectById = async (id: string) => {
+export async function getProjectById(id: string) {
   try {
     logger.info('Fetching project by ID', { projectId: id });
 
@@ -62,9 +62,9 @@ export const getProjectById = async (id: string) => {
     });
     throw new DatabaseError('Failed to retrieve project');
   }
-};
+}
 
-export const createProject = async (data: CreateProjectInput) => {
+export async function createProject(data: CreateProjectInput) {
   try {
     logger.info('Creating new project', {
       projectName: data.name,
@@ -86,9 +86,9 @@ export const createProject = async (data: CreateProjectInput) => {
     });
     throw new DatabaseError('Failed to create project');
   }
-};
+}
 
-export const updateProject = async (id: string, data: UpdateProjectInput) => {
+export async function updateProject(id: string, data: UpdateProjectInput) {
   try {
     logger.info('Updating project', {
       projectId: id,
@@ -123,9 +123,9 @@ export const updateProject = async (id: string, data: UpdateProjectInput) => {
 
     throw new DatabaseError('Failed to update project');
   }
-};
+}
 
-export const deleteProject = async (id: string) => {
+export async function deleteProject(id: string) {
   try {
     logger.info('Deleting project', { projectId: id });
 
@@ -155,4 +155,4 @@ export const deleteProject = async (id: string) => {
 
     throw new DatabaseError('Failed to delete project');
   }
-};
+}

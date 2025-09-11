@@ -44,13 +44,13 @@ export class DatabaseError extends AppError {
 }
 
 // Error handler middleware
-export const errorHandler = (
+export function errorHandler(
   error: Error,
   req: RequestWithId,
   res: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction
-) => {
+) {
   let statusCode = 500;
   let message = 'Internal server error';
   let details: unknown = undefined;
@@ -139,23 +139,23 @@ export const errorHandler = (
   }
 
   res.status(statusCode).json(errorResponse);
-};
+}
 
 // Async error wrapper to catch async errors
-export const asyncHandler = (
+export function asyncHandler(
   fn: (req: RequestWithId, res: Response, next?: NextFunction) => Promise<void>
-) => {
+) {
   return (req: RequestWithId, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
-};
+}
 
 // 404 handler for undefined routes
-export const notFoundHandler = (
+export function notFoundHandler(
   req: RequestWithId,
   res: Response,
   next: NextFunction
-) => {
+) {
   const error = new NotFoundError(`Route ${req.method} ${req.originalUrl}`);
   next(error);
-};
+}

@@ -11,7 +11,7 @@ import { z } from 'zod';
 type CreateVolunteerInput = z.infer<typeof createVolunteerSchema>;
 type UpdateVolunteerInput = z.infer<typeof updateVolunteerSchema>;
 
-export const getAllVolunteers = async () => {
+export async function getAllVolunteers() {
   try {
     logger.info('Fetching all volunteers');
     const volunteers = await prisma.volunteers.findMany({
@@ -29,9 +29,9 @@ export const getAllVolunteers = async () => {
     });
     throw new DatabaseError('Failed to retrieve volunteers');
   }
-};
+}
 
-export const getVolunteerById = async (id: string) => {
+export async function getVolunteerById(id: string) {
   try {
     logger.info('Fetching volunteer by ID', { volunteerId: id });
 
@@ -61,9 +61,9 @@ export const getVolunteerById = async (id: string) => {
     });
     throw new DatabaseError('Failed to retrieve volunteer');
   }
-};
+}
 
-export const createVolunteer = async (data: CreateVolunteerInput) => {
+export async function createVolunteer(data: CreateVolunteerInput) {
   try {
     logger.info('Creating new volunteer', {
       volunteerName: data.first_name + ' ' + data.last_name,
@@ -85,12 +85,9 @@ export const createVolunteer = async (data: CreateVolunteerInput) => {
     });
     throw new DatabaseError('Failed to create volunteer');
   }
-};
+}
 
-export const updateVolunteer = async (
-  id: string,
-  data: UpdateVolunteerInput
-) => {
+export async function updateVolunteer(id: string, data: UpdateVolunteerInput) {
   try {
     logger.info('Updating volunteer', {
       volunteerId: id,
@@ -125,9 +122,9 @@ export const updateVolunteer = async (
 
     throw new DatabaseError('Failed to update volunteer');
   }
-};
+}
 
-export const deleteVolunteer = async (id: string) => {
+export async function deleteVolunteer(id: string) {
   try {
     logger.info('Deleting volunteer', { volunteerId: id });
 
@@ -157,4 +154,4 @@ export const deleteVolunteer = async (id: string) => {
 
     throw new DatabaseError('Failed to delete volunteer');
   }
-};
+}

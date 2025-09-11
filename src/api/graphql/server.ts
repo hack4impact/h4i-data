@@ -20,7 +20,7 @@ import { logger } from '../../config/logger';
 export const graphqlSchema = makeExecutableSchema({ typeDefs, resolvers });
 
 // Create a function that returns a configured GraphQL app
-export const createGraphqlApp = () => {
+export function createGraphqlApp() {
   const app = express();
 
   // Security middleware (apply first)
@@ -57,10 +57,10 @@ export const createGraphqlApp = () => {
   app.use(errorHandler);
 
   return app;
-};
+}
 
 // --- Add this startup logic ---
-const startServer = async () => {
+async function startServer() {
   await connectDB();
   const app = createGraphqlApp();
   app.listen(env.GRAPHQL_PORT, () => {
@@ -70,7 +70,7 @@ const startServer = async () => {
       environment: env.NODE_ENV,
     });
   });
-};
+}
 
 // This makes the file runnable
 if (process.env.NODE_ENV !== 'test') {

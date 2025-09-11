@@ -11,11 +11,11 @@ interface RequestWithId extends Request {
 const generateRequestId = (): string => randomUUID();
 
 // Request logging middleware
-export const requestLogger = (
+export function requestLogger(
   req: RequestWithId,
   res: Response,
   next: NextFunction
-) => {
+) {
   const start = Date.now();
 
   // Generate and attach request ID
@@ -80,16 +80,16 @@ export const requestLogger = (
   };
 
   next();
-};
+}
 
 // Skip logging for health check endpoints
-export const skipHealthCheck = (
+export function skipHealthCheck(
   req: RequestWithId,
   res: Response,
   next: NextFunction
-) => {
+) {
   if (req.path === '/health' || req.path === '/ping') {
     return next();
   }
   return requestLogger(req, res, next);
-};
+}
