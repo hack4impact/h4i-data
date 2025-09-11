@@ -62,10 +62,11 @@ Check if all files follow Prettier format
 npx prettier . --check
 ```
 
+## Writing Code
+
+- Use function declarations - not arrow functions
+
 ### Best Practices to Write REST API
-
-
-## Best Practices Summary
 
 ### 1. Test Structure
 - **Integration tests** verify full request/response cycle
