@@ -66,6 +66,13 @@ npx prettier . --check
 
 - Use function declarations - not arrow functions
 
+## Pull Request Instructions
+
+- Set base branch to "develop"
+- Add screenshots of results
+- Assign at least 2 reviewers
+- Link your issue (follow the PR template)
+
 ### Best Practices to Write REST API
 
 ### 1. Test Structure
