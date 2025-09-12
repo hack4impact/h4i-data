@@ -34,6 +34,7 @@ enum StatusType {
 ## Queries
 
 ### Get All Chapters
+
 ```graphql
 query {
   chapters {
@@ -49,6 +50,7 @@ query {
 ```
 
 ### Get Single Chapter
+
 ```graphql
 query GetChapter($id: ID!) {
   chapter(id: $id) {
@@ -64,6 +66,7 @@ query GetChapter($id: ID!) {
 ```
 
 **Variables**:
+
 ```json
 {
   "id": "your-chapter-id-here"
@@ -75,6 +78,7 @@ query GetChapter($id: ID!) {
 ## Mutations
 
 ### Create Chapter
+
 ```graphql
 mutation CreateChapter($input: CreateChapterInput!) {
   createChapter(input: $input) {
@@ -90,16 +94,18 @@ mutation CreateChapter($input: CreateChapterInput!) {
 ```
 
 **Input Type**:
+
 ```graphql
 input CreateChapterInput {
-  name: String!              # Required: Chapter name (min 3 chars)
-  founded_date: String!      # Required: ISO 8601 datetime string
-  status_type: StatusType    # Optional: Defaults to ACTIVE
-  location_id: String        # Optional: UUID reference to location
+  name: String! # Required: Chapter name (min 3 chars)
+  founded_date: String! # Required: ISO 8601 datetime string
+  status_type: StatusType # Optional: Defaults to ACTIVE
+  location_id: String # Optional: UUID reference to location
 }
 ```
 
 **Variables Example**:
+
 ```json
 {
   "input": {
@@ -112,6 +118,7 @@ input CreateChapterInput {
 ```
 
 ### Update Chapter
+
 ```graphql
 mutation UpdateChapter($id: ID!, $input: UpdateChapterInput!) {
   updateChapter(id: $id, input: $input) {
@@ -126,16 +133,18 @@ mutation UpdateChapter($id: ID!, $input: UpdateChapterInput!) {
 ```
 
 **Input Type**:
+
 ```graphql
 input UpdateChapterInput {
-  name: String               # Optional: Chapter name
-  founded_date: String       # Optional: ISO 8601 datetime string
-  status_type: StatusType    # Optional: ACTIVE or INACTIVE
-  location_id: String        # Optional: UUID reference to location
+  name: String # Optional: Chapter name
+  founded_date: String # Optional: ISO 8601 datetime string
+  status_type: StatusType # Optional: ACTIVE or INACTIVE
+  location_id: String # Optional: UUID reference to location
 }
 ```
 
 ### Delete Chapter
+
 ```graphql
 mutation DeleteChapter($id: ID!) {
   deleteChapter(id: $id) {
@@ -168,6 +177,7 @@ GraphQL errors are returned in the standard GraphQL error format:
 ```
 
 ### Common Error Codes
+
 - `NOT_FOUND`: Resource doesn't exist
 - `VALIDATION_ERROR`: Input validation failed
 - `INTERNAL_ERROR`: Server error
@@ -177,6 +187,7 @@ GraphQL errors are returned in the standard GraphQL error format:
 ## Validation Rules
 
 ### Chapter Validation
+
 - `name`: Minimum 3 characters, required for creation
 - `founded_date`: Must be valid ISO 8601 datetime string
 - `status_type`: Must be either `ACTIVE` or `INACTIVE`
@@ -187,14 +198,18 @@ GraphQL errors are returned in the standard GraphQL error format:
 ## Development Tools
 
 ### GraphQL Playground
+
 Visit `http://localhost:3000/api/graphql` in your browser for an interactive query editor with:
+
 - Schema exploration
 - Query autocompletion
 - Real-time error validation
 - Query history
 
 ### Introspection Query
+
 Get the full schema:
+
 ```graphql
 query IntrospectionQuery {
   __schema {

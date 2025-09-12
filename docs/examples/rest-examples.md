@@ -7,11 +7,13 @@ This guide demonstrates how to create REST endpoints using Test-Driven Developme
 ## TDD Flow for REST APIs
 
 ### 1. Test-First Development Cycle
+
 1. **Red**: Write failing integration and unit tests
 2. **Green**: Implement minimal code to pass tests
 3. **Refactor**: Improve code while maintaining green tests
 
 ### 2. REST Testing Strategy
+
 - **Integration Tests**: `tests/integration/rest/` - Full HTTP request/response testing
 - **Unit Tests**: `tests/unit/services/` - Business logic testing
 - **Controller Tests**: Test request/response handling and validation
@@ -45,7 +47,9 @@ beforeAll(() => {
 
 afterAll(async () => {
   if (createdVolunteerId) {
-    await prisma.volunteers.delete({ where: { volunteer_id: createdVolunteerId } });
+    await prisma.volunteers.delete({
+      where: { volunteer_id: createdVolunteerId },
+    });
   }
   server.close();
   await disconnectDB();
@@ -58,7 +62,7 @@ describe('REST API - /volunteers', () => {
         first_name: 'John',
         last_name: 'Doe',
         email: 'john.doe@example.com',
-        volunteer_status: 'STUDENT'
+        volunteer_status: 'STUDENT',
       };
 
       const response = await request(server)
@@ -93,8 +97,7 @@ describe('REST API - /volunteers', () => {
 
   describe('GET /volunteers', () => {
     it('should fetch all volunteers', async () => {
-      const response = await request(server)
-        .get('/volunteers');
+      const response = await request(server).get('/volunteers');
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
@@ -105,8 +108,9 @@ describe('REST API - /volunteers', () => {
     it('should fetch a volunteer by ID', async () => {
       expect(createdVolunteerId).toBeDefined();
 
-      const response = await request(server)
-        .get(`/volunteers/${createdVolunteerId}`);
+      const response = await request(server).get(
+        `/volunteers/${createdVolunteerId}`
+      );
 
       expect(response.status).toBe(200);
       expect(response.body.volunteer_id).toBe(createdVolunteerId);
@@ -115,9 +119,8 @@ describe('REST API - /volunteers', () => {
 
     it('should return 404 for non-existent volunteer', async () => {
       const fakeId = '00000000-0000-0000-0000-000000000000';
-      
-      const response = await request(server)
-        .get(`/volunteers/${fakeId}`);
+
+      const response = await request(server).get(`/volunteers/${fakeId}`);
 
       expect(response.status).toBe(404);
       expect(response.body.error).toContain('not found');
@@ -130,7 +133,7 @@ describe('REST API - /volunteers', () => {
 
       const updateData = {
         first_name: 'Jane',
-        volunteer_status: 'PROFESSIONAL'
+        volunteer_status: 'PROFESSIONAL',
       };
 
       const response = await request(server)
@@ -148,17 +151,19 @@ describe('REST API - /volunteers', () => {
     it('should delete a volunteer', async () => {
       expect(createdVolunteerId).toBeDefined();
 
-      const response = await request(server)
-        .delete(`/volunteers/${createdVolunteerId}`);
+      const response = await request(server).delete(
+        `/volunteers/${createdVolunteerId}`
+      );
 
       expect(response.status).toBe(204);
 
       // Verify deletion
-      const getResponse = await request(server)
-        .get(`/volunteers/${createdVolunteerId}`);
-      
+      const getResponse = await request(server).get(
+        `/volunteers/${createdVolunteerId}`
+      );
+
       expect(getResponse.status).toBe(404);
-      
+
       // Prevent cleanup attempt
       createdVolunteerId = '';
     });
@@ -167,6 +172,7 @@ describe('REST API - /volunteers', () => {
 ```
 
 **Run tests** (they will fail):
+
 ```bash
 npm run test:integration
 ```
@@ -224,9 +230,14 @@ describe('Volunteer Controller', () => {
         body: volunteerData,
       };
 
-      (volunteerService.createVolunteer as jest.Mock).mockResolvedValue(createdVolunteer);
+      (volunteerService.createVolunteer as jest.Mock).mockResolvedValue(
+        createdVolunteer
+      );
 
-      await volunteerController.createVolunteer(mockRequest as Request, mockResponse as Response);
+      await volunteerController.createVolunteer(
+        mockRequest as Request,
+        mockResponse as Response
+      );
 
       expect(mockStatus).toHaveBeenCalledWith(201);
       expect(mockJson).toHaveBeenCalledWith(createdVolunteer);
@@ -241,9 +252,14 @@ describe('Volunteer Controller', () => {
 
       // Mock validation error
       const validationError = new Error('Validation failed');
-      (volunteerService.createVolunteer as jest.Mock).mockRejectedValue(validationError);
+      (volunteerService.createVolunteer as jest.Mock).mockRejectedValue(
+        validationError
+      );
 
-      await volunteerController.createVolunteer(mockRequest as Request, mockResponse as Response);
+      await volunteerController.createVolunteer(
+        mockRequest as Request,
+        mockResponse as Response
+      );
 
       expect(mockStatus).toHaveBeenCalledWith(400);
     });
@@ -258,9 +274,14 @@ describe('Volunteer Controller', () => {
 
       mockRequest = {};
 
-      (volunteerService.getAllVolunteers as jest.Mock).mockResolvedValue(volunteers);
+      (volunteerService.getAllVolunteers as jest.Mock).mockResolvedValue(
+        volunteers
+      );
 
-      await volunteerController.getAllVolunteers(mockRequest as Request, mockResponse as Response);
+      await volunteerController.getAllVolunteers(
+        mockRequest as Request,
+        mockResponse as Response
+      );
 
       expect(mockJson).toHaveBeenCalledWith(volunteers);
     });
@@ -309,8 +330,8 @@ export const getAllVolunteers = async () => {
 
 export const getVolunteerById = async (id: string) => {
   try {
-    return await prisma.volunteers.findUnique({ 
-      where: { volunteer_id: id } 
+    return await prisma.volunteers.findUnique({
+      where: { volunteer_id: id },
     });
   } catch (error) {
     throw new Error('Failed to fetch volunteer');
@@ -325,11 +346,14 @@ export const createVolunteer = async (data: CreateVolunteerInput) => {
   }
 };
 
-export const updateVolunteer = async (id: string, data: UpdateVolunteerInput) => {
+export const updateVolunteer = async (
+  id: string,
+  data: UpdateVolunteerInput
+) => {
   try {
-    return await prisma.volunteers.update({ 
-      where: { volunteer_id: id }, 
-      data 
+    return await prisma.volunteers.update({
+      where: { volunteer_id: id },
+      data,
     });
   } catch (error) {
     throw new Error('Failed to update volunteer');
@@ -338,8 +362,8 @@ export const updateVolunteer = async (id: string, data: UpdateVolunteerInput) =>
 
 export const deleteVolunteer = async (id: string) => {
   try {
-    return await prisma.volunteers.delete({ 
-      where: { volunteer_id: id } 
+    return await prisma.volunteers.delete({
+      where: { volunteer_id: id },
     });
   } catch (error) {
     throw new Error('Failed to delete volunteer');
@@ -369,9 +393,9 @@ export const volunteerController = {
       const volunteers = await getAllVolunteers();
       res.json(volunteers);
     } catch (error) {
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to retrieve volunteers',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   },
@@ -385,9 +409,9 @@ export const volunteerController = {
         res.status(404).json({ error: 'Volunteer not found' });
       }
     } catch (error) {
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to retrieve volunteer',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   },
@@ -399,14 +423,14 @@ export const volunteerController = {
       res.status(201).json(newVolunteer);
     } catch (error) {
       if (error instanceof Error && error.message.includes('validation')) {
-        res.status(400).json({ 
-          error: 'Invalid data', 
-          details: error.message 
+        res.status(400).json({
+          error: 'Invalid data',
+          details: error.message,
         });
       } else {
-        res.status(500).json({ 
+        res.status(500).json({
           error: 'Failed to create volunteer',
-          details: error instanceof Error ? error.message : 'Unknown error'
+          details: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -415,20 +439,26 @@ export const volunteerController = {
   updateVolunteer: async (req: Request, res: Response) => {
     try {
       const validatedData = updateVolunteerSchema.parse(req.body);
-      const updatedVolunteer = await updateVolunteer(req.params.id, validatedData);
+      const updatedVolunteer = await updateVolunteer(
+        req.params.id,
+        validatedData
+      );
       res.json(updatedVolunteer);
     } catch (error) {
       if (error instanceof Error && error.message.includes('validation')) {
-        res.status(400).json({ 
-          error: 'Invalid data', 
-          details: error.message 
+        res.status(400).json({
+          error: 'Invalid data',
+          details: error.message,
         });
-      } else if (error instanceof Error && error.message.includes('not found')) {
+      } else if (
+        error instanceof Error &&
+        error.message.includes('not found')
+      ) {
         res.status(404).json({ error: 'Volunteer not found' });
       } else {
-        res.status(500).json({ 
+        res.status(500).json({
           error: 'Failed to update volunteer',
-          details: error instanceof Error ? error.message : 'Unknown error'
+          details: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -442,9 +472,9 @@ export const volunteerController = {
       if (error instanceof Error && error.message.includes('not found')) {
         res.status(404).json({ error: 'Volunteer not found' });
       } else {
-        res.status(500).json({ 
+        res.status(500).json({
           error: 'Failed to delete volunteer',
-          details: error instanceof Error ? error.message : 'Unknown error'
+          details: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -491,12 +521,13 @@ export default router;
 ### Step 8: Update Exports (GREEN)
 
 **File**: `src/core/index.ts`
+
 ```typescript
 // Services
 export * from './services/chapter.service';
 export * from './services/volunteer.service'; // Add this
 
-// Validators  
+// Validators
 export * from './validators/chapter.validator';
 export * from './validators/volunteer.validator'; // Add this
 ```
@@ -519,6 +550,7 @@ npm test
 Now that tests are passing, consider improvements:
 
 1. **Error Handling Middleware**:
+
 ```typescript
 // src/api/rest/middleware/errorHandler.ts
 import { Request, Response, NextFunction } from 'express';
@@ -534,23 +566,24 @@ export const errorHandler = (
   if (error.name === 'ZodError') {
     return res.status(400).json({
       error: 'Validation failed',
-      details: error.message
+      details: error.message,
     });
   }
 
   if (error.message.includes('not found')) {
     return res.status(404).json({
-      error: 'Resource not found'
+      error: 'Resource not found',
     });
   }
 
   res.status(500).json({
-    error: 'Internal server error'
+    error: 'Internal server error',
   });
 };
 ```
 
 2. **Request Validation Middleware**:
+
 ```typescript
 // src/api/rest/middleware/validation.ts
 import { Request, Response, NextFunction } from 'express';
@@ -564,7 +597,7 @@ export const validateBody = (schema: z.ZodSchema) => {
     } catch (error) {
       res.status(400).json({
         error: 'Validation failed',
-        details: error
+        details: error,
       });
     }
   };
@@ -610,6 +643,7 @@ curl -X DELETE http://localhost:3000/api/rest/volunteers/[volunteer-id]
 1. **Create Collection**: "Volunteer Management API"
 
 2. **Environment Variables**:
+
 ```json
 {
   "baseUrl": "http://localhost:3000/api/rest",
@@ -618,19 +652,20 @@ curl -X DELETE http://localhost:3000/api/rest/volunteers/[volunteer-id]
 ```
 
 3. **Test Scripts** (in Postman Tests tab):
+
 ```javascript
 // For POST /volunteers
-pm.test("Status code is 201", function () {
-    pm.response.to.have.status(201);
+pm.test('Status code is 201', function () {
+  pm.response.to.have.status(201);
 });
 
-pm.test("Response has volunteer_id", function () {
-    pm.expect(pm.response.json()).to.have.property('volunteer_id');
+pm.test('Response has volunteer_id', function () {
+  pm.expect(pm.response.json()).to.have.property('volunteer_id');
 });
 
-pm.test("Store volunteer ID", function () {
-    const responseJson = pm.response.json();
-    pm.environment.set("volunteer_id", responseJson.volunteer_id);
+pm.test('Store volunteer ID', function () {
+  const responseJson = pm.response.json();
+  pm.environment.set('volunteer_id', responseJson.volunteer_id);
 });
 ```
 
@@ -643,14 +678,14 @@ name: Test API
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:13
@@ -664,24 +699,24 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Run unit tests
-      run: npm run test:unit
-    
-    - name: Run integration tests
-      run: npm run test:integration
-      env:
-        DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
 ```
 
 ---
@@ -689,24 +724,28 @@ jobs:
 ## Best Practices Summary
 
 ### 1. Test Structure
+
 - **Integration tests** verify full request/response cycle
 - **Unit tests** test business logic in isolation
 - **Clean up data** in test teardown
 - **Use descriptive test names** that explain behavior
 
 ### 2. Error Handling
+
 - **Return appropriate HTTP status codes**
 - **Include error details** for debugging
 - **Log errors** for monitoring
 - **Handle validation errors** separately from server errors
 
 ### 3. Code Organization
+
 - **Separation of concerns**: Controller → Service → Database
 - **Input validation** at controller level
 - **Business logic** in service layer
 - **Consistent error responses** across endpoints
 
 ### 4. Development Workflow
+
 - **Write tests first** (TDD)
 - **Run tests frequently** during development
 - **Use hot reloading** for fast feedback
