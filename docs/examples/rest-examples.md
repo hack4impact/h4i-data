@@ -206,34 +206,37 @@ Refer to `src/middleware/error.middleware.ts` for what you can use
 
 ## REST API Examples & Testing
 
-### Manual Testing with cURL
+### Manual Testing with cURL in the Terminal
 
 ```bash
 # Create a volunteer
-curl -X POST http://localhost:3002/api/rest/volunteers \
+curl -X POST http://localhost:3001/api/rest/volunteers \
   -H "Content-Type: application/json" \
   -d '{
     "first_name": "Alice",
     "last_name": "Johnson",
     "email": "alice@example.com",
-    "volunteer_status": "STUDENT"
+    "graduation_date": "2026-06-18T00:00:00.000Z",
+    "volunteer_status": "STUDENT",
+    "volunteer_type": "BOTH",
+    "university_id": "07608837-420f-4697-bda2-701506079a9d"
   }'
 
 # Get all volunteers
-curl -X GET http://localhost:3000/api/rest/volunteers
+curl -X GET http://localhost:3001/api/rest/volunteers
 
 # Get specific volunteer
-curl -X GET http://localhost:3000/api/rest/volunteers/[volunteer-id]
+curl -X GET http://localhost:3001/api/rest/volunteers/[volunteer-id]
 
 # Update volunteer
-curl -X PATCH http://localhost:3000/api/rest/volunteers/[volunteer-id] \
+curl -X PATCH http://localhost:3001/api/rest/volunteers/[volunteer-id] \
   -H "Content-Type: application/json" \
   -d '{
     "volunteer_status": "PROFESSIONAL"
   }'
 
 # Delete volunteer
-curl -X DELETE http://localhost:3000/api/rest/volunteers/[volunteer-id]
+curl -X DELETE http://localhost:3001/api/rest/volunteers/[volunteer-id]
 ```
 
 ### Testing with Postman
@@ -241,14 +244,40 @@ curl -X DELETE http://localhost:3000/api/rest/volunteers/[volunteer-id]
 1. **Create Collection**: "Volunteer Management API"
 
 2. **Environment Variables**:
+
+Go to top right where it says "No environment" and create an environment to insert what's below
+
 ```json
 {
-  "baseUrl": "http://localhost:3000/api/rest",
+  "baseUrl": "http://localhost:3001/api/rest",
   "volunteerId": "{{volunteer_id}}"
 }
 ```
 
-3. **Test Scripts** (in Postman Tests tab):
+3. **Body**:
+
+Go to the Body tab and click on raw -> JSON and insert what's below
+
+```json
+{
+  "first_name": "Alice",
+  "last_name": "Johnson",
+  "email": "alice@example.com",
+  "graduation_date": "2026-06-18T00:00:00.000Z",
+  "volunteer_status": "STUDENT",
+  "volunteer_type": "CHAPTER",
+  "university_id": "07608837-420f-4697-bda2-701506079a9d"
+}
+```
+
+4. **URL**:
+
+Paste `http://localhost:3001/api/rest/volunteers` into the POST request of the field
+
+5. **Test Scripts**:
+
+Go to the Scripts tab to insert what's below in the post-response section (since this tests the results after a volunteer is created)
+
 ```javascript
 // For POST /volunteers
 pm.test("Status code is 201", function () {
@@ -264,6 +293,10 @@ pm.test("Store volunteer ID", function () {
     pm.environment.set("volunteer_id", responseJson.volunteer_id);
 });
 ```
+
+6. **Send it!**
+
+Hit Send and you should get a 201 response. Click on "Body" and change it to "Test Results" to view the results.
 
 ### Integration with GitHub Actions
 
