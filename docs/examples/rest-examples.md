@@ -316,6 +316,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: test
     
     services:
       postgres:
@@ -343,7 +344,13 @@ jobs:
     
     - name: Run unit tests
       run: npm run test:unit
+      env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
     
     - name: Run integration tests
       run: npm run test:integration
+      env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 ```
