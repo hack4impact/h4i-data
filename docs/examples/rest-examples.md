@@ -2,6 +2,8 @@
 
 This guide demonstrates how to create REST endpoints using Test-Driven Development (TDD) in this project.
 
+Note that the ports here are 3001, meaning you should run `npm run dev` and not `npm run dev:rest` in order for easy copy-paste of the code! Otherwise, just replace 3001 with 3002 if you prefer running REST API server specifically.
+
 ---
 
 ## TDD Flow for REST APIs
@@ -344,6 +346,4 @@ jobs:
     
     - name: Run integration tests
       run: npm run test:integration
-      env:
-        DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
 ```
