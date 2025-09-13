@@ -3,7 +3,9 @@ import dotenv from 'dotenv';
 import { z } from 'zod';
 
 dotenv.config({
-  path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+  //path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+  // TODO: fix once we get our own test database set up that's not our prod database
+  path: '.env',
 });
 
 // Define a schema for your environment variables
