@@ -19,6 +19,7 @@ Currently no authentication is required. Future versions may include JWT or API 
 All responses follow a consistent JSON format:
 
 ### Success Response
+
 ```json
 {
   "chapter_id": "uuid",
@@ -32,6 +33,7 @@ All responses follow a consistent JSON format:
 ```
 
 ### Error Response
+
 ```json
 {
   "error": "Error message",
@@ -44,11 +46,13 @@ All responses follow a consistent JSON format:
 ## Chapters Endpoints
 
 ### Get All Chapters
+
 **GET** `/chapters`
 
 **Description**: Retrieve all chapters from the database.
 
 **Response**: `200 OK`
+
 ```json
 [
   {
@@ -64,19 +68,23 @@ All responses follow a consistent JSON format:
 ```
 
 **Error Responses**:
+
 - `500 Internal Server Error`: Database connection or server error
 
 ---
 
 ### Get Chapter by ID
+
 **GET** `/chapters/:id`
 
 **Description**: Retrieve a specific chapter by its ID.
 
 **Parameters**:
+
 - `id` (path): Chapter UUID
 
 **Response**: `200 OK`
+
 ```json
 {
   "chapter_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -90,17 +98,20 @@ All responses follow a consistent JSON format:
 ```
 
 **Error Responses**:
+
 - `404 Not Found`: Chapter doesn't exist
 - `500 Internal Server Error`: Server error
 
 ---
 
 ### Create Chapter
+
 **POST** `/chapters`
 
 **Description**: Create a new chapter.
 
 **Request Body**:
+
 ```json
 {
   "name": "New Chapter Name",
@@ -111,14 +122,17 @@ All responses follow a consistent JSON format:
 ```
 
 **Required Fields**:
+
 - `name`: String (minimum 3 characters)
 - `founded_date`: ISO 8601 datetime string
 
 **Optional Fields**:
+
 - `status_type`: "ACTIVE" | "INACTIVE" (defaults to "ACTIVE")
 - `location_id`: UUID string
 
 **Response**: `201 Created`
+
 ```json
 {
   "chapter_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -132,20 +146,24 @@ All responses follow a consistent JSON format:
 ```
 
 **Error Responses**:
+
 - `400 Bad Request`: Validation error
 - `500 Internal Server Error`: Server error
 
 ---
 
 ### Update Chapter
+
 **PATCH** `/chapters/:id`
 
 **Description**: Update an existing chapter. Only provided fields will be updated.
 
 **Parameters**:
+
 - `id` (path): Chapter UUID
 
 **Request Body** (all fields optional):
+
 ```json
 {
   "name": "Updated Chapter Name",
@@ -156,6 +174,7 @@ All responses follow a consistent JSON format:
 ```
 
 **Response**: `200 OK`
+
 ```json
 {
   "chapter_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -169,6 +188,7 @@ All responses follow a consistent JSON format:
 ```
 
 **Error Responses**:
+
 - `400 Bad Request`: Validation error
 - `404 Not Found`: Chapter doesn't exist
 - `500 Internal Server Error`: Server error
@@ -176,16 +196,19 @@ All responses follow a consistent JSON format:
 ---
 
 ### Delete Chapter
+
 **DELETE** `/chapters/:id`
 
 **Description**: Delete a chapter by ID.
 
 **Parameters**:
+
 - `id` (path): Chapter UUID
 
 **Response**: `204 No Content`
 
 **Error Responses**:
+
 - `404 Not Found`: Chapter doesn't exist
 - `500 Internal Server Error`: Server error
 
@@ -193,14 +216,14 @@ All responses follow a consistent JSON format:
 
 ## HTTP Status Codes
 
-| Code | Meaning | Usage |
-|------|---------|-------|
-| 200 | OK | Successful GET/PATCH request |
-| 201 | Created | Successful POST request |
-| 204 | No Content | Successful DELETE request |
-| 400 | Bad Request | Validation error or malformed request |
-| 404 | Not Found | Resource doesn't exist |
-| 500 | Internal Server Error | Server or database error |
+| Code | Meaning               | Usage                                 |
+| ---- | --------------------- | ------------------------------------- |
+| 200  | OK                    | Successful GET/PATCH request          |
+| 201  | Created               | Successful POST request               |
+| 204  | No Content            | Successful DELETE request             |
+| 400  | Bad Request           | Validation error or malformed request |
+| 404  | Not Found             | Resource doesn't exist                |
+| 500  | Internal Server Error | Server or database error              |
 
 ---
 
@@ -209,11 +232,13 @@ All responses follow a consistent JSON format:
 ### cURL Examples
 
 **Get all chapters**:
+
 ```bash
 curl -X GET http://localhost:3000/api/rest/chapters
 ```
 
 **Create a chapter**:
+
 ```bash
 curl -X POST http://localhost:3000/api/rest/chapters \
   -H "Content-Type: application/json" \
@@ -225,6 +250,7 @@ curl -X POST http://localhost:3000/api/rest/chapters \
 ```
 
 **Update a chapter**:
+
 ```bash
 curl -X PATCH http://localhost:3000/api/rest/chapters/550e8400-e29b-41d4-a716-446655440000 \
   -H "Content-Type: application/json" \
@@ -234,6 +260,7 @@ curl -X PATCH http://localhost:3000/api/rest/chapters/550e8400-e29b-41d4-a716-44
 ```
 
 **Delete a chapter**:
+
 ```bash
 curl -X DELETE http://localhost:3000/api/rest/chapters/550e8400-e29b-41d4-a716-446655440000
 ```
@@ -243,22 +270,24 @@ curl -X DELETE http://localhost:3000/api/rest/chapters/550e8400-e29b-41d4-a716-4
 ## Validation Rules
 
 ### Chapter Validation
-- **name**: 
+
+- **name**:
   - Required for creation
   - Minimum 3 characters
   - String type
-- **founded_date**: 
+- **founded_date**:
   - Required for creation
   - Must be valid ISO 8601 datetime format
   - Example: `"2024-01-15T00:00:00.000Z"`
-- **status_type**: 
+- **status_type**:
   - Optional (defaults to "ACTIVE")
   - Must be either "ACTIVE" or "INACTIVE"
-- **location_id**: 
+- **location_id**:
   - Optional
   - Must be valid UUID format if provided
 
 ### Error Response Format
+
 When validation fails, you'll receive a `400 Bad Request` with details:
 
 ```json

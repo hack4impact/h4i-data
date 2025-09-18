@@ -22,7 +22,7 @@ beforeAll(async () => {
       email: `int-${Date.now()}@example.com`,
       // phone_number: '1234567890', // optional
     },
-  });  
+  });
   contactId = contact.contact_id;
 });
 
