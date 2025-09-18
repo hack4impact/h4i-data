@@ -76,24 +76,28 @@ npx prettier . --check
 ### Best Practices to Write REST API
 
 ### 1. Test Structure
+
 - **Integration tests** verify full request/response cycle
 - **Unit tests** test business logic in isolation
 - **Clean up data** in test teardown
 - **Use descriptive test names** that explain behavior
 
 ### 2. Error Handling
+
 - **Return appropriate HTTP status codes**
 - **Include error details** for debugging
 - **Log errors** for monitoring
 - **Handle validation errors** separately from server errors
 
 ### 3. Code Organization
+
 - **Separation of concerns**: Controller → Service → Database
 - **Input validation** at controller level
 - **Business logic** in service layer
 - **Consistent error responses** across endpoints
 
 ### 4. Development Workflow
+
 - **Write tests first** (TDD)
 - **Run tests frequently** during development
 - **Use hot reloading** for fast feedback

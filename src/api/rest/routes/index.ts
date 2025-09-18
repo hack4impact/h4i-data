@@ -3,3 +3,4 @@ export * from './projects.routes';
 export * from './volunteers.routes';
 export * from './companies.routes';
 export * from './nonprofits.routes';
+export * from './sponsors.routes';
