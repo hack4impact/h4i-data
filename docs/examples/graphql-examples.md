@@ -555,4 +555,3 @@ query {
 - Use transactions for multi-table operations
 - Clean up test data in `afterAll`/`afterEach`
 - Use connection pooling for better performance
-

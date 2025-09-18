@@ -9,11 +9,13 @@ Note that the ports here are 3001, meaning you should run `npm run dev` and not 
 ## TDD Flow for REST APIs
 
 ### 1. Test-First Development Cycle
+
 1. **Red**: Write failing integration and unit tests
 2. **Green**: Implement minimal code to pass tests
 3. **Refactor**: Improve code while maintaining green tests
 
 ### 2. REST Testing Strategy
+
 - **Controller Tests**: Test request/response handling and validation
 - **Integration Tests**: `tests/integration/rest/` - Full HTTP request/response testing
 - **Unit Tests**: `tests/unit/services/` - Business logic testing
@@ -58,9 +60,9 @@ describe('POST /volunteers', () => {
 
     createdVolunteerId = response.body.volunteer_id;
   });
-})
-
+});
 ```
+
 ### Step 1: Run tests (they will fail) (RED)
 
 ```bash
@@ -140,18 +142,18 @@ export * from './volunteer.service';
 ```typescript
 export const volunteerController = {
   createVolunteer: asyncHandler(async (req: RequestWithId, res: Response) => {
-      // Validate input data
-      const validatedData = createVolunteerSchema.parse(req.body);
+    // Validate input data
+    const validatedData = createVolunteerSchema.parse(req.body);
 
-      logger.info('Creating volunteer via REST API', {
-        requestId: req.requestId,
-        volunteerData: validatedData,
-      });
+    logger.info('Creating volunteer via REST API', {
+      requestId: req.requestId,
+      volunteerData: validatedData,
+    });
 
-      const newVolunteer = await createVolunteer(validatedData);
-      res.status(201).json(newVolunteer);
-    }),
-}
+    const newVolunteer = await createVolunteer(validatedData);
+    res.status(201).json(newVolunteer);
+  }),
+};
 ```
 
 **File**: `src/api/rest/controllers/index.ts`
@@ -282,17 +284,17 @@ Go to the Scripts tab to insert what's below in the post-response section (since
 
 ```javascript
 // For POST /volunteers
-pm.test("Status code is 201", function () {
-    pm.response.to.have.status(201);
+pm.test('Status code is 201', function () {
+  pm.response.to.have.status(201);
 });
 
-pm.test("Response has volunteer_id", function () {
-    pm.expect(pm.response.json()).to.have.property('volunteer_id');
+pm.test('Response has volunteer_id', function () {
+  pm.expect(pm.response.json()).to.have.property('volunteer_id');
 });
 
-pm.test("Store volunteer ID", function () {
-    const responseJson = pm.response.json();
-    pm.environment.set("volunteer_id", responseJson.volunteer_id);
+pm.test('Store volunteer ID', function () {
+  const responseJson = pm.response.json();
+  pm.environment.set('volunteer_id', responseJson.volunteer_id);
 });
 ```
 
@@ -309,15 +311,15 @@ name: Test API
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     environment: test
-    
+
     services:
       postgres:
         image: postgres:13
@@ -331,26 +333,26 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Run unit tests
-      run: npm run test:unit
-      env:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:unit
+        env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
-    
-    - name: Run integration tests
-      run: npm run test:integration
-      env:
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 ```
