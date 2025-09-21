@@ -8,6 +8,7 @@ import {
   createLocationSchema,
   updateLocationSchema,
 } from '../../../core';
+import z from 'zod';
 
 export const locationController = {
   getAllLocations: async (_req: Request, res: Response) => {
@@ -44,15 +45,16 @@ export const locationController = {
       const newLocation = await createLocation(validatedData);
       res.status(201).json(newLocation);
     } catch (error) {
-      if (error instanceof Error && error.message.includes('validation')) {
-        res.status(400).json({
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
           error: 'Invalid data',
           details: error.message,
         });
-      } else {
-        res.status(500).json({
+      }
+      if (error instanceof Error) {
+        return res.status(500).json({
           error: 'Failed to create location',
-          details: error instanceof Error ? error.message : 'Unknown error',
+          details: error.message,
         });
       }
     }
