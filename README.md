@@ -4,7 +4,7 @@ This is the backend repository for setting up the Prisma ORM, tests, and databas
 
 ---
 
-## 🛠 Technology Used
+## Technology Used
 
 - **Language** - Typescript
 - **Express** — Javascript backend framework
