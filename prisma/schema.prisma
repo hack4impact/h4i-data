@@ -65,13 +65,6 @@ model locations {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model national_branches {
-  branch_id            String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                 String
-  volunteer_assignment volunteer_assignment[]
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model nonprofit_chapter_project {
   nonprofit_chapter_project_id                                    String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   nonprofit_id                                                    String      @db.Uuid
@@ -116,6 +109,7 @@ model projects {
   repo                      String
   created_at                DateTime                    @default(now()) @db.Timestamptz(6)
   updated_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  project_type              project_type                @default(DESIGN_AND_DEVELOP)
   nonprofit_chapter_project nonprofit_chapter_project[]
   volunteer_role_project    volunteer_role_project[]
 }
@@ -161,18 +155,18 @@ model sponsors {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model volunteer_assignment {
-  volunteer_assignment_id String             @id(map: "member_assignment_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  volunteer_id            String             @db.Uuid
-  role_id                 String             @db.Uuid
-  branch_id               String?            @db.Uuid
-  start_date              DateTime           @db.Date
-  end_date                DateTime           @db.Date
-  status                  status_type        @default(ACTIVE)
-  created_at              DateTime           @default(now()) @db.Timestamptz(6)
-  updated_at              DateTime           @default(now()) @db.Timestamptz(6)
-  national_branches       national_branches? @relation(fields: [branch_id], references: [branch_id], onDelete: NoAction, onUpdate: NoAction, map: "member_assignment_branch_id_fkey")
-  roles                   roles              @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction, map: "member_assignment_role_id_fkey")
-  volunteers              volunteers         @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
+  volunteer_assignment_id String               @id(map: "member_assignment_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  volunteer_id            String               @db.Uuid
+  role_id                 String               @db.Uuid
+  branch_id               String?              @db.Uuid
+  start_date              DateTime             @db.Date
+  end_date                DateTime             @db.Date
+  status                  status_type          @default(ACTIVE)
+  created_at              DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime             @default(now()) @db.Timestamptz(6)
+  national_branches       operations_branches? @relation(fields: [branch_id], references: [branch_id], onDelete: NoAction, onUpdate: NoAction, map: "member_assignment_branch_id_fkey")
+  roles                   roles                @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction, map: "member_assignment_role_id_fkey")
+  volunteers              volunteers           @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -227,6 +221,13 @@ model volunteers {
   locations              locations                @relation(fields: [university_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model operations_branches {
+  branch_id            String                 @id(map: "national_branches_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String
+  volunteer_assignment volunteer_assignment[]
+}
+
 /// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 enum action_type {
   JOINED
@@ -236,10 +237,10 @@ enum action_type {
 
 /// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 enum level_type {
-  REGULAR_CHAPTER_VOLUNTEER_LEVEL  @map("1 - REGULAR CHAPTER VOLUNTEER LEVEL")
-  CHAPTER_BOARD_LEVEL              @map("2 - CHAPTER BOARD LEVEL")
-  REGULAR_NATIONAL_VOLUNTEER_LEVEL @map("3 - REGULAR NATIONAL VOLUNTEER LEVEL")
-  NATIONAL_BOARD_LEVEL             @map("4 - NATIONAL BOARD LEVEL")
+  REGULAR_CHAPTER_VOLUNTEER_LEVEL    @map("1 - REGULAR CHAPTER VOLUNTEER LEVEL")
+  CHAPTER_BOARD_LEVEL                @map("2 - CHAPTER BOARD LEVEL")
+  REGULAR_OPERATIONS_VOLUNTEER_LEVEL @map("3 - REGULAR OPERATIONS VOLUNTEER LEVEL")
+  OPERATIONS_BOARD_LEVEL             @map("4 - OPERATIONS BOARD LEVEL")
 }
 
 /// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -257,6 +258,15 @@ enum volunteer_status {
 /// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 enum volunteer_type {
   CHAPTER
-  NATIONALS
+  OPERATIONS
   BOTH
+}
+
+/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+enum project_type {
+  DESIGN_ONLY        @map("DESIGN-ONLY")
+  DEVELOP_ONLY       @map("DEVELOP-ONLY")
+  DESIGN_AND_DEVELOP @map("DESIGN AND DEVELOP")
+  CONSULT
+  MAINTAIN
 }
