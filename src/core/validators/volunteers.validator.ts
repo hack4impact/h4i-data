@@ -7,7 +7,7 @@ export const createVolunteerSchema = z.object({
   graduation_date: z.iso.datetime(),
   volunteer_status: z.enum(['STUDENT', 'PROFESSIONAL']),
   h4i_email: z.email('Must be a valid H4I email address').optional(),
-  volunteer_type: z.enum(['CHAPTER', 'BOTH', 'NATIONALS']),
+  volunteer_type: z.enum(['CHAPTER', 'BOTH', 'OPERATIONS']),
   university_id: z.uuid(),
   chapter_id: z.uuid().optional(),
   company_id: z.uuid().optional(),

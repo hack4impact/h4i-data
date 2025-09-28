@@ -6,7 +6,7 @@ export const volunteerSchemaString = `
   }
 
   enum VolunteerType {
-    NATIONALS
+    OPERATIONS
     CHAPTER
     BOTH
   }
