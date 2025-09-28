@@ -112,7 +112,7 @@ The database includes the following main entities:
 - **companies** - Companies associated with volunteers, sponsors, & nonprofits
 - **contacts** - Contact information
 - **locations** - Geographic locations
-- **national_branches** - H4I Branches of the National Board
+- **operations_branches** - H4I Branches of the Operations Board
 - **nonprofits** - Partner nonprofit organizations
 - **roles** - All existing roles within the organization
 - **projects** - Development projects for nonprofits
