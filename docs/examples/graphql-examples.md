@@ -22,7 +22,7 @@ This guide demonstrates how to create GraphQL endpoints using Test-Driven Develo
 
 ## Example: Adding a New GraphQL Endpoint
 
-Let's walk through adding a `volunteer` entity using TDD.
+Let's walk through adding a `volunteer` entity using TDD!
 
 ### Step 1: Write the Failing Integration Test (RED)
 
