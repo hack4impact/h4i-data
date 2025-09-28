@@ -4,7 +4,7 @@ import { createGraphqlApp } from './api/graphql/server';
 import { env } from './config/server';
 import { connectDB, disconnectDB } from './config/database'; // Import disconnectDB
 
-const startServer = async () => {
+async function startServer() {
   await connectDB();
 
   const app = express();
@@ -26,7 +26,7 @@ const startServer = async () => {
   });
 
   // --- Graceful shutdown logic ---
-  const shutdown = async (signal: string) => {
+  async function shutdown(signal: string) {
     console.log(`\nReceived ${signal}, shutting down gracefully...`);
 
     // 1. Stop the server from accepting new connections
@@ -39,11 +39,11 @@ const startServer = async () => {
       // 3. Exit the process
       process.exit(0);
     });
-  };
+  }
 
   // Listen for termination signals
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT', () => shutdown('SIGINT'));
-};
+}
 
 startServer();

@@ -14,8 +14,8 @@ This guide demonstrates how to create GraphQL endpoints using Test-Driven Develo
 
 ### 2. Test Pyramid in This Project
 
-- **Unit Tests**: `tests/unit/services/` - Test business logic in isolation
 - **Integration Tests**: `tests/integration/graphql/` - Test GraphQL endpoints end-to-end
+- **Unit Tests**: `tests/unit/services/` - Test business logic in isolation
 - **Validation**: Zod schemas ensure type safety at runtime
 
 ---

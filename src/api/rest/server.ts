@@ -13,7 +13,7 @@ import {
 } from '../../middleware';
 import { logger } from '../../config/logger';
 
-export const createRestApp = () => {
+export function createRestApp() {
   const app = express();
 
   // Security middleware (apply first)
@@ -45,9 +45,9 @@ export const createRestApp = () => {
   app.use(errorHandler);
 
   return app;
-};
+}
 
-const startServer = async () => {
+async function startServer() {
   await connectDB();
   const app = createRestApp();
 
@@ -58,7 +58,7 @@ const startServer = async () => {
       environment: env.NODE_ENV,
     });
   });
-};
+}
 
 if (process.env.NODE_ENV !== 'test') {
   startServer();

@@ -12,7 +12,7 @@ import { z } from 'zod';
 type CreateChapterInput = z.infer<typeof createChapterSchema>;
 type UpdateChapterInput = z.infer<typeof updateChapterSchema>;
 
-export const getAllChapters = async () => {
+export async function getAllChapters() {
   try {
     logger.info('Fetching all chapters');
     const chapters = await prisma.chapters.findMany({
@@ -30,9 +30,9 @@ export const getAllChapters = async () => {
     });
     throw new DatabaseError('Failed to retrieve chapters');
   }
-};
+}
 
-export const getChapterById = async (id: string) => {
+export async function getChapterById(id: string) {
   try {
     logger.info('Fetching chapter by ID', { chapterId: id });
 
@@ -62,9 +62,9 @@ export const getChapterById = async (id: string) => {
     });
     throw new DatabaseError('Failed to retrieve chapter');
   }
-};
+}
 
-export const createChapter = async (data: CreateChapterInput) => {
+export async function createChapter(data: CreateChapterInput) {
   try {
     logger.info('Creating new chapter', {
       chapterName: data.name,
@@ -86,9 +86,9 @@ export const createChapter = async (data: CreateChapterInput) => {
     });
     throw new DatabaseError('Failed to create chapter');
   }
-};
+}
 
-export const updateChapter = async (id: string, data: UpdateChapterInput) => {
+export async function updateChapter(id: string, data: UpdateChapterInput) {
   try {
     logger.info('Updating chapter', {
       chapterId: id,
@@ -123,9 +123,9 @@ export const updateChapter = async (id: string, data: UpdateChapterInput) => {
 
     throw new DatabaseError('Failed to update chapter');
   }
-};
+}
 
-export const deleteChapter = async (id: string) => {
+export async function deleteChapter(id: string) {
   try {
     logger.info('Deleting chapter', { chapterId: id });
 
@@ -155,4 +155,4 @@ export const deleteChapter = async (id: string) => {
 
     throw new DatabaseError('Failed to delete chapter');
   }
-};
+}

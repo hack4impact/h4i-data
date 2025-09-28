@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { env } from './server';
 
 // Build database URL with connection pool parameters
-const buildDatabaseUrl = () => {
+function buildDatabaseUrl() {
   const baseUrl = env.DATABASE_URL;
   const url = new URL(baseUrl);
 
@@ -11,7 +11,7 @@ const buildDatabaseUrl = () => {
   url.searchParams.set('pool_timeout', env.DB_POOL_TIMEOUT.toString());
 
   return url.toString();
-};
+}
 
 // Create Prisma client with connection pooling and enhanced configuration
 export const prisma = new PrismaClient({
@@ -46,7 +46,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Connection pool health check
-export const checkDatabaseHealth = async () => {
+export async function checkDatabaseHealth() {
   try {
     const startTime = Date.now();
     await prisma.$queryRaw`SELECT 1`;
@@ -64,10 +64,10 @@ export const checkDatabaseHealth = async () => {
       timestamp: new Date().toISOString(),
     };
   }
-};
+}
 
 // Function to connect to the DB, used at startup
-export const connectDB = async () => {
+export async function connectDB() {
   try {
     await prisma.$connect();
 
@@ -90,14 +90,14 @@ export const connectDB = async () => {
     console.error('Failed to connect to the database', error);
     process.exit(1);
   }
-};
+}
 
 //  isconnect from the DB, used at shutdown
-export const disconnectDB = async () => {
+export async function disconnectDB() {
   try {
     await prisma.$disconnect();
     console.log('Database disconnected successfully');
   } catch (error) {
     console.error('Failed to disconnect from the database', error);
   }
-};
+}

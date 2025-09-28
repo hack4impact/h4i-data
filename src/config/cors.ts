@@ -2,7 +2,7 @@ import { CorsOptions } from 'cors';
 import { env } from './server';
 import { logger } from './logger';
 
-const getAllowedOrigins = (): string[] => {
+function getAllowedOrigins() {
   const origins: string[] = [];
 
   // Always allow localhost in development
@@ -47,7 +47,7 @@ const getAllowedOrigins = (): string[] => {
   });
 
   return origins;
-};
+}
 
 export const corsConfig: CorsOptions = {
   origin: (origin, callback) => {

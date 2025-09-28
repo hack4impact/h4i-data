@@ -6,6 +6,10 @@ const router = Router();
 
 // Mount the chapter routes under the /chapters path
 router.use('/chapters', featureRoutes.chapterRoutes);
+router.use('/projects', featureRoutes.projectRoutes);
+router.use('/volunteers', featureRoutes.volunteerRoutes);
+router.use('/companies', featureRoutes.companyRoutes);
+router.use('/sponsors', featureRoutes.sponsorRoutes);
 
 // Example of how you would add more routes in the future
 // mainRouter.use('/users', featureRoutes.userRoutes);
