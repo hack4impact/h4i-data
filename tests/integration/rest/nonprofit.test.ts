@@ -29,6 +29,16 @@ describe('REST API - /nonprofits', () => {
     expect(response.body.name).toBe('REST Integration Test Nonprofit');
   });
 
+  it('should return validation error (400) if required fields are missing', async () => {
+    const response = await request(server).post('/nonprofits').send({
+      // missing name & mission
+      founded_date: '2025-08-30T12:00:00.000Z',
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty('message'); // assuming error handler sends { message }
+  });
+
   it('should create and fetch a nonprofit by its ID via GET', async () => {
     const createResponse = await request(server).post('/nonprofits').send({
       name: 'Test Nonprofit for Fetch',
@@ -44,6 +54,16 @@ describe('REST API - /nonprofits', () => {
     expect(response.status).toBe(200);
     expect(response.body.nonprofit_id).toBe(nonprofitId);
     expect(response.body.name).toBe('Test Nonprofit for Fetch');
+  });
+
+  it('should fetch all nonprofits via GET /nonprofits', async () => {
+    const response = await request(server).get('/nonprofits');
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    if (response.body.length > 0) {
+      expect(response.body[0]).toHaveProperty('nonprofit_id');
+    }
   });
 
   it('should update an existing nonprofit via PATCH', async () => {
@@ -64,6 +84,14 @@ describe('REST API - /nonprofits', () => {
 
     expect(updateResponse.status).toBe(200);
     expect(updateResponse.body.mission).toBe('Updated mission statement');
+  });
+
+  it('should return 404 when updating a non-existent nonprofit', async () => {
+    const response = await request(server)
+      .patch('/nonprofits/00000000-0000-0000-0000-000000000000')
+      .send({ mission: 'Won’t work' });
+
+    expect(response.status).toBe(404);
   });
 
   it('should delete an existing nonprofit via DELETE', async () => {
@@ -88,7 +116,14 @@ describe('REST API - /nonprofits', () => {
     expect(fetchResponse.status).toBe(404);
   });
 
-  it('should return 404 for a non-existent nonprofit ID', async () => {
+  it('should return 404 when deleting a non-existent nonprofit', async () => {
+    const response = await request(server).delete(
+      '/nonprofits/00000000-0000-0000-0000-000000000000'
+    );
+    expect(response.status).toBe(404);
+  });
+
+  it('should return 404 for a non-existent nonprofit ID via GET', async () => {
     const response = await request(server).get(
       '/nonprofits/00000000-0000-0000-0000-000000000000'
     );
