@@ -63,5 +63,4 @@ export const volunteerSchemaString = `
     updateVolunteer(id: ID!, input: UpdateVolunteerInput!): Volunteer!
     deleteVolunteer(id: ID!): Volunteer
   }
-
 `;

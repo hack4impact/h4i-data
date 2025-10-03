@@ -11,22 +11,71 @@ The GraphQL API provides a flexible way to query and mutate volunteer management
 
 ## Schema Structure
 
-### Chapter Entity
+### Volunteer Entity
 
 ```graphql
-type Chapter {
-  chapter_id: ID!
-  name: String!
-  location_id: String
-  founded_date: String!
-  status_type: StatusType!
+type Volunteer {
+  volunteer_id: ID!
+  first_name: String!
+  last_name: String!
+  email: String!
+  graduation_date: String!
+  university_id: ID!
+  volunteer_status: StatusType!
+  h4i_email: String
+  chapter_id: ID
+  company_id: ID
+  volunteer_type: VolunteerType!
   created_at: String!
   updated_at: String!
 }
 
 enum StatusType {
-  ACTIVE
-  INACTIVE
+  STUDENT
+  PROFESSIONAL
+}
+
+enum VolunteerType {
+  OPERATIONS
+  CHAPTER
+  BOTH
+}
+
+type Query {
+  volunteers: [Volunteer!]!
+  volunteer(id: ID!): Volunteer
+}
+
+input CreateVolunteerInput {
+  first_name: String
+  last_name: String
+  email: String
+  graduation_date: String
+  university_id: ID
+  volunteer_status: StatusType
+  volunteer_type: VolunteerType
+  h4i_email: String
+  chapter_id: ID
+  company_id: ID
+}
+
+input UpdateVolunteerInput {
+  first_name: String
+  last_name: String
+  email: String
+  graduation_date: String
+  university_id: ID
+  volunteer_status: StatusType
+  volunteer_type: VolunteerType
+  h4i_email: String
+  chapter_id: ID
+  company_id: ID
+}
+
+type Mutation {
+  createVolunteer(input: CreateVolunteerInput!): Volunteer!
+  updateVolunteer(id: ID!, input: UpdateVolunteerInput!): Volunteer!
+  deleteVolunteer(id: ID!): Volunteer
 }
 ```
 
@@ -34,34 +83,30 @@ enum StatusType {
 
 ## Queries
 
-### Get All Chapters
+### Get All Volunteers
 
 ```graphql
 query {
-  chapters {
-    chapter_id
-    name
-    founded_date
-    status_type
-    location_id
-    created_at
-    updated_at
+  volunteers {
+    volunteer_id
+    first_name
+    last_name
+    email
+    volunteer_status
   }
 }
 ```
 
-### Get Single Chapter
+### Get Single Volunteer with Variables
 
 ```graphql
-query GetChapter($id: ID!) {
-  chapter(id: $id) {
-    chapter_id
-    name
-    founded_date
-    status_type
-    location_id
-    created_at
-    updated_at
+query GetVolunteer($id: ID!) {
+  volunteer(id: $id) {
+    volunteer_id
+    first_name
+    last_name
+    email
+    volunteer_status
   }
 }
 ```
@@ -70,7 +115,7 @@ query GetChapter($id: ID!) {
 
 ```json
 {
-  "id": "your-chapter-id-here"
+  "id": "your-volunteer-id-here"
 }
 ```
 
@@ -78,18 +123,18 @@ query GetChapter($id: ID!) {
 
 ## Mutations
 
-### Create Chapter
-
+### Create a Volunteer
 ```graphql
-mutation CreateChapter($input: CreateChapterInput!) {
-  createChapter(input: $input) {
-    chapter_id
-    name
-    founded_date
-    status_type
-    location_id
-    created_at
-    updated_at
+mutation CreateVolunteer($input: CreateVolunteerInput!) {
+  createVolunteer(input: $input) {
+    volunteer_id
+    first_name
+    last_name
+    email
+    graduation_date
+    university_id
+    volunteer_status
+    volunteer_type
   }
 }
 ```
@@ -97,38 +142,48 @@ mutation CreateChapter($input: CreateChapterInput!) {
 **Input Type**:
 
 ```graphql
-input CreateChapterInput {
-  name: String! # Required: Chapter name (min 3 chars)
-  founded_date: String! # Required: ISO 8601 datetime string
-  status_type: StatusType # Optional: Defaults to ACTIVE
-  location_id: String # Optional: UUID reference to location
+input CreateVolunteerInput {
+  first_name: String
+  last_name: String
+  email: String
+  graduation_date: String
+  university_id: ID
+  volunteer_status: StatusType
+  volunteer_type: VolunteerType
+  h4i_email: String
+  chapter_id: ID
+  company_id: ID
 }
 ```
 
 **Variables Example**:
 
-```json
+```typescript
 {
-  "input": {
-    "name": "San Francisco Chapter",
-    "founded_date": "2024-01-15T00:00:00.000Z",
-    "status_type": "ACTIVE",
-    "location_id": "550e8400-e29b-41d4-a716-446655440000"
-  }
+  input: {
+    first_name: 'John',
+    last_name: 'Doe',
+    email:
+      'john.doe' +
+      Date.now() +
+      Math.floor(Math.random() * 1000) +
+      '@example.com',
+    graduation_date: new Date('2026-06-18').toISOString(),
+    volunteer_status: 'STUDENT',
+    volunteer_type: 'BOTH',
+    university_id: '07608837-420f-4697-bda2-701506079a9d', // Test UUID from Supabase
+  },
 }
 ```
 
-### Update Chapter
+### Update Volunteer (updating only first and last name)
 
 ```graphql
-mutation UpdateChapter($id: ID!, $input: UpdateChapterInput!) {
-  updateChapter(id: $id, input: $input) {
-    chapter_id
-    name
-    founded_date
-    status_type
-    location_id
-    updated_at
+mutation UpdateVolunteer($id: ID!, $input: UpdateVolunteerInput!) {
+  updateVolunteer(id: $id, input: $input) {
+    volunteer_id
+    first_name
+    last_name
   }
 }
 ```
@@ -136,21 +191,26 @@ mutation UpdateChapter($id: ID!, $input: UpdateChapterInput!) {
 **Input Type**:
 
 ```graphql
-input UpdateChapterInput {
-  name: String # Optional: Chapter name
-  founded_date: String # Optional: ISO 8601 datetime string
-  status_type: StatusType # Optional: ACTIVE or INACTIVE
-  location_id: String # Optional: UUID reference to location
+input UpdateVolunteerInput {
+  first_name: String
+  last_name: String
+  email: String
+  graduation_date: String
+  university_id: ID
+  volunteer_status: StatusType
+  volunteer_type: VolunteerType
+  h4i_email: String
+  chapter_id: ID
+  company_id: ID
 }
 ```
 
-### Delete Chapter
+### Delete a Volunteer
 
 ```graphql
-mutation DeleteChapter($id: ID!) {
-  deleteChapter(id: $id) {
-    chapter_id
-    name
+mutation DeleteVolunteer($id: ID!) {
+  deleteVolunteer(id: $id) {
+    volunteer_id
   }
 }
 ```
@@ -161,19 +221,16 @@ mutation DeleteChapter($id: ID!) {
 
 GraphQL errors are returned in the standard GraphQL error format:
 
-```json
+```graphql
 {
-  "errors": [
+  errors: [
     {
-      "message": "Chapter not found",
-      "extensions": {
-        "code": "NOT_FOUND"
-      }
+      message: 'Database error: Failed to retrieve volunteer',
+      locations: [Array],
+      path: [Array]
     }
   ],
-  "data": {
-    "chapter": null
-  }
+  data: { volunteer: null }
 }
 ```
 
@@ -187,12 +244,18 @@ GraphQL errors are returned in the standard GraphQL error format:
 
 ## Validation Rules
 
-### Chapter Validation
+### Volunteer Validation
 
-- `name`: Minimum 3 characters, required for creation
-- `founded_date`: Must be valid ISO 8601 datetime string
-- `status_type`: Must be either `ACTIVE` or `INACTIVE`
-- `location_id`: Must be valid UUID format if provided
+- `first_name`: Minimum 2 characters, required for creation
+- `last_name`: Minimum 2 characters, required for creation
+- `email`: Must be a valid email address
+- `graduation_date`: Must be valid ISO 8601 datetime string
+- `volunteer_status`: Must be either `STUDENT` or `PROFESSIONAL`
+- `h4i_email`: Optional field of a valid H4I email address
+- `volunteer_type`: Must be either `CHAPTER` or `BOTH` or `OPERATIONS`
+- `university_id`: Must be valid UUID format if provided
+- `chapter_id`: Must be valid UUID format if provided
+- `company_id`: Must be valid UUID format if provided
 
 ---
 
@@ -207,9 +270,9 @@ Visit `http://localhost:3000/api/graphql` in your browser for an interactive que
 - Real-time error validation
 - Query history
 
-### Introspection Query
+### Top Level Introspection Query
 
-Get the full schema:
+Get the top level schema:
 
 ```graphql
 query IntrospectionQuery {

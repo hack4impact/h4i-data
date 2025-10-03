@@ -63,7 +63,7 @@ describe('POST /volunteers', () => {
 });
 ```
 
-### Step 1: Run tests (they will fail) (RED)
+### Step 2: Run tests (they will fail) (RED)
 
 ```bash
 npm run test:integration
@@ -95,7 +95,7 @@ export const updateVolunteerSchema = createVolunteerSchema.partial();
 **File**: `src/core/validators/index.ts`
 
 ```typescript
-export * from './volunteers.validator';
+export * from './volunteers.validator'; // Add this
 ```
 
 ### Step 4: Create Service Layer (GREEN)
@@ -132,7 +132,7 @@ export const createVolunteer = async (data: CreateVolunteerInput) => {
 **File**: `src/core/services/index.ts`
 
 ```typescript
-export * from './volunteer.service';
+export * from './volunteer.service'; // Add this
 ```
 
 ### Step 5: Create Controller (GREEN)
@@ -159,7 +159,7 @@ export const volunteerController = {
 **File**: `src/api/rest/controllers/index.ts`
 
 ```typescript
-export * from './volunteers.controller';
+export * from './volunteers.controller'; // Add this
 ```
 
 ### Step 6: Create Routes (GREEN)
@@ -184,7 +184,7 @@ export const volunteerRoutes = router;
 **File**: `src/api/rest/routes/index.ts`
 
 ```typescript
-export * from './volunteers.route';
+export * from './volunteers.route'; // Add this
 ```
 
 ### Step 7: Add Wire Routes into Main Server (GREEN)
