@@ -23,19 +23,19 @@ All responses follow a consistent JSON format:
 
 ```json
 {
-    "volunteer_id": "08ca0169-5c9c-4e1b-9557-b5bb1b294bfe",
-    "first_name": "Alice",
-    "last_name": "Johnson",
-    "email": "alice@example.com",
-    "graduation_date": "2026-06-18T00:00:00.000Z",
-    "university_id": "07608837-420f-4697-bda2-701506079a9d",
-    "volunteer_status": "STUDENT",
-    "H4I_email": null,
-    "chapter_id": null,
-    "volunteer_type": "CHAPTER",
-    "created_at": "2025-10-03T04:52:44.887Z",
-    "updated_at": "2025-10-03T04:52:44.887Z",
-    "company_id": null
+  "volunteer_id": "08ca0169-5c9c-4e1b-9557-b5bb1b294bfe",
+  "first_name": "Alice",
+  "last_name": "Johnson",
+  "email": "alice@example.com",
+  "graduation_date": "2026-06-18T00:00:00.000Z",
+  "university_id": "07608837-420f-4697-bda2-701506079a9d",
+  "volunteer_status": "STUDENT",
+  "H4I_email": null,
+  "chapter_id": null,
+  "volunteer_type": "CHAPTER",
+  "created_at": "2025-10-03T04:52:44.887Z",
+  "updated_at": "2025-10-03T04:52:44.887Z",
+  "company_id": null
 }
 ```
 
@@ -67,35 +67,35 @@ All responses follow a consistent JSON format:
 ```json
 [
   {
-      "volunteer_id": "08ca0169-5c9c-4e1b-9557-b5bb1b294bfe",
-      "first_name": "Alice",
-      "last_name": "Johnson",
-      "email": "alice@example.com",
-      "graduation_date": "2026-06-18T00:00:00.000Z",
-      "university_id": "07608837-420f-4697-bda2-701506079a9d",
-      "volunteer_status": "STUDENT",
-      "H4I_email": null,
-      "chapter_id": null,
-      "volunteer_type": "CHAPTER",
-      "created_at": "2025-10-03T04:52:44.887Z",
-      "updated_at": "2025-10-03T04:52:44.887Z",
-      "company_id": null
+    "volunteer_id": "08ca0169-5c9c-4e1b-9557-b5bb1b294bfe",
+    "first_name": "Alice",
+    "last_name": "Johnson",
+    "email": "alice@example.com",
+    "graduation_date": "2026-06-18T00:00:00.000Z",
+    "university_id": "07608837-420f-4697-bda2-701506079a9d",
+    "volunteer_status": "STUDENT",
+    "H4I_email": null,
+    "chapter_id": null,
+    "volunteer_type": "CHAPTER",
+    "created_at": "2025-10-03T04:52:44.887Z",
+    "updated_at": "2025-10-03T04:52:44.887Z",
+    "company_id": null
   },
   {
-      "volunteer_id": "0a35549d-c9c6-42fe-9723-6f80cd0fa572",
-      "first_name": "New Updated John",
-      "last_name": "New Updated Smith",
-      "email": "john.doe175945307185846@example.com",
-      "graduation_date": "2026-06-18T00:00:00.000Z",
-      "university_id": "07608837-420f-4697-bda2-701506079a9d",
-      "volunteer_status": "STUDENT",
-      "H4I_email": null,
-      "chapter_id": null,
-      "volunteer_type": "BOTH",
-      "created_at": "2025-10-03T00:57:51.863Z",
-      "updated_at": "2025-10-03T00:57:51.863Z",
-      "company_id": null
-  },
+    "volunteer_id": "0a35549d-c9c6-42fe-9723-6f80cd0fa572",
+    "first_name": "New Updated John",
+    "last_name": "New Updated Smith",
+    "email": "john.doe175945307185846@example.com",
+    "graduation_date": "2026-06-18T00:00:00.000Z",
+    "university_id": "07608837-420f-4697-bda2-701506079a9d",
+    "volunteer_status": "STUDENT",
+    "H4I_email": null,
+    "chapter_id": null,
+    "volunteer_type": "BOTH",
+    "created_at": "2025-10-03T00:57:51.863Z",
+    "updated_at": "2025-10-03T00:57:51.863Z",
+    "company_id": null
+  }
 ]
 ```
 
@@ -119,19 +119,19 @@ All responses follow a consistent JSON format:
 
 ```json
 {
-    "volunteer_id": "661bb298-b237-4925-8d16-aa6673063cf0",
-    "first_name": "John",
-    "last_name": "Doe",
-    "email": "john.doe1759003071414392@example.com",
-    "graduation_date": "2026-06-18T00:00:00.000Z",
-    "university_id": "07608837-420f-4697-bda2-701506079a9d",
-    "volunteer_status": "STUDENT",
-    "H4I_email": null,
-    "chapter_id": null,
-    "volunteer_type": "BOTH",
-    "created_at": "2025-09-27T19:57:51.418Z",
-    "updated_at": "2025-09-27T19:57:51.418Z",
-    "company_id": null
+  "volunteer_id": "661bb298-b237-4925-8d16-aa6673063cf0",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john.doe1759003071414392@example.com",
+  "graduation_date": "2026-06-18T00:00:00.000Z",
+  "university_id": "07608837-420f-4697-bda2-701506079a9d",
+  "volunteer_status": "STUDENT",
+  "H4I_email": null,
+  "chapter_id": null,
+  "volunteer_type": "BOTH",
+  "created_at": "2025-09-27T19:57:51.418Z",
+  "updated_at": "2025-09-27T19:57:51.418Z",
+  "company_id": null
 }
 ```
 
@@ -182,19 +182,19 @@ All responses follow a consistent JSON format:
 
 ```json
 {
-    "volunteer_id": "08ca0169-5c9c-4e1b-9557-b5bb1b294bfe",
-    "first_name": "Alice",
-    "last_name": "Johnson",
-    "email": "alice@example.com",
-    "graduation_date": "2026-06-18T00:00:00.000Z",
-    "university_id": "07608837-420f-4697-bda2-701506079a9d",
-    "volunteer_status": "STUDENT",
-    "H4I_email": null,
-    "chapter_id": null,
-    "volunteer_type": "CHAPTER",
-    "created_at": "2025-10-03T04:52:44.887Z",
-    "updated_at": "2025-10-03T04:52:44.887Z",
-    "company_id": null
+  "volunteer_id": "08ca0169-5c9c-4e1b-9557-b5bb1b294bfe",
+  "first_name": "Alice",
+  "last_name": "Johnson",
+  "email": "alice@example.com",
+  "graduation_date": "2026-06-18T00:00:00.000Z",
+  "university_id": "07608837-420f-4697-bda2-701506079a9d",
+  "volunteer_status": "STUDENT",
+  "H4I_email": null,
+  "chapter_id": null,
+  "volunteer_type": "CHAPTER",
+  "created_at": "2025-10-03T04:52:44.887Z",
+  "updated_at": "2025-10-03T04:52:44.887Z",
+  "company_id": null
 }
 ```
 
@@ -222,26 +222,25 @@ All responses follow a consistent JSON format:
   "first_name": "Newly Updated First Name",
   "last_name": "Newly Updated Last Name"
 }
-
 ```
 
 **Response**: `200 OK`
 
 ```json
 {
-    "volunteer_id": "661bb298-b237-4925-8d16-aa6673063cf0",
-    "first_name": "Newly Updated First Name",
-    "last_name": "Newly Updated Last Name",
-    "email": "john.doe1759003071414392@example.com",
-    "graduation_date": "2026-06-18T00:00:00.000Z",
-    "university_id": "07608837-420f-4697-bda2-701506079a9d",
-    "volunteer_status": "STUDENT",
-    "H4I_email": null,
-    "chapter_id": null,
-    "volunteer_type": "BOTH",
-    "created_at": "2025-09-27T19:57:51.418Z",
-    "updated_at": "2025-09-27T19:57:51.418Z",
-    "company_id": null
+  "volunteer_id": "661bb298-b237-4925-8d16-aa6673063cf0",
+  "first_name": "Newly Updated First Name",
+  "last_name": "Newly Updated Last Name",
+  "email": "john.doe1759003071414392@example.com",
+  "graduation_date": "2026-06-18T00:00:00.000Z",
+  "university_id": "07608837-420f-4697-bda2-701506079a9d",
+  "volunteer_status": "STUDENT",
+  "H4I_email": null,
+  "chapter_id": null,
+  "volunteer_type": "BOTH",
+  "created_at": "2025-09-27T19:57:51.418Z",
+  "updated_at": "2025-09-27T19:57:51.418Z",
+  "company_id": null
 }
 ```
 

@@ -5,3 +5,4 @@ export * from './companies.validator';
 export * from './sponsors.validator';
 export * from './nonprofits.validator';
 export * from './contacts.validator';
+export * from './roles.validator';
