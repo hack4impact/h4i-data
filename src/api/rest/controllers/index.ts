@@ -4,3 +4,4 @@ export * from './volunteers.controller';
 export * from './companies.controller';
 export * from './nonprofits.controller';
 export * from './sponsors.controller';
+export * from './contacts.controllers';
