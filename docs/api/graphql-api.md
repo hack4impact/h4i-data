@@ -124,6 +124,7 @@ query GetVolunteer($id: ID!) {
 ## Mutations
 
 ### Create a Volunteer
+
 ```graphql
 mutation CreateVolunteer($input: CreateVolunteerInput!) {
   createVolunteer(input: $input) {

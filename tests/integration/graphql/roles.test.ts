@@ -105,7 +105,9 @@ describe('GraphQL API - Roles', () => {
     const role = response.body.data.role;
     expect(role.role_id).toBe(roleId);
     expect(role.name).toMatch(/^Editor-/);
-    expect(role.permissions).toEqual(expect.objectContaining({ edit_content: true }));
+    expect(role.permissions).toEqual(
+      expect.objectContaining({ edit_content: true })
+    );
   });
 
   it('should fetch all roles', async () => {
@@ -147,7 +149,9 @@ describe('GraphQL API - Roles', () => {
     expect(response.body.data.role).toBeNull();
     expect(response.body.errors).toBeDefined();
     // Depending on your resolver error mapping, this may be "Role not found" or a wrapped DB error:
-    expect(response.body.errors[0].message).toMatch(/Role not found|Failed to retrieve role/);
+    expect(response.body.errors[0].message).toMatch(
+      /Role not found|Failed to retrieve role/
+    );
   });
 
   it('should update a role', async () => {
@@ -253,6 +257,9 @@ describe('GraphQL API - Roles', () => {
     // Assertions
     expect(deleteResponse.status).toBe(200);
     expect(deleteResponse.body.errors).toBeUndefined();
-    expect(deleteResponse.body.data.deleteRole).toHaveProperty('role_id', roleId);
+    expect(deleteResponse.body.data.deleteRole).toHaveProperty(
+      'role_id',
+      roleId
+    );
   });
 });
