@@ -3,6 +3,7 @@ import express from 'express';
 import { Server } from 'http';
 import { createGraphqlApp } from '../../../src/api/graphql/server';
 import { env } from '../../../src/config/server';
+import { level_type } from '@prisma/client';
 
 let server: Server;
 let app: express.Application;
@@ -35,7 +36,7 @@ describe('GraphQL API - Roles', () => {
         name: `Admin-${Date.now()}`,
         description: 'Full access to management actions',
         permissions: { manage_users: true, manage_events: true },
-        // level_type: ADMIN_LEVEL, // include if your SDL defines the enum
+        level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
       },
     };
 
@@ -72,6 +73,7 @@ describe('GraphQL API - Roles', () => {
         name: `Editor-${Date.now()}`,
         description: 'Can edit content',
         permissions: { edit_content: true },
+        level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
       },
     };
 
@@ -171,6 +173,7 @@ describe('GraphQL API - Roles', () => {
         name: `Contributor-${Date.now()}`,
         description: 'Limited content permissions',
         permissions: { create_posts: true },
+        level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
       },
     };
 
@@ -199,6 +202,7 @@ describe('GraphQL API - Roles', () => {
         name: 'Updated Contributor',
         description: 'Updated description',
         permissions: { create_posts: true, comment: true },
+        level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
       },
     };
 
@@ -230,6 +234,7 @@ describe('GraphQL API - Roles', () => {
         name: `Temp-${Date.now()}`,
         description: 'To be deleted',
         permissions: { temp: true },
+        level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
       },
     };
     const createResponse = await request(server)

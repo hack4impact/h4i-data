@@ -11,6 +11,7 @@ router.use('/volunteers', featureRoutes.volunteerRoutes);
 router.use('/companies', featureRoutes.companyRoutes);
 router.use('/sponsors', featureRoutes.sponsorRoutes);
 router.use('/contacts', featureRoutes.contactRoutes);
+router.use('/roles', featureRoutes.roleRoutes);
 
 // Example of how you would add more routes in the future
 // mainRouter.use('/users', featureRoutes.userRoutes);
