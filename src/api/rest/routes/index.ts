@@ -5,3 +5,4 @@ export * from './companies.routes';
 export * from './nonprofits.routes';
 export * from './sponsors.routes';
 export * from './contacts.routes';
+export * from './roles.routes';
