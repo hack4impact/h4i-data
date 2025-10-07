@@ -6,7 +6,7 @@ import {
   deleteRole,
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
-import { level_type as LevelType } from '@prisma/client';
+import { level_type } from '@prisma/client';
 
 // Mock the entire prisma module
 jest.mock('../../../src/config/database', () => ({
@@ -34,7 +34,7 @@ describe('Role Service', () => {
           name: 'Admin',
           description: 'Full access',
           permissions: { manage_users: true, manage_events: true },
-          level_type: LevelType.REGULAR_CHAPTER_VOLUNTEER_LEVEL,
+          level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
         },
       ];
 
@@ -55,7 +55,7 @@ describe('Role Service', () => {
         name: 'Editor',
         description: 'Can edit content',
         permissions: { edit_content: true },
-        level_type: LevelType.REGULAR_CHAPTER_VOLUNTEER_LEVEL,
+        level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
       };
 
       (prisma.roles.findUnique as jest.Mock).mockResolvedValue(mockRole);
@@ -84,7 +84,7 @@ describe('Role Service', () => {
         name: 'Contributor',
         description: 'Limited content permissions',
         permissions: { create_posts: true },
-        level_type: LevelType.REGULAR_CHAPTER_VOLUNTEER_LEVEL,
+        level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
       };
 
       const createdRole = {
@@ -113,7 +113,7 @@ describe('Role Service', () => {
         name: 'Admin',
         description: 'Updated description',
         permissions: { manage_users: true, manage_events: true },
-        level_type: LevelType.REGULAR_CHAPTER_VOLUNTEER_LEVEL,
+        level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
       };
 
       (prisma.roles.update as jest.Mock).mockResolvedValue(updatedRole);
@@ -136,7 +136,7 @@ describe('Role Service', () => {
         name: 'Obsolete',
         description: 'To be deleted',
         permissions: {},
-        level_type: LevelType.REGULAR_CHAPTER_VOLUNTEER_LEVEL,
+        level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
       };
 
       (prisma.roles.delete as jest.Mock).mockResolvedValue(deletedRole);
