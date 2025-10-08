@@ -50,7 +50,10 @@ export const nonprofitController = {
       updateData: validatedData,
     });
 
-    const updatedNonprofit = await updateNonprofit(req.params.id, validatedData);
+    const updatedNonprofit = await updateNonprofit(
+      req.params.id,
+      validatedData
+    );
     res.json(updatedNonprofit);
   }),
 

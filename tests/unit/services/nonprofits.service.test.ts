@@ -39,7 +39,9 @@ describe('Nonprofit Service', () => {
           updated_at: new Date(),
         },
       ];
-      (prisma.nonprofits.findMany as jest.Mock).mockResolvedValue(mockNonprofits);
+      (prisma.nonprofits.findMany as jest.Mock).mockResolvedValue(
+        mockNonprofits
+      );
 
       const result = await getAllNonprofits();
 
@@ -64,7 +66,9 @@ describe('Nonprofit Service', () => {
         created_at: new Date(),
         updated_at: new Date(),
       };
-      (prisma.nonprofits.findUnique as jest.Mock).mockResolvedValue(mockNonprofit);
+      (prisma.nonprofits.findUnique as jest.Mock).mockResolvedValue(
+        mockNonprofit
+      );
 
       const result = await getNonprofitById(nonprofitId);
 
@@ -101,12 +105,14 @@ describe('Nonprofit Service', () => {
         updated_at: new Date(),
       };
 
-      (prisma.nonprofits.create as jest.Mock).mockResolvedValue(createdNonprofit);
+      (prisma.nonprofits.create as jest.Mock).mockResolvedValue(
+        createdNonprofit
+      );
 
       const result = await createNonprofit(inputData);
 
       expect(result).toEqual(createdNonprofit);
-      
+
       expect(prisma.nonprofits.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           name: inputData.name,
@@ -135,7 +141,9 @@ describe('Nonprofit Service', () => {
         updated_at: new Date(),
       };
 
-      (prisma.nonprofits.update as jest.Mock).mockResolvedValue(updatedNonprofit);
+      (prisma.nonprofits.update as jest.Mock).mockResolvedValue(
+        updatedNonprofit
+      );
 
       const result = await updateNonprofit(nonprofitId, updateData);
 
@@ -161,7 +169,9 @@ describe('Nonprofit Service', () => {
         updated_at: new Date(),
       };
 
-      (prisma.nonprofits.delete as jest.Mock).mockResolvedValue(deletedNonprofit);
+      (prisma.nonprofits.delete as jest.Mock).mockResolvedValue(
+        deletedNonprofit
+      );
 
       const result = await deleteNonprofit(nonprofitId);
 

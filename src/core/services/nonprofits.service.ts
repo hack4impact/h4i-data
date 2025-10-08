@@ -2,7 +2,10 @@
 import { prisma } from '../../config/database';
 import { createNonprofitSchema, updateNonprofitSchema } from '../validators';
 import { logger } from '../../config/logger';
-import { NotFoundError, DatabaseError } from '../../middleware/error.middleware';
+import {
+  NotFoundError,
+  DatabaseError,
+} from '../../middleware/error.middleware';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 
@@ -73,10 +76,10 @@ export async function createNonprofit(input: CreateNonprofitInput) {
 
     const data: Prisma.nonprofitsUncheckedCreateInput = {
       name,
-      mission,        // required string
-      contact_id,     // required string
-      ...(website === undefined ? {} : { website }),           // include if not undefined (can be null)
-      ...(location_id === undefined ? {} : { location_id }),   // include if not undefined (can be null)
+      mission, // required string
+      contact_id, // required string
+      ...(website === undefined ? {} : { website }), // include if not undefined (can be null)
+      ...(location_id === undefined ? {} : { location_id }), // include if not undefined (can be null)
     };
 
     const nonprofit = await prisma.nonprofits.create({ data });
@@ -109,8 +112,8 @@ export async function updateNonprofit(id: string, input: UpdateNonprofitInput) {
       ...(name === undefined ? {} : { name }),
       ...(mission === undefined ? {} : { mission }),
       ...(contact_id === undefined ? {} : { contact_id }),
-      ...(website === undefined ? {} : { website }),           // null clears it
-      ...(location_id === undefined ? {} : { location_id }),   // null clears it
+      ...(website === undefined ? {} : { website }), // null clears it
+      ...(location_id === undefined ? {} : { location_id }), // null clears it
     };
 
     const nonprofit = await prisma.nonprofits.update({
@@ -131,7 +134,10 @@ export async function updateNonprofit(id: string, input: UpdateNonprofitInput) {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
 
-    if (error instanceof Error && error.message.includes('Record to update not found')) {
+    if (
+      error instanceof Error &&
+      error.message.includes('Record to update not found')
+    ) {
       throw new NotFoundError('Nonprofit', id);
     }
 

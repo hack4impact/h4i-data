@@ -34,7 +34,7 @@ describe('GraphQL API - Nonprofits', () => {
       input: {
         name: 'GraphQL Integration Test Nonprofit',
         mission: 'This is a test mission for nonprofit',
-        website: 'https://example.org',              // must be a valid URL
+        website: 'https://example.org', // must be a valid URL
         // location_id is optional; include only if you want
         // location_id: '0d0f34a1-3f6f-4f7f-8a9e-0e1a2b3c4d5e',
         contact_id: 'e9ded8b8-53e3-4747-aafa-d662458c2a65',
@@ -69,7 +69,7 @@ describe('GraphQL API - Nonprofits', () => {
       input: {
         name: 'Test Nonprofit for Query',
         mission: 'This is a test query mission for nonprofit',
-        website: 'https://example.com',              // valid URL
+        website: 'https://example.com', // valid URL
         // location_id: '0d0f34a1-3f6f-4f7f-8a9e-0e1a2b3c4d5e',
         contact_id: 'e9ded8b8-53e3-4747-aafa-d662458c2a65',
       },
