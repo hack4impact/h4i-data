@@ -4,6 +4,7 @@ import { volunteerSchemaString } from './schemas/volunteers.schema';
 import { contactSchemaString } from './schemas/contacts.schema';
 import { roleSchemaString } from './schemas/roles.schema';
 import { projectSchemaString } from './schemas/projects.schema';
+import { nonprofitSchemaString } from './schemas/nonprofits.schema';
 
 // Combine all schema strings into a single array
 export const typeDefs = [
@@ -13,4 +14,5 @@ export const typeDefs = [
   contactSchemaString,
   roleSchemaString,
   projectSchemaString,
+  nonprofitSchemaString,
 ];
