@@ -37,6 +37,7 @@ describe('Project Service', () => {
           description: 'A test project',
           repo: 'A test repo link',
           budget: 20,
+          project_type: 'DESIGN_ONLY' as const,
           created_at: new Date(),
           updated_at: new Date(),
         },
@@ -63,6 +64,7 @@ describe('Project Service', () => {
         description: 'A test project',
         repo: 'A test repo link',
         budget: 20,
+        project_type: 'DESIGN_ONLY' as const,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -98,6 +100,7 @@ describe('Project Service', () => {
         description: 'A test project',
         repo: 'A test repo link',
         budget: 20,
+        project_type: 'DESIGN_ONLY' as const,
       };
       // The data returned from prisma.create will have a Date object
       const createdProject = {
@@ -106,6 +109,7 @@ describe('Project Service', () => {
         description: 'A test project',
         repo: 'A test repo link',
         budget: 20,
+        project_type: 'DESIGN_ONLY' as const,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -131,6 +135,7 @@ describe('Project Service', () => {
         description: 'A test project',
         repo: 'A test repo link',
         budget: 20,
+        project_type: 'DESIGN_ONLY' as const,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -158,6 +163,7 @@ describe('Project Service', () => {
         description: 'A test project',
         repo: 'A test repo link',
         budget: 20,
+        project_type: 'DESIGN_ONLY' as const,
         created_at: new Date(),
         updated_at: new Date(),
       };

@@ -26,6 +26,7 @@ describe('REST API - /projects', () => {
     const response = await request(server).post('/projects').send({
       name: 'REST Integration Test Project',
       repo: 'REPO URL',
+      project_type: 'DESIGN_ONLY',
     });
 
     // Assertions
@@ -40,6 +41,7 @@ describe('REST API - /projects', () => {
     const createResponse = await request(server).post('/projects').send({
       name: 'REST Integration Test Project',
       repo: 'REPO URL',
+      project_type: 'DESIGN_ONLY',
     });
 
     expect(createResponse.status).toBe(201);

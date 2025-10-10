@@ -6,7 +6,7 @@ export const volunteerSchemaString = `
   }
 
   enum VolunteerType {
-    NATIONALS
+    OPERATIONS
     CHAPTER
     BOTH
   }
@@ -63,5 +63,4 @@ export const volunteerSchemaString = `
     updateVolunteer(id: ID!, input: UpdateVolunteerInput!): Volunteer!
     deleteVolunteer(id: ID!): Volunteer
   }
-
 `;

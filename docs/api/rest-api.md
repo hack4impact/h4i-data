@@ -4,7 +4,8 @@
 
 The REST API follows RESTful conventions and provides endpoints for managing volunteer data. All endpoints return JSON responses and use standard HTTP status codes.
 
-**Base URL**: `http://localhost:3000/api/rest`
+**Base URL**: `http://localhost:3002/api/rest` for npm run dev:rest
+**Base URL**: `http://localhost:3001/api/rest` for npm run dev
 
 ---
 
@@ -22,13 +23,19 @@ All responses follow a consistent JSON format:
 
 ```json
 {
-  "chapter_id": "uuid",
-  "name": "Chapter Name",
-  "founded_date": "2024-01-15T00:00:00.000Z",
-  "status_type": "ACTIVE",
-  "location_id": "uuid",
-  "created_at": "2024-01-15T10:30:00.000Z",
-  "updated_at": "2024-01-15T10:30:00.000Z"
+  "volunteer_id": "08ca0169-5c9c-4e1b-9557-b5bb1b294bfe",
+  "first_name": "Alice",
+  "last_name": "Johnson",
+  "email": "alice@example.com",
+  "graduation_date": "2026-06-18T00:00:00.000Z",
+  "university_id": "07608837-420f-4697-bda2-701506079a9d",
+  "volunteer_status": "STUDENT",
+  "H4I_email": null,
+  "chapter_id": null,
+  "volunteer_type": "CHAPTER",
+  "created_at": "2025-10-03T04:52:44.887Z",
+  "updated_at": "2025-10-03T04:52:44.887Z",
+  "company_id": null
 }
 ```
 
@@ -37,32 +44,57 @@ All responses follow a consistent JSON format:
 ```json
 {
   "error": "Error message",
-  "details": "Additional error information (optional)"
+  "statusCode": 400,
+  "timestamp": "Current Timestamp",
+  "requestId": "Request ID",
+  "details": "Error information",
+  "stack": "Additional error information"
 }
 ```
 
 ---
 
-## Chapters Endpoints
+## Volunteers Endpoints
 
-### Get All Chapters
+### Get All Volunteers
 
-**GET** `/chapters`
+**GET** `/volunteers`
 
-**Description**: Retrieve all chapters from the database.
+**Description**: Retrieve all volunteers from the database.
 
 **Response**: `200 OK`
 
 ```json
 [
   {
-    "chapter_id": "550e8400-e29b-41d4-a716-446655440000",
-    "name": "San Francisco Chapter",
-    "founded_date": "2024-01-15T00:00:00.000Z",
-    "status_type": "ACTIVE",
-    "location_id": "660e8400-e29b-41d4-a716-446655440001",
-    "created_at": "2024-01-15T10:30:00.000Z",
-    "updated_at": "2024-01-15T10:30:00.000Z"
+    "volunteer_id": "08ca0169-5c9c-4e1b-9557-b5bb1b294bfe",
+    "first_name": "Alice",
+    "last_name": "Johnson",
+    "email": "alice@example.com",
+    "graduation_date": "2026-06-18T00:00:00.000Z",
+    "university_id": "07608837-420f-4697-bda2-701506079a9d",
+    "volunteer_status": "STUDENT",
+    "H4I_email": null,
+    "chapter_id": null,
+    "volunteer_type": "CHAPTER",
+    "created_at": "2025-10-03T04:52:44.887Z",
+    "updated_at": "2025-10-03T04:52:44.887Z",
+    "company_id": null
+  },
+  {
+    "volunteer_id": "0a35549d-c9c6-42fe-9723-6f80cd0fa572",
+    "first_name": "New Updated John",
+    "last_name": "New Updated Smith",
+    "email": "john.doe175945307185846@example.com",
+    "graduation_date": "2026-06-18T00:00:00.000Z",
+    "university_id": "07608837-420f-4697-bda2-701506079a9d",
+    "volunteer_status": "STUDENT",
+    "H4I_email": null,
+    "chapter_id": null,
+    "volunteer_type": "BOTH",
+    "created_at": "2025-10-03T00:57:51.863Z",
+    "updated_at": "2025-10-03T00:57:51.863Z",
+    "company_id": null
   }
 ]
 ```
@@ -73,75 +105,96 @@ All responses follow a consistent JSON format:
 
 ---
 
-### Get Chapter by ID
+### Get a Volunteer by ID
 
-**GET** `/chapters/:id`
+**GET** `/volunteers/:id`
 
-**Description**: Retrieve a specific chapter by its ID.
+**Description**: Retrieve a specific volunteer by its ID.
 
 **Parameters**:
 
-- `id` (path): Chapter UUID
+- `id` (path): Volunteer UUID
 
 **Response**: `200 OK`
 
 ```json
 {
-  "chapter_id": "550e8400-e29b-41d4-a716-446655440000",
-  "name": "San Francisco Chapter",
-  "founded_date": "2024-01-15T00:00:00.000Z",
-  "status_type": "ACTIVE",
-  "location_id": "660e8400-e29b-41d4-a716-446655440001",
-  "created_at": "2024-01-15T10:30:00.000Z",
-  "updated_at": "2024-01-15T10:30:00.000Z"
+  "volunteer_id": "661bb298-b237-4925-8d16-aa6673063cf0",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john.doe1759003071414392@example.com",
+  "graduation_date": "2026-06-18T00:00:00.000Z",
+  "university_id": "07608837-420f-4697-bda2-701506079a9d",
+  "volunteer_status": "STUDENT",
+  "H4I_email": null,
+  "chapter_id": null,
+  "volunteer_type": "BOTH",
+  "created_at": "2025-09-27T19:57:51.418Z",
+  "updated_at": "2025-09-27T19:57:51.418Z",
+  "company_id": null
 }
 ```
 
 **Error Responses**:
 
-- `404 Not Found`: Chapter doesn't exist
+- `404 Not Found`: Volunteer doesn't exist
 - `500 Internal Server Error`: Server error
 
 ---
 
-### Create Chapter
+### Create a Volunteer
 
-**POST** `/chapters`
+**POST** `/volunteers`
 
-**Description**: Create a new chapter.
+**Description**: Create a new volunteer.
 
 **Request Body**:
 
 ```json
 {
-  "name": "New Chapter Name",
-  "founded_date": "2024-01-15T00:00:00.000Z",
-  "status_type": "ACTIVE",
-  "location_id": "660e8400-e29b-41d4-a716-446655440001"
+  "first_name": "Alice",
+  "last_name": "Johnson",
+  "email": "alice@example.com",
+  "graduation_date": "2026-06-18T00:00:00.000Z",
+  "volunteer_status": "STUDENT",
+  "volunteer_type": "CHAPTER",
+  "university_id": "07608837-420f-4697-bda2-701506079a9d"
 }
 ```
 
 **Required Fields**:
 
-- `name`: String (minimum 3 characters)
-- `founded_date`: ISO 8601 datetime string
+- `first_name`: String (minimum 2 characters)
+- `last_name`: String (minimum 2 characters)
+- `email`: Valid email
+- `graduation_date`: ISO 8601 datetime string
+- `volunteer_status`: "STUDENT" or "PROFESSIONAL"
+- `volunteer_type`: "CHAPTER" or "BOTH" or "OPERATIONS"
+- `university_id`: UUID string
 
 **Optional Fields**:
 
-- `status_type`: "ACTIVE" | "INACTIVE" (defaults to "ACTIVE")
-- `location_id`: UUID string
+- `h4i_email`: Valid email
+- `chapter_id`: UUID string
+- `company_id`: UUID string
 
 **Response**: `201 Created`
 
 ```json
 {
-  "chapter_id": "550e8400-e29b-41d4-a716-446655440000",
-  "name": "New Chapter Name",
-  "founded_date": "2024-01-15T00:00:00.000Z",
-  "status_type": "ACTIVE",
-  "location_id": "660e8400-e29b-41d4-a716-446655440001",
-  "created_at": "2024-01-15T10:30:00.000Z",
-  "updated_at": "2024-01-15T10:30:00.000Z"
+  "volunteer_id": "08ca0169-5c9c-4e1b-9557-b5bb1b294bfe",
+  "first_name": "Alice",
+  "last_name": "Johnson",
+  "email": "alice@example.com",
+  "graduation_date": "2026-06-18T00:00:00.000Z",
+  "university_id": "07608837-420f-4697-bda2-701506079a9d",
+  "volunteer_status": "STUDENT",
+  "H4I_email": null,
+  "chapter_id": null,
+  "volunteer_type": "CHAPTER",
+  "created_at": "2025-10-03T04:52:44.887Z",
+  "updated_at": "2025-10-03T04:52:44.887Z",
+  "company_id": null
 }
 ```
 
@@ -152,24 +205,22 @@ All responses follow a consistent JSON format:
 
 ---
 
-### Update Chapter
+### Update Volunteer
 
-**PATCH** `/chapters/:id`
+**PATCH** `/volunteers/:id`
 
-**Description**: Update an existing chapter. Only provided fields will be updated.
+**Description**: Update an existing volunteer. Only provided fields will be updated.
 
 **Parameters**:
 
-- `id` (path): Chapter UUID
+- `id` (path): Volunteer UUID
 
 **Request Body** (all fields optional):
 
 ```json
 {
-  "name": "Updated Chapter Name",
-  "founded_date": "2024-02-15T00:00:00.000Z",
-  "status_type": "INACTIVE",
-  "location_id": "770e8400-e29b-41d4-a716-446655440002"
+  "first_name": "Newly Updated First Name",
+  "last_name": "Newly Updated Last Name"
 }
 ```
 
@@ -177,39 +228,45 @@ All responses follow a consistent JSON format:
 
 ```json
 {
-  "chapter_id": "550e8400-e29b-41d4-a716-446655440000",
-  "name": "Updated Chapter Name",
-  "founded_date": "2024-02-15T00:00:00.000Z",
-  "status_type": "INACTIVE",
-  "location_id": "770e8400-e29b-41d4-a716-446655440002",
-  "created_at": "2024-01-15T10:30:00.000Z",
-  "updated_at": "2024-03-15T11:45:00.000Z"
+  "volunteer_id": "661bb298-b237-4925-8d16-aa6673063cf0",
+  "first_name": "Newly Updated First Name",
+  "last_name": "Newly Updated Last Name",
+  "email": "john.doe1759003071414392@example.com",
+  "graduation_date": "2026-06-18T00:00:00.000Z",
+  "university_id": "07608837-420f-4697-bda2-701506079a9d",
+  "volunteer_status": "STUDENT",
+  "H4I_email": null,
+  "chapter_id": null,
+  "volunteer_type": "BOTH",
+  "created_at": "2025-09-27T19:57:51.418Z",
+  "updated_at": "2025-09-27T19:57:51.418Z",
+  "company_id": null
 }
 ```
 
 **Error Responses**:
 
 - `400 Bad Request`: Validation error
-- `404 Not Found`: Chapter doesn't exist
+- `404 Not Found`: Volunteer doesn't exist
 - `500 Internal Server Error`: Server error
 
 ---
 
-### Delete Chapter
+### Delete Volunteer
 
-**DELETE** `/chapters/:id`
+**DELETE** `/volunteers/:id`
 
-**Description**: Delete a chapter by ID.
+**Description**: Delete a volunteer by ID.
 
 **Parameters**:
 
-- `id` (path): Chapter UUID
+- `id` (path): Volunteer UUID
 
 **Response**: `204 No Content`
 
 **Error Responses**:
 
-- `404 Not Found`: Chapter doesn't exist
+- `404 Not Found`: Volunteer doesn't exist
 - `500 Internal Server Error`: Server error
 
 ---
@@ -229,60 +286,83 @@ All responses follow a consistent JSON format:
 
 ## Request/Response Examples
 
-### cURL Examples
+### cURL Examples (npm run dev)
 
-**Get all chapters**:
+**Get all volunteers**:
 
 ```bash
-curl -X GET http://localhost:3000/api/rest/chapters
+curl -X GET http://localhost:3001/api/rest/volunteers
 ```
 
-**Create a chapter**:
+**Create a volunteer**:
 
 ```bash
-curl -X POST http://localhost:3000/api/rest/chapters \
+curl -X POST http://localhost:3001/api/rest/volunteers \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Austin Chapter",
-    "founded_date": "2024-03-15T00:00:00.000Z",
-    "status_type": "ACTIVE"
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john.doe1759003071414392@example.com",
+    "graduation_date": "2026-06-18T00:00:00.000Z",
+    "university_id": "07608837-420f-4697-bda2-701506079a9d",
+    "volunteer_status": "STUDENT",
+    "volunteer_type": "BOTH"
   }'
 ```
 
-**Update a chapter**:
+**Update a volunteers**:
 
 ```bash
-curl -X PATCH http://localhost:3000/api/rest/chapters/550e8400-e29b-41d4-a716-446655440000 \
+curl -X PATCH http://localhost:3001/api/rest/volunteers/f2c6386b-60b2-4c5b-a971-a56f5a79dd6a \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Austin Chapter - Updated"
+    "first_name": "Austin Volunteer - Updated"
   }'
 ```
 
-**Delete a chapter**:
+**Delete a volunteer**:
 
 ```bash
-curl -X DELETE http://localhost:3000/api/rest/chapters/550e8400-e29b-41d4-a716-446655440000
+curl -X DELETE http://localhost:3001/api/rest/volunteers/f2c6386b-60b2-4c5b-a971-a56f5a79dd6a
 ```
 
 ---
 
 ## Validation Rules
 
-### Chapter Validation
+### Volunteer Validation
 
-- **name**:
+- **first_name**:
   - Required for creation
-  - Minimum 3 characters
+  - Minimum 2 characters
   - String type
-- **founded_date**:
+- **last_name**:
+  - Required for creation
+  - Minimum 2 characters
+  - String type
+- **email**:
+  - Required for creation
+  - Valid unique email
+- **graduation_date**:
   - Required for creation
   - Must be valid ISO 8601 datetime format
   - Example: `"2024-01-15T00:00:00.000Z"`
-- **status_type**:
-  - Optional (defaults to "ACTIVE")
-  - Must be either "ACTIVE" or "INACTIVE"
-- **location_id**:
+- **volunteer_status**:
+  - Required (defaults to "STUDENT")
+  - Must be either "STUDENT" or "PROFESSIONAL"
+- **h4i_email**:
+  - Optional for creation
+  - Valid unique email
+- **volunteer_type**:
+  - Required (defaults to "CHAPTER")
+  - Must be either "CHAPTER" or "BOTH" or "OPERATIONS
+- **university_id**:
+  - Required for creation
+  - Must be valid UUID format
+- **chapter_id**:
+  - Optional
+  - Must be valid UUID format if provided
+- **company_id**:
   - Optional
   - Must be valid UUID format if provided
 
@@ -292,12 +372,16 @@ When validation fails, you'll receive a `400 Bad Request` with details:
 
 ```json
 {
-  "error": "Invalid data",
-  "details": {
-    "_errors": [],
-    "name": {
-      "_errors": ["String must contain at least 3 character(s)"]
+  "error": "Validation error",
+  "statusCode": 400,
+  "timestamp": "Current Timestamp",
+  "requestId": "Request ID",
+  "details": [
+    {
+      "field": "first_name",
+      "message": "Invalid input: expected string, received number"
     }
-  }
+  ],
+  "stack": "Additional error information"
 }
 ```
