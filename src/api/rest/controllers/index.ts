@@ -6,3 +6,4 @@ export * from './companies.controller';
 export * from './sponsors.controller';
 export * from './contacts.controllers';
 export * from './roles.controllers';
+export * from './nonprofits.controller';

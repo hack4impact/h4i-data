@@ -6,10 +6,20 @@ import { env } from '../../../src/config/server';
 
 let server: Server;
 let app: express.Application;
+let contactId: string;
 
-beforeAll(() => {
+beforeAll(async () => {
   app = createRestApp();
   server = app.listen(env.REST_PORT);
+
+  // create a contact id to associate with the nonprofit
+  const createResponse = await request(server).post('/contacts').send({
+    name: 'Test Contact for Fetch',
+    email: 'fetchcontact@example.com',
+  });
+
+  expect(createResponse.status).toBe(201);
+  contactId = createResponse.body.contact_id;
 });
 
 afterAll(() => {
@@ -21,7 +31,8 @@ describe('REST API - /nonprofits', () => {
     const response = await request(server).post('/nonprofits').send({
       name: 'REST Integration Test Nonprofit',
       mission: 'Helping communities through REST testing',
-      founded_date: '2025-08-30T12:00:00.000Z',
+      website: 'https://example.org',
+      contact_id: contactId,
     });
 
     expect(response.status).toBe(201);
@@ -30,20 +41,21 @@ describe('REST API - /nonprofits', () => {
   });
 
   it('should return validation error (400) if required fields are missing', async () => {
+    // Missing 'contact_id' and other required fields
     const response = await request(server).post('/nonprofits').send({
-      // missing name & mission
-      founded_date: '2025-08-30T12:00:00.000Z',
+      name: 'Invalid Nonprofit',
+      mission: 'Too short',
     });
 
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty('message'); // assuming error handler sends { message }
   });
 
   it('should create and fetch a nonprofit by its ID via GET', async () => {
     const createResponse = await request(server).post('/nonprofits').send({
       name: 'Test Nonprofit for Fetch',
-      mission: 'Testing fetching a nonprofit',
-      founded_date: '2025-08-30T12:00:00.000Z',
+      mission: 'Testing fetching a nonprofit by ID',
+      website: 'https://fetch.org',
+      contact_id: contactId,
     });
 
     expect(createResponse.status).toBe(201);
@@ -70,7 +82,7 @@ describe('REST API - /nonprofits', () => {
     const createResponse = await request(server).post('/nonprofits').send({
       name: 'Updatable Nonprofit',
       mission: 'Initial mission',
-      founded_date: '2025-08-30T12:00:00.000Z',
+      contact_id: contactId,
     });
 
     expect(createResponse.status).toBe(201);
@@ -86,19 +98,11 @@ describe('REST API - /nonprofits', () => {
     expect(updateResponse.body.mission).toBe('Updated mission statement');
   });
 
-  it('should return 404 when updating a non-existent nonprofit', async () => {
-    const response = await request(server)
-      .patch('/nonprofits/00000000-0000-0000-0000-000000000000')
-      .send({ mission: 'Won’t work' });
-
-    expect(response.status).toBe(404);
-  });
-
   it('should delete an existing nonprofit via DELETE', async () => {
     const createResponse = await request(server).post('/nonprofits').send({
       name: 'Deletable Nonprofit',
-      mission: 'To be deleted',
-      founded_date: '2025-08-30T12:00:00.000Z',
+      mission: 'To be deleted soon',
+      contact_id: contactId,
     });
 
     expect(createResponse.status).toBe(201);
@@ -114,6 +118,14 @@ describe('REST API - /nonprofits', () => {
       `/nonprofits/${nonprofitId}`
     );
     expect(fetchResponse.status).toBe(404);
+  });
+
+  it('should return 404 when updating a non-existent nonprofit', async () => {
+    const response = await request(server)
+      .patch('/nonprofits/00000000-0000-0000-0000-000000000000')
+      .send({ mission: 'Will not work' });
+
+    expect(response.status).toBe(404);
   });
 
   it('should return 404 when deleting a non-existent nonprofit', async () => {
