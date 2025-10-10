@@ -7,8 +7,8 @@ import {
   DatabaseError,
 } from '../../middleware/error.middleware';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
-// Define types based on Zod schemas for better type safety
 type CreateNonprofitInput = z.infer<typeof createNonprofitSchema>;
 type UpdateNonprofitInput = z.infer<typeof updateNonprofitSchema>;
 
@@ -47,7 +47,7 @@ export async function getNonprofitById(id: string) {
 
     logger.info('Successfully retrieved nonprofit', {
       nonprofitId: id,
-      name: nonprofit.name,
+      nonprofitName: nonprofit.name,
     });
 
     return nonprofit;
@@ -57,43 +57,64 @@ export async function getNonprofitById(id: string) {
     }
 
     logger.error('Failed to fetch nonprofit by ID', {
-      nonprofitId: id,
+      nonprofittId: id,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to retrieve nonprofit');
   }
 }
 
-export async function createNonprofit(data: CreateNonprofitInput) {
+export async function createNonprofit(input: CreateNonprofitInput) {
   try {
     logger.info('Creating new nonprofit', {
-      name: data.name,
-      data,
+      nonprofitName: input.name,
+      nonprofitData: input,
     });
+
+    // Destructure and include only defined optionals
+    const { name, mission, contact_id, website, location_id } = input;
+
+    const data: Prisma.nonprofitsUncheckedCreateInput = {
+      name,
+      mission, // required string
+      contact_id, // required string
+      ...(website === undefined ? {} : { website }), // include if not undefined (can be null)
+      ...(location_id === undefined ? {} : { location_id }), // include if not undefined (can be null)
+    };
 
     const nonprofit = await prisma.nonprofits.create({ data });
 
     logger.info('Successfully created nonprofit', {
       nonprofitId: nonprofit.nonprofit_id,
-      name: nonprofit.name,
+      nonprofitName: nonprofit.name,
     });
 
     return nonprofit;
   } catch (error) {
     logger.error('Failed to create nonprofit', {
-      nonprofitData: data,
+      nonprofitData: input,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create nonprofit');
   }
 }
 
-export async function updateNonprofit(id: string, data: UpdateNonprofitInput) {
+export async function updateNonprofit(id: string, input: UpdateNonprofitInput) {
   try {
     logger.info('Updating nonprofit', {
       nonprofitId: id,
-      updateData: data,
+      updateData: input,
     });
+
+    const { name, mission, contact_id, website, location_id } = input;
+
+    const data: Prisma.nonprofitsUncheckedUpdateInput = {
+      ...(name === undefined ? {} : { name }),
+      ...(mission === undefined ? {} : { mission }),
+      ...(contact_id === undefined ? {} : { contact_id }),
+      ...(website === undefined ? {} : { website }), // null clears it
+      ...(location_id === undefined ? {} : { location_id }), // null clears it
+    };
 
     const nonprofit = await prisma.nonprofits.update({
       where: { nonprofit_id: id },
@@ -102,18 +123,17 @@ export async function updateNonprofit(id: string, data: UpdateNonprofitInput) {
 
     logger.info('Successfully updated nonprofit', {
       nonprofitId: id,
-      name: nonprofit.name,
+      nonprofitName: nonprofit.name,
     });
 
     return nonprofit;
   } catch (error) {
     logger.error('Failed to update nonprofit', {
       nonprofitId: id,
-      updateData: data,
+      updateData: input,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
 
-    // Check if nonprofit doesnt exist
     if (
       error instanceof Error &&
       error.message.includes('Record to update not found')
@@ -135,7 +155,7 @@ export async function deleteNonprofit(id: string) {
 
     logger.info('Successfully deleted nonprofit', {
       nonprofitId: id,
-      name: nonprofit.name,
+      nonprofitName: nonprofit.name,
     });
 
     return nonprofit;
@@ -145,7 +165,7 @@ export async function deleteNonprofit(id: string) {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
 
-    // Check if nonprofit doesnt exist
+    // Check if nonprofit doesn't exist
     if (
       error instanceof Error &&
       error.message.includes('Record to delete does not exist')

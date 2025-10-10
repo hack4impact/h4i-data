@@ -16,5 +16,6 @@ router.use('/roles', featureRoutes.roleRoutes);
 
 // Example of how you would add more routes in the future
 // mainRouter.use('/users', featureRoutes.userRoutes);
+router.use('/locations', featureRoutes.locationRoutes);
 
 export default router;

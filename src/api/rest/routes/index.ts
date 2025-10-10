@@ -1,4 +1,5 @@
 export * from './chapters.routes';
+export * from './locations.routes';
 export * from './projects.routes';
 export * from './volunteers.routes';
 export * from './companies.routes';
