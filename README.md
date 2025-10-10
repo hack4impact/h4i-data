@@ -1,86 +1,161 @@
-# Backend Test Repository
+# Volunteer Management Backend!
 
-This is the backend repository for setting up the Prisma ORM, tests, and database.
-
----
-
-## Technology Used
-
-- **Language** - Typescript
-- **Express** — Javascript backend framework
-- **PostgreSQL** — Relational Database (Supabase is our hosting service)
-- **Prisma** - Object Relational Mapping (ORM) so we don't have to write raw SQL
-- **Jest** - Testing Framework
-- **Github Actions** - CI
+A comprehensive backend API for managing volunteers, chapters, nonprofits, projects, and sponsors with both REST and GraphQL endpoints.
 
 ---
 
-## Guidelines
+## Technology Stack
 
-- Do not edit schema.prisma - once we are in production, we will only edit from supabase and run "npx prisma db pull" and "npx prisma generate" to stay consistent (explanations provided above in Prisma section). This means we will not have any migration folders to keep track of our migrations!!
+- **Language** - TypeScript
+- **Framework** - Express.js
+- **Database** - PostgreSQL (hosted on Supabase)
+- **ORM** - Prisma
+- **API Types** - REST & GraphQL
+- **Testing** - Jest & Supertest
+- **Code Quality** - ESLint, Prettier, Husky
+- **CI/CD** - GitHub Actions
 
 ---
 
-## Setup and Run
+## Project Structure
+
+```markdown
+src/
+├── api/
+│ ├── rest/ # REST API endpoints
+│ └── graphql/ # GraphQL schema and resolvers
+├── core/
+│ ├── services/ # Business logic
+│ └── validators/ # Input validation
+├── config/ # Database and server configuration
+├── middleware/ # Logging, security, and errors
+└── app.ts # Main application entry point
+
+tests/
+├── unit/ # Unit tests
+└── integration/ # Integration tests
+
+prisma/
+├── schema.prisma # Database schema
+└── migrations/ # Database migrations
+```
+
+---
+
+## Quick Start
+
+### 1. Install Dependencies
 
 ```bash
-npm i
+npm install
 ```
 
----
+### 2. Environment Setup
 
-Then create a file in the main directory called ".env". For the .env info, ask Sophia for it! To view the databases in Supabase, Slack Sophia to get access!
+Create a `.env` file in the root directory and copy fields from `.env.example`:
 
----
+```env
+# Database Configuration
+DATABASE_URL=your_database_url_here
+DIRECT_URL=your_direct_url_here
 
-## Prisma
+# Server Configuration
+PORT=3000
+REST_PORT=3001
+GRAPHQL_PORT=3002
+```
+
+### 3. Database Setup
 
 ```bash
-npx prisma db pull
-npx prisma generate
+npx prisma db pull     # Sync schema with database
+npx prisma generate    # Generate Prisma client
 ```
 
-This is a test for branch protections.
-
-npx prisma db pull - This is to update models in schema.prisma according to the database in Supabase (so if you created a new table in supabase, then you can update schema.prisma by executing this command - test it out and see it for yourself! the tables would appear if you create one and run this command)
-
-npx prisma generate - This generates the Prisma Client code based on our schema.prisma. We need this to generate a new Prisma Client, which allows us to use the helpful Prisma Client CRUD functions such as findMany(), findFirst(), and more with our new tables!
-
----
-
-## Run main.ts
+### 4. Start Development Server
 
 ```bash
-npx ts-node main.ts
+# Start integrated server (both REST & GraphQL)
+npm run dev
+
+# Or start servers separately
+npm run dev:rest       # REST API only
+npm run dev:graphql    # GraphQL API only
+npm run dev:both       # Both servers concurrently
 ```
 
+The servers will be available at:
+
+- **Integrated**: <http://localhost:3001>
+- **REST API**: <http://localhost:3002>
+- **GraphQL API**: <http://localhost:3003>
+
 ---
 
-## Rules When Creating Branches
-
-1. Please make sure to name your branch with your name (ex. jane)
-
----
-
-## Run Tests (2 ways)
+## Testing
 
 ```bash
-npm test
-```
-
-OR
-
-```bash
-npx jest
+npm run test               # Run all tests (Unit &  Integration)
+npm run test:coverage      # Generate coverage report for Unit tests only
+npm run test:integration   # Integration tests only
+npm run test:unit          # Unit tests only
+npm run test:watch         # Watch mode for unit tests
 ```
 
 ---
 
-## Running GraphQL
+## Database Schema
 
-Example of what you can run:
+The database includes the following main entities:
 
-```
+- **chapters** - Local H4I chapters
+- **companies** - Companies associated with volunteers, sponsors, & nonprofits
+- **contacts** - Contact information
+- **locations** - Geographic locations
+- **operations_branches** - H4I Branches of the Operations Board
+- **nonprofits** - Partner nonprofit organizations
+- **roles** - All existing roles within the organization
+- **projects** - Development projects for nonprofits
+- **sponsors** - Corporate sponsors
+- **volunteers** - Student and professional volunteers
+
+The database includes the following main relationship tables:
+
+- **nonprofit_chapter_project**
+- **sponsor_chapter**
+- **volunteer_assignment**
+- **volunteer_history**
+- **volunteer_role_project**
+
+---
+
+## Development Guidelines
+
+### Database Management
+
+- **DO NOT** edit `schema.prisma` directly in production
+- Use Supabase Table Editor for schema changes in production
+- Always run `npx prisma db pull` and `npx prisma generate` after database changes
+- This ensures code stays synchronized with the database
+
+### Branch Naming Convention
+
+Follow the pattern: `feature/issue-number-description`
+
+- Example: `feature/1-add-volunteer-endpoints`
+- This automatically links branches to GitHub issues
+
+---
+
+## API Documentation
+
+### GraphQL API
+
+GraphQL endpoint available at `/api/graphql` with interactive playground.
+
+Example mutation:
+
+```graphql
 mutation {
   addVolunteer(
     volunteer: {
@@ -97,49 +172,54 @@ mutation {
 }
 ```
 
-This creates a volunteer in the Volunteer table. Other examples are listed in the docs/graphqlExamples.md
+More examples available in [`docs/examples/graphql-examples.md`](docs/examples/graphql-examples.md)
+
+### REST API
+
+REST endpoints available at `/api/rest` following RESTful conventions.
+
+See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md`](docs/api/graphql-api.md) for complete API documentation.
 
 ---
 
-## How To Add/Update GraphQL Endpoints
+## Architecture
 
-1. Define all data querying functions in the service.ts file - follow the patterns in how functions are written based on the current existing functions:
+### Adding New Endpoints
 
-- Async functions, because we are fetching data and don't know how long it'll take
-- Try and catch functions to catch any errors that may result in attempting to query data
-- You will notice the prisma.member.create or prisma.project.findFirst functions and more. The endings of the functions (create, findFirst, findMany, etc.) are the Prisma Client CRUD Operations (link below in Helpful Links), while "member", "project", "member_project" within those functions are taken from schema.prisma file located in the prisma folder; make sure you copy them properly because they are case sensitive!
+1. **Service Layer** (`src/core/services/`)
+   - Create business logic functions
+   - Use async/await pattern
+   - Implement proper error handling with try/catch
+   - Follow existing naming conventions
+   - Use function declarations and not arrow functions
 
-2. Make sure to export the function you write by writing "module.exports.[function name] = [function name]; with many examples listed below in the file - we need to do this in order to use the function in the main.ts file
-3. Now, let's look at main.ts - first thing to note is that a schema needs 2 crucial parts - typeDefs (we defined in graphqlModels) and resolvers (explanation below)
+2. **GraphQL** (`src/api/graphql/`)
+   - Add schema definitions in `schemas/`
+   - Implement resolvers in `resolvers/`
+   - Export from respective index files
+   - Update `graphql/resolvers.ts` and `graphql/schemas.ts` after schema and resolver implementations
 
-- In graphqlModels, this is where we define the actual GraphQL schema
-- "type Member" is us defining what a Member will hold, and same logic for Project - it tells GraphQL what our data LOOKS like (this is only necessary if we want to group our result or input in specific ways)
-- "type Query" tells GraphQL what kind of OPERATIONS users can execute, so in this case, getAllMembers: [Member] means executing the function getAllMembers() with no inputs would give us result of object Member but in an array because of the brackets around Member. Another example is the deleteMemberById function. We can see that memberId is an input of type ID that will enter the deleteMemberById function, and the output of that will be a String.
-- Now looking at resolvers! It defines how to respond to queries! So for every query in the schema, we write a corresponding resolver function. So getAllMembers (that we wrote in "type Query") will point to the getAllMembers() function from service.ts. The parenthesis () are empty because we have no inputs we need to insert into the actual function getAllMembers. So with deleteMemberById, we see we have (_: any, args: { memberId: number }). The resolver function accepts (parent, args, context, info) respectively. So in this case, only parent and args are read. We're not using the parent so that is why we use "_" to mark it as "unused". But for args, we need to use it since deleteMemberById must take in a number as input as stated in service.ts, so we wrap the arguments in curly brackets, define the type of argument which in this case is "number", and map it to the deleteMemberById(args.memberId) function from service.ts
+3. **REST** (`src/api/rest/`)
+   - Add controllers in `controllers/`
+   - Define routes in `routes/`
+   - Export from respective index files
+   - Apply validation using Zod validators from `core/validators`
+   - Add route in `rest/routes.ts`
 
----
+### Testing Best Practices
 
-## How to Make Changes to Supabase Tables
-
-1. Access the hack4impact project and navigate to Table Editor using the left sidebar
-2. You can use Insert button to create new rows of data, create new tables with "+ New Table" button, etc.
-3. After making changes, in your terminal, in order to update your code to match what the database has, run "npx prisma db pull" and "npx prisma generate" (explanations provided above in Prisma section)
-4. With this, your code is up to date with the database and you can safely query data!
-
----
-
-## How to Write Tests
-
-1. Examples with detailed comments in userResolvers.test.ts and db.test.ts (for the first test)
-2. When mocking functions, such as getMemberId in userResolvers.test.ts, make sure to mock the service BEFORE importing. The reason is due to Jest replacing the actual module with our mock and if we do it the other way around, then mocking won't be successful. After that, import any necessary functions
-3. Next, we have describe(). This groups up related tests that we will have and is useful for organization. If you only have one test or so, a describe() isn't necessary.
-4. Now we can start creating individual tests. it() and test() both do the same thing in Jest, and test() is just a more general function, while it() allows us to read everything in a sentence easily (ex. it("returns an id") vs test("returns an id")). Make sure the functions are async!
-5. Then write the test logic inside, normally creating a mock object that we will test to get or update, etc. and then comparing its result with our real result using the expect() method. More detailed documentation is listed below in the Helpful Links.
+- Mock services before importing in tests
+- Use `describe()` blocks for organizing related tests
+- Write async test functions
+- Follow AAA pattern: Arrange, Act, Assert
+- **Integration tests should be completely self-contained** - each test creates its own data and doesn't depend on other tests
+- Examples available in `tests/` directory
 
 ---
 
-## Helpful Links
+## Useful Resources
 
-1. Prisma Client CRUD Operations: <https://www.prisma.io/docs/orm/prisma-client/queries/crud>
-2. Jest Documentation: <https://jestjs.io/docs/getting-started>
-
+- [Prisma Client CRUD Operations](https://www.prisma.io/docs/orm/prisma-client/queries/crud)
+- [Jest Documentation](https://jestjs.io/docs/getting-started)
+- [GraphQL Best Practices](https://graphql.org/learn/best-practices/)
+- [Express.js Guide](https://expressjs.com/en/guide/routing.html)

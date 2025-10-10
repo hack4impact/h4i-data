@@ -1,14 +1,11 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-    preset: 'ts-jest',
-    testEnvironment: 'node',
-    moduleFileExtensions: ['ts', 'js', 'json', 'node'],
-    transform: {
-      '^.+\\.ts$': 'ts-jest',
-    },
-    moduleNameMapper: {
-      '^@/(.*)$': '<rootDir>/src/$1', // optional alias mapping if you use @/ paths
-    },
-    setupFilesAfterEnv: ["<rootDir>/prisma.ts"],
-  };
-  
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/*.test.ts'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  testTimeout: 15000,
+  maxWorkers: 4, // Force all tests to run sequentially to avoid port conflicts
+};

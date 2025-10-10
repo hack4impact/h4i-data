@@ -4,15 +4,14 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
-    branches:
-      - '*'
   workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment: testing
+    environment: test
 
     steps:
       - name: Checkout
@@ -35,7 +34,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
-        
+
       - name: Prisma migrate
         run: npx prisma migrate deploy
         env:
@@ -44,6 +43,12 @@ jobs:
 
       - name: Verify Prisma client
         run: ls -la node_modules/.prisma/client
+
+      - name: Run ESLint
+        run: npx eslint "src/**/*.ts" "tests/**/*.ts" --max-warnings=0
+
+      - name: Run Prettier
+        run: npx prettier --check "src/**/*.ts" "tests/**/*.ts"
 
       - name: Run tests
         run: npm run test
