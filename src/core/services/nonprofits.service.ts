@@ -128,6 +128,13 @@ export async function updateNonprofit(id: string, input: UpdateNonprofitInput) {
 
     return nonprofit;
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
+    ) {
+      throw new NotFoundError('Nonprofit', id); // maps to 404
+    }
+
     logger.error('Failed to update nonprofit', {
       nonprofitId: id,
       updateData: input,
@@ -160,6 +167,13 @@ export async function deleteNonprofit(id: string) {
 
     return nonprofit;
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
+    ) {
+      throw new NotFoundError('Nonprofit', id); // maps to 404
+    }
+
     logger.error('Failed to delete nonprofit', {
       nonprofitId: id,
       error: error instanceof Error ? error.message : 'Unknown error',
