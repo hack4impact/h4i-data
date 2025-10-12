@@ -1,12 +1,22 @@
 import request from 'supertest';
-import { app } from '../../../main';
-import { prisma } from '../../../prisma';
+import express from 'express';
+import { Server } from 'http';
+import { createGraphqlApp } from '../../../src/api/graphql/server';
+import { env } from '../../../src/config/server';
+
+let server: Server;
+let app: express.Application;
+
+beforeAll(() => {
+  app = createGraphqlApp();
+  server = app.listen(env.GRAPHQL_PORT);
+});
+
+afterAll(() => {
+  server.close();
+});
 
 describe('GraphQL Companies CRUD', () => {
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
-
   let createdId: string;
 
   it('creates a company', async () => {
@@ -19,7 +29,7 @@ describe('GraphQL Companies CRUD', () => {
       variables: { input: { name: 'Test Co', location_id: null } },
     };
 
-    const res = await request(app).post('/graphql').send(mutation);
+    const res = await request(server).post('/').send(mutation);
     expect(res.status).toBe(200);
     const company = res.body.data.createCompany;
     expect(company.name).toBe('Test Co');
@@ -35,7 +45,7 @@ describe('GraphQL Companies CRUD', () => {
       variables: { id: createdId },
     };
 
-    const res = await request(app).post('/graphql').send(query);
+    const res = await request(server).post('/').send(query);
     expect(res.status).toBe(200);
     expect(res.body.data.company.company_id).toBe(createdId);
   });
@@ -50,14 +60,14 @@ describe('GraphQL Companies CRUD', () => {
       variables: { id: createdId, input: { name: 'Test Co Updated' } },
     };
 
-    const res = await request(app).post('/graphql').send(mutation);
+    const res = await request(server).post('/').send(mutation);
     expect(res.status).toBe(200);
     expect(res.body.data.updateCompany.name).toBe('Test Co Updated');
   });
 
   it('lists companies', async () => {
     const query = { query: `query { companies { company_id name } }` };
-    const res = await request(app).post('/graphql').send(query);
+    const res = await request(server).post('/').send(query);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.data.companies)).toBe(true);
   });
@@ -69,12 +79,12 @@ describe('GraphQL Companies CRUD', () => {
       `,
       variables: { id: createdId },
     };
-    const res = await request(app).post('/graphql').send(mutation);
+    const res = await request(server).post('/').send(mutation);
     expect(res.status).toBe(200);
     expect(res.body.data.deleteCompany).toBe(true);
 
-    const verify = await request(app)
-      .post('/graphql')
+    const verify = await request(server)
+      .post('/')
       .send({
         query: `query($id: ID!) { company(company_id: $id) { company_id } }`,
         variables: { id: createdId },

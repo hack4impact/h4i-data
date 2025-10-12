@@ -2,9 +2,9 @@ import {
   createCompany,
   deleteCompany,
   getCompanyById,
-  listCompanies,
+  getAllCompanies,
   updateCompany,
-} from '../../../service';
+} from '../../../core/services/companies.service';
 
 export const companyResolvers = {
   Query: {
@@ -12,7 +12,7 @@ export const companyResolvers = {
       return getCompanyById(args.company_id);
     },
     companies: () => {
-      return listCompanies();
+      return getAllCompanies();
     },
   },
   Mutation: {
@@ -20,7 +20,11 @@ export const companyResolvers = {
       _: unknown,
       args: { input: { name: string; location_id?: string | null } }
     ) => {
-      return createCompany(args.input);
+      const input = {
+        name: args.input.name,
+        location_id: args.input.location_id || undefined,
+      };
+      return createCompany(input);
     },
     updateCompany: (
       _: unknown,
@@ -29,10 +33,15 @@ export const companyResolvers = {
         input: { name?: string | null; location_id?: string | null };
       }
     ) => {
-      return updateCompany(args.company_id, args.input);
+      const input = {
+        name: args.input.name || undefined,
+        location_id: args.input.location_id || undefined,
+      };
+      return updateCompany(args.company_id, input);
     },
-    deleteCompany: (_: unknown, args: { company_id: string }) => {
-      return deleteCompany(args.company_id);
+    deleteCompany: async (_: unknown, args: { company_id: string }) => {
+      await deleteCompany(args.company_id);
+      return true;
     },
   },
 };

@@ -1,4 +1,4 @@
-export const companyTypeDefs = `
+export const companySchemaString = `
   type Company {
     company_id: ID!
     name: String!
