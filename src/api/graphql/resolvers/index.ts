@@ -3,3 +3,6 @@ export * from './sponsors.resolvers';
 export * from './volunteers.resolvers';
 export * from './contacts.resolvers';
 export * from './roles.resolvers';
+export * from './projects.resolvers';
+export * from './nonprofits.resolvers';
+export * from './companies.resolvers';
