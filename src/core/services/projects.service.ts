@@ -1,4 +1,3 @@
-// src/core/services/project.service.ts
 import { prisma } from '../../config/database';
 import { createProjectSchema, updateProjectSchema } from '../validators';
 import { logger } from '../../config/logger';

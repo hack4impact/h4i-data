@@ -8,10 +8,14 @@ import {
   createLocationSchema,
   updateLocationSchema,
 } from '../../../core';
-import z from 'zod';
+import { asyncHandler } from '../../../middleware';
+
+interface RequestWithId extends Request {
+  requestId?: string;
+}
 
 export const locationController = {
-  getAllLocations: async (_req: Request, res: Response) => {
+  getAllLocations: asyncHandler(async (_req: RequestWithId, res: Response) => {
     try {
       const locations = await getAllLocations();
       res.json(locations);
@@ -21,9 +25,9 @@ export const locationController = {
         details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
-  },
+  }),
 
-  getLocationById: async (req: Request, res: Response) => {
+  getLocationById: asyncHandler(async (req: RequestWithId, res: Response) => {
     try {
       const location = await getLocationById(req.params.id);
       if (location) {
@@ -37,30 +41,15 @@ export const locationController = {
         details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
-  },
+  }),
 
-  createLocation: async (req: Request, res: Response) => {
-    try {
-      const validatedData = createLocationSchema.parse(req.body);
-      const newLocation = await createLocation(validatedData);
-      res.status(201).json(newLocation);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          error: 'Invalid data',
-          details: error.message,
-        });
-      }
-      if (error instanceof Error) {
-        return res.status(500).json({
-          error: 'Failed to create location',
-          details: error.message,
-        });
-      }
-    }
-  },
+  createLocation: asyncHandler(async (req: RequestWithId, res: Response) => {
+    const validatedData = createLocationSchema.parse(req.body);
+    const newLocation = await createLocation(validatedData);
+    res.status(201).json(newLocation);
+  }),
 
-  updateLocation: async (req: Request, res: Response) => {
+  updateLocation: asyncHandler(async (req: RequestWithId, res: Response) => {
     try {
       const validatedData = updateLocationSchema.parse(req.body);
       const updatedLocation = await updateLocation(
@@ -86,9 +75,9 @@ export const locationController = {
         });
       }
     }
-  },
+  }),
 
-  deleteLocation: async (req: Request, res: Response) => {
+  deleteLocation: asyncHandler(async (req: RequestWithId, res: Response) => {
     try {
       await deleteLocation(req.params.id);
       res.status(204).send();
@@ -102,5 +91,5 @@ export const locationController = {
         });
       }
     }
-  },
+  }),
 };
