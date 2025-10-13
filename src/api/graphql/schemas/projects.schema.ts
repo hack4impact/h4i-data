@@ -3,7 +3,7 @@ export const projectSchemaString = `
     project_id: ID!
     name: String!
     description: String
-    budget: Int
+    budget: Float
     repo: String
     created_at: String!
     updated_at: String!
@@ -18,7 +18,7 @@ export const projectSchemaString = `
   input CreateProjectInput {
     name: String!
     description: String
-    budget: Int
+    budget: Float
     repo: String
     project_type: String
   }
@@ -26,7 +26,7 @@ export const projectSchemaString = `
   input UpdateProjectInput {
     name: String!
     description: String
-    budget: Int
+    budget: Float
     repo: String
     project_type: String
   }
