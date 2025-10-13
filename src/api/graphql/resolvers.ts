@@ -5,7 +5,7 @@ import { contactResolvers } from './resolvers/contacts.resolvers';
 import { roleResolvers } from './resolvers/roles.resolvers';
 import { projectResolvers } from './resolvers/projects.resolvers';
 import { nonprofitResolvers } from './resolvers/nonprofits.resolvers';
-import { companyResolvers } from './resolvers/company.resolvers';
+import { companyResolvers } from './resolvers/companies.resolvers';
 
 // Merge multiple resolver objects here
 export const resolvers = {
