@@ -14,42 +14,62 @@ import { z } from 'zod';
 type CreateProjectInput = z.infer<typeof createProjectSchema>;
 type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 
+// Helper to convert Prisma Decimal fields to numbers
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function serializeProject(project: any) {
+  return {
+    ...project,
+    budget:
+      project.budget && typeof project.budget.toNumber === 'function'
+        ? project.budget.toNumber()
+        : project.budget,
+  };
+}
+
 export const projectResolvers = {
   Query: {
-    projects: () => getAllProjects(),
-    project: async (_parent: unknown, { id }: { id: string }) => {
-      const project = await getProjectById(id);
+    projects: async () => {
+      const projects = await getAllProjects();
+      return projects.map(serializeProject);
+    },
+    project: async (_parent: unknown, args: { id: string }) => {
+      const project = await getProjectById(args.id);
       if (!project) {
         throw new GraphQLError(
           'Project not found',
-          undefined, // nodes
-          undefined, // source
-          undefined, // positions
-          undefined, // path
-          undefined, // originalError
-          { code: 'NOT_FOUND' } // extensions
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          {
+            code: 'NOT_FOUND',
+          }
         );
       }
-      return project;
+      return serializeProject(project);
     },
   },
   Mutation: {
-    createProject: (
+    createProject: async (
       _parent: unknown,
-      { input }: { input: CreateProjectInput }
+      args: { input: CreateProjectInput }
     ) => {
-      const validatedInput = createProjectSchema.parse(input);
-      return createProject(validatedInput);
+      const validatedInput = createProjectSchema.parse(args.input);
+      const project = await createProject(validatedInput);
+      return serializeProject(project);
     },
-    updateProject: (
+    updateProject: async (
       _parent: unknown,
-      { id, input }: { id: string; input: UpdateProjectInput }
+      args: { id: string; input: UpdateProjectInput }
     ) => {
-      const validatedInput = updateProjectSchema.parse(input);
-      return updateProject(id, validatedInput);
+      const validatedInput = updateProjectSchema.parse(args.input);
+      const project = await updateProject(args.id, validatedInput);
+      return serializeProject(project);
     },
-    deleteProject: (_parent: unknown, { id }: { id: string }) => {
-      return deleteProject(id);
+    deleteProject: async (_parent: unknown, args: { id: string }) => {
+      const project = await deleteProject(args.id);
+      return serializeProject(project);
     },
   },
 };
