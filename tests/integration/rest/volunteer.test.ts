@@ -7,11 +7,23 @@ import { env } from '../../../src/config/server';
 let server: Server;
 let app: express.Application;
 let createdVolunteerId: string;
+let universityId: string;
 
-beforeAll(() => {
+beforeAll(async () => {
   app = createRestApp();
   // Start the server on the port defined in .env.test
   server = app.listen(env.REST_PORT);
+
+  const locationData = {
+    name: 'Headquarters',
+    address: '123 Main Street',
+    country_code: 'US',
+    subdivision_code: 'CA',
+  };
+
+  const response = await request(server).post('/locations').send(locationData);
+
+  universityId = response.body.location_id;
 });
 
 afterAll(async () => {
@@ -29,7 +41,7 @@ describe('REST API - /volunteers', () => {
         graduation_date: new Date('2026-06-18').toISOString(),
         volunteer_status: 'STUDENT',
         volunteer_type: 'BOTH',
-        university_id: '07608837-420f-4697-bda2-701506079a9d', // Test UUID from Supabase
+        university_id: universityId,
       };
 
       const response = await request(server)

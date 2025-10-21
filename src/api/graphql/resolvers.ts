@@ -5,6 +5,7 @@ import { contactResolvers } from './resolvers/contacts.resolvers';
 import { roleResolvers } from './resolvers/roles.resolvers';
 import { projectResolvers } from './resolvers/projects.resolvers';
 import { nonprofitResolvers } from './resolvers/nonprofits.resolvers';
+import { companyResolvers } from './resolvers/companies.resolvers';
 
 // Merge multiple resolver objects here
 export const resolvers = {
@@ -16,6 +17,7 @@ export const resolvers = {
     ...roleResolvers.Query,
     ...projectResolvers.Query,
     ...nonprofitResolvers.Query,
+    ...companyResolvers.Query,
   },
   Mutation: {
     ...chapterResolvers.Mutation,
@@ -25,5 +27,6 @@ export const resolvers = {
     ...roleResolvers.Mutation,
     ...projectResolvers.Mutation,
     ...nonprofitResolvers.Mutation,
+    ...companyResolvers.Mutation,
   },
 };

@@ -16,7 +16,6 @@ Note that the ports here are 3001, meaning you should run `npm run dev` and not 
 
 ### 2. REST Testing Strategy
 
-- **Controller Tests**: Test request/response handling and validation
 - **Integration Tests**: `tests/integration/rest/` - Full HTTP request/response testing
 - **Unit Tests**: `tests/unit/services/` - Business logic testing
 
@@ -248,6 +247,7 @@ curl -X DELETE http://localhost:3001/api/rest/volunteers/[volunteer-id]
 1. **Create Collection**: "Volunteer Management API"
 
 2. **Environment Variables**:
+
 
 Go to top right where it says "No environment" and create an environment to insert what's below
 

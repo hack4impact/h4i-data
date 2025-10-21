@@ -1,0 +1,28 @@
+export const companySchemaString = `
+  type Company {
+    company_id: ID!
+    name: String!
+    location_id: ID
+  }
+
+  input CompanyCreateInput {
+    name: String!
+    location_id: ID
+  }
+
+  input CompanyUpdateInput {
+    name: String
+    location_id: ID
+  }
+
+  extend type Query {
+    company(company_id: ID!): Company
+    companies: [Company!]!
+  }
+
+  extend type Mutation {
+    createCompany(input: CompanyCreateInput!): Company!
+    updateCompany(company_id: ID!, input: CompanyUpdateInput!): Company!
+    deleteCompany(company_id: ID!): Boolean!
+  }
+`;
