@@ -6,3 +6,4 @@ export * from './roles.resolvers';
 export * from './projects.resolvers';
 export * from './nonprofits.resolvers';
 export * from './companies.resolvers';
+export * from './locations.resolvers';
