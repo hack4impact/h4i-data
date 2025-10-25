@@ -1,9 +1,9 @@
--- Enable UUID generation
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
 -- Drop and recreate schema for idempotent reseeding
 DROP SCHEMA IF EXISTS public CASCADE;
 CREATE SCHEMA public;
+
+-- Enable UUID generation
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Create Enums
 CREATE TYPE public.action_type AS ENUM ('JOINED', 'LEFT', 'ON HIATUS');
