@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  test-db:
+    image: postgres:16-alpine
+    container_name: h4i-test-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_db
+    ports:
+      - "5433:5432"  # Map to port 5433 to avoid conflicts with local PostgreSQL
+    volumes:
+      - test-db-data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d  # Initialization scripts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d test_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+volumes:
+  test-db-data:
+    driver: local
+
+networks:
+  test-network:
+    driver: bridge
