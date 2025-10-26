@@ -6,3 +6,4 @@ export * from './nonprofits.schema';
 export * from './companies.schema';
 export * from './roles.schema';
 export * from './projects.schema';
+export * from './locations.schema';
