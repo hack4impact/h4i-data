@@ -28,12 +28,29 @@ beforeEach(async () => {
 
     // Skip cleanup for unit tests since they mock the database
     if (!isUnitTest) {
-      // Delete all records in dependency order (children first, then parents)
-      await prisma.chapters.deleteMany({});
+      // Delete all records in dependency order (children/junction tables first, then parents)
+      // Order matters due to foreign key constraints
+
+      // Junction/linking tables (children) first
+      await prisma.volunteer_role_project.deleteMany({});
+      await prisma.volunteer_assignment.deleteMany({});
+      await prisma.volunteer_history.deleteMany({});
+      await prisma.nonprofit_chapter_project.deleteMany({});
+      await prisma.sponsor_chapter.deleteMany({});
+
+      // Main tables (depend on contacts, locations, chapters, etc.)
+      await prisma.volunteers.deleteMany({});
+      await prisma.nonprofits.deleteMany({});
+      await prisma.sponsors.deleteMany({});
       await prisma.projects.deleteMany({});
-      // Add other models as needed:
-      // await prisma.users.deleteMany({});
-      // await prisma.events.deleteMany({});
+      await prisma.roles.deleteMany({});
+      await prisma.operations_branches.deleteMany({});
+
+      // Parent tables (referenced by others)
+      await prisma.chapters.deleteMany({});
+      await prisma.companies.deleteMany({});
+      await prisma.contacts.deleteMany({});
+      await prisma.locations.deleteMany({});
     }
   } catch (error) {
     console.error('Failed to clean database between tests:', error);
