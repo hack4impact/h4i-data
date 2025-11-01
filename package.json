@@ -17,6 +17,9 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:coverage": "jest --coverage --testPathIgnorePatterns=tests/integration",
     "test:integration": "jest tests/integration --runInBand",
+    "test:local": "cross-env NODE_ENV=test npm run test:local:unit && cross-env NODE_ENV=test npm run test:local:integration",
+    "test:local:integration": "cross-env NODE_ENV=test jest tests/integration --runInBand",
+    "test:local:unit": "cross-env NODE_ENV=test jest tests/unit",
     "test:unit": "jest tests/unit",
     "test:watch": "jest --watch tests/unit",
     "type-check": "tsc --noEmit"
