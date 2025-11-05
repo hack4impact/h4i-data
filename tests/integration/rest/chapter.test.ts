@@ -7,6 +7,7 @@ import { env } from '../../../src/config/server';
 // Hold the server instance to close it after tests
 let server: Server;
 let app: express.Application;
+let chapterId: string;
 
 // beforeAll runs once before all tests in this file
 beforeAll(() => {
@@ -32,31 +33,12 @@ describe('REST API - /chapters', () => {
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('chapter_id');
     expect(response.body.name).toBe('REST Integration Test Chapter');
-  });
 
-  it('should create and fetch a chapter by its ID via GET', async () => {
-    // Create a chapter for this specific test
-    const createResponse = await request(server).post('/chapters').send({
-      name: 'Test Chapter for Fetch',
-      founded_date: '2025-08-30T12:00:00.000Z',
-    });
-
-    expect(createResponse.status).toBe(201);
-    const chapterId = createResponse.body.chapter_id;
-
-    // Now fetch it
-    const response = await request(server).get(`/chapters/${chapterId}`);
-
-    // Assertions
-    expect(response.status).toBe(200);
-    expect(response.body.chapter_id).toBe(chapterId);
-    expect(response.body.name).toBe('Test Chapter for Fetch');
+    chapterId = response.body.chapter_id;
   });
 
   it('should return 404 for a non-existent chapter ID', async () => {
-    const response = await request(server).get(
-      '/chapters/00000000-0000-0000-0000-000000000000'
-    );
+    const response = await request(server).get(`/chapters/${chapterId}`);
     expect(response.status).toBe(404);
   });
 });

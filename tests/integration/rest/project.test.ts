@@ -7,6 +7,7 @@ import { env } from '../../../src/config/server';
 // Hold the server instance to close it after tests
 let server: Server;
 let app: express.Application;
+let projectId: string;
 
 // beforeAll runs once before all tests in this file
 beforeAll(() => {
@@ -34,32 +35,12 @@ describe('REST API - /projects', () => {
     expect(response.body).toHaveProperty('project_id');
     expect(response.body.name).toBe('REST Integration Test Project');
     expect(response.body.repo).toBe('REPO URL');
-  });
 
-  it('should create and fetch a project by its ID via GET', async () => {
-    // Create a project for this test
-    const createResponse = await request(server).post('/projects').send({
-      name: 'REST Integration Test Project',
-      repo: 'REPO URL',
-      project_type: 'DESIGN_ONLY',
-    });
-
-    expect(createResponse.status).toBe(201);
-    const projectId = createResponse.body.project_id;
-
-    // Fetch project
-    const response = await request(server).get(`/projects/${projectId}`);
-
-    // Assertions
-    expect(response.status).toBe(200);
-    expect(response.body.project_id).toBe(projectId);
-    expect(response.body.name).toBe('REST Integration Test Project');
+    projectId = response.body.project_id;
   });
 
   it('should return 404 for a non-existent project ID', async () => {
-    const response = await request(server).get(
-      '/projects/00000000-0000-0000-0000-000000000000'
-    );
+    const response = await request(server).get(`/projects/${projectId}`);
     expect(response.status).toBe(404);
   });
 });

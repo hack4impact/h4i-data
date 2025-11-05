@@ -6,6 +6,7 @@ import { env } from '../../../src/config/server';
 
 let server: Server;
 let app: express.Application;
+let contactId: string;
 
 beforeAll(() => {
   app = createGraphqlApp();
@@ -46,35 +47,11 @@ describe('GraphQL API - Contacts', () => {
     const contact = response.body.data.createContact;
     expect(contact).toHaveProperty('contact_id');
     expect(contact.name).toBe('GraphQL Integration Test Contact');
+
+    contactId = contact.contact_id;
   });
 
-  it('should create and fetch a contact by its ID via query', async () => {
-    // Create a contact for this specific test
-    const createMutation = `
-      mutation CreateContact($input: CreateContactInput!) {
-        createContact(input: $input) {
-          contact_id
-          name
-          email
-        }
-      }
-    `;
-    const createVariables = {
-      input: {
-        name: 'Test Contact for Query',
-        email: 'query@example.com',
-        phone_number: '987-654-3210',
-      },
-    };
-
-    const createResponse = await request(server)
-      .post('/')
-      .send({ query: createMutation, variables: createVariables });
-
-    expect(createResponse.status).toBe(200);
-    expect(createResponse.body.errors).toBeUndefined();
-    const contactId = createResponse.body.data.createContact.contact_id;
-
+  it('should fetch a contact by its ID via query', async () => {
     // Now fetch it
     const query = `
       query Contact($id: ID!) {
@@ -94,6 +71,6 @@ describe('GraphQL API - Contacts', () => {
     expect(response.body.errors).toBeUndefined();
     const contact = response.body.data.contact;
     expect(contact.contact_id).toBe(contactId);
-    expect(contact.name).toBe('Test Contact for Query');
+    expect(contact.name).toBe('GraphQL Integration Test Contact');
   });
 });

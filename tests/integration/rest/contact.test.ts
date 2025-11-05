@@ -7,6 +7,7 @@ import { env } from '../../../src/config/server';
 // Hold the server instance to close it after tests
 let server: Server;
 let app: express.Application;
+let createdContactId: string;
 
 // beforeAll runs once before all tests in this file
 beforeAll(() => {
@@ -32,31 +33,28 @@ describe('REST API - /contacts', () => {
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('contact_id');
     expect(response.body.name).toBe('REST Integration Test Contact');
+    createdContactId = response.body.contact_id;
   });
 
-  it('should create and fetch a contact by its ID via GET', async () => {
-    // Create a contact for this specific test
-    const createResponse = await request(server).post('/contacts').send({
-      name: 'Test Contact for Fetch',
-      email: 'fetchcontact@example.com',
-    });
-
-    expect(createResponse.status).toBe(201);
-    const contactId = createResponse.body.contact_id;
-
+  it('should fetch a contact by its ID via GET', async () => {
     // Now fetch it
-    const response = await request(server).get(`/contacts/${contactId}`);
+    const response = await request(server).get(`/contacts/${createdContactId}`);
 
     // Assertions
     expect(response.status).toBe(200);
-    expect(response.body.contact_id).toBe(contactId);
-    expect(response.body.name).toBe('Test Contact for Fetch');
+    expect(response.body.contact_id).toBe(createdContactId);
+    expect(response.body.name).toBe('REST Integration Test Contact');
+  });
+
+  it('should delete the contact', async () => {
+    const response = await request(server).delete(
+      `/contacts/${createdContactId}`
+    );
+    expect(response.status).toBe(204);
   });
 
   it('should return 404 for a non-existent contact ID', async () => {
-    const response = await request(server).get(
-      '/contacts/00000000-0000-0000-0000-000000000000'
-    );
+    const response = await request(server).get(`/contacts/${createdContactId}`);
     expect(response.status).toBe(404);
   });
 });
