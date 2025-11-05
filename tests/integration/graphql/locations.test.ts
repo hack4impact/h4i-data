@@ -6,6 +6,7 @@ import { env } from '../../../src/config/server';
 
 let server: Server;
 let app: express.Application;
+let locationId: string;
 
 beforeAll(() => {
   app = createGraphqlApp();
@@ -32,7 +33,7 @@ describe('GraphQL API - Locations', () => {
 
     const variables = {
       input: {
-        name: 'Test Location ',
+        name: 'Test Location',
         address: '123 Test St',
         country_code: 'US',
         subdivision_code: 'NY',
@@ -52,39 +53,11 @@ describe('GraphQL API - Locations', () => {
     expect(location.address).toBe('123 Test St');
     expect(location.country_code).toBe('US');
     expect(location.subdivision_code).toBe('NY');
+
+    locationId = location.location_id;
   });
 
-  it('should create and fetch a location by its ID via query', async () => {
-    // Create a new location first
-    const createMutation = `
-      mutation CreateLocation($input: CreateLocationInput!) {
-        createLocation(input: $input) {
-          location_id
-          name
-          address
-          country_code
-          subdivision_code
-        }
-      }
-    `;
-
-    const createVariables = {
-      input: {
-        name: 'Fetch Test Location',
-        address: '456 Fetch Ave',
-        country_code: 'CA',
-        subdivision_code: 'ON',
-      },
-    };
-
-    const createResponse = await request(server)
-      .post('/')
-      .send({ query: createMutation, variables: createVariables });
-
-    expect(createResponse.status).toBe(200);
-    expect(createResponse.body.errors).toBeUndefined();
-    const locationId = createResponse.body.data.createLocation.location_id;
-
+  it('should fetch a location by its ID via query', async () => {
     // Now fetch it using the ID
     const query = `
       query Location($id: ID!) {
@@ -108,7 +81,30 @@ describe('GraphQL API - Locations', () => {
 
     // Verify the fetched data matches the created data
     expect(location.location_id).toBe(locationId);
-    expect(location.name).toBe('Fetch Test Location');
-    expect(location.address).toBe('456 Fetch Ave');
+    expect(location.name).toBe('Test Location');
+    expect(location.address).toBe('123 Test St');
+  });
+
+  it('should delete a location by its ID via mutation', async () => {
+    const mutation = `
+      mutation DeleteLocation($id: ID!) {
+        deleteLocation(id: $id) {
+          location_id
+        }
+      }
+    `;
+    const variables = { id: locationId };
+
+    const response = await request(server)
+      .post('/')
+      .send({ query: mutation, variables: variables });
+
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.deleteLocation).toHaveProperty(
+      'location_id',
+      locationId
+    );
   });
 });
