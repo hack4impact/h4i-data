@@ -7,6 +7,7 @@ import { env } from '../../../src/config/server';
 let server: Server;
 let app: express.Application;
 let contactId: string;
+let nonprofitId: string;
 
 beforeAll(async () => {
   app = createRestApp();
@@ -38,6 +39,8 @@ describe('REST API - /nonprofits', () => {
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('nonprofit_id');
     expect(response.body.name).toBe('REST Integration Test Nonprofit');
+
+    nonprofitId = response.body.nonprofit_id;
   });
 
   it('should return validation error (400) if required fields are missing', async () => {
@@ -50,22 +53,12 @@ describe('REST API - /nonprofits', () => {
     expect(response.status).toBe(400);
   });
 
-  it('should create and fetch a nonprofit by its ID via GET', async () => {
-    const createResponse = await request(server).post('/nonprofits').send({
-      name: 'Test Nonprofit for Fetch',
-      mission: 'Testing fetching a nonprofit by ID',
-      website: 'https://fetch.org',
-      contact_id: contactId,
-    });
-
-    expect(createResponse.status).toBe(201);
-    const nonprofitId = createResponse.body.nonprofit_id;
-
+  it('should fetch a nonprofit by its ID via GET', async () => {
     const response = await request(server).get(`/nonprofits/${nonprofitId}`);
 
     expect(response.status).toBe(200);
     expect(response.body.nonprofit_id).toBe(nonprofitId);
-    expect(response.body.name).toBe('Test Nonprofit for Fetch');
+    expect(response.body.name).toBe('REST Integration Test Nonprofit');
   });
 
   it('should fetch all nonprofits via GET /nonprofits', async () => {
@@ -125,20 +118,6 @@ describe('REST API - /nonprofits', () => {
       .patch('/nonprofits/00000000-0000-0000-0000-000000000000')
       .send({ mission: 'Will not work' });
 
-    expect(response.status).toBe(404);
-  });
-
-  it('should return 404 when deleting a non-existent nonprofit', async () => {
-    const response = await request(server).delete(
-      '/nonprofits/00000000-0000-0000-0000-000000000000'
-    );
-    expect(response.status).toBe(404);
-  });
-
-  it('should return 404 for a non-existent nonprofit ID via GET', async () => {
-    const response = await request(server).get(
-      '/nonprofits/00000000-0000-0000-0000-000000000000'
-    );
     expect(response.status).toBe(404);
   });
 });

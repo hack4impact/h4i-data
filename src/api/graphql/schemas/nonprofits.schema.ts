@@ -34,6 +34,6 @@ export const nonprofitSchemaString = `
   type Mutation {
     createNonprofit(input: CreateNonprofitInput!): Nonprofit!
     updateNonprofit(nonprofit_id: ID!, input: UpdateNonprofitInput!): Nonprofit!
-    deleteNonprofit(nonprofit_id: ID!): Nonprofit
+    deleteNonprofit(id: ID!): Nonprofit
   }
 `;

@@ -6,10 +6,38 @@ import { env } from '../../../src/config/server';
 
 let server: Server;
 let app: express.Application;
+let contactId: string;
+let nonprofitId: string;
 
-beforeAll(() => {
+beforeAll(async () => {
   app = createGraphqlApp();
   server = app.listen(env.GRAPHQL_PORT);
+
+  // create a contact and get its id
+  const contactMutation = `
+  mutation CreateContact($input: CreateContactInput!) {
+    createContact(input: $input) {
+      contact_id
+      name
+      email
+      phone_number
+      }
+    }
+  `;
+
+  const contactVariables = {
+    input: {
+      name: 'GraphQL Integration Test Contact',
+      email: 'test@example.com',
+      phone_number: '123-456-7890',
+    },
+  };
+
+  const contactResponse = await request(server)
+    .post('/') // GraphQL server is at the root
+    .send({ query: contactMutation, variables: contactVariables });
+
+  contactId = contactResponse.body.data.createContact.contact_id;
 });
 
 afterAll(() => {
@@ -35,9 +63,7 @@ describe('GraphQL API - Nonprofits', () => {
         name: 'GraphQL Integration Test Nonprofit',
         mission: 'This is a test mission for nonprofit',
         website: 'https://example.org', // must be a valid URL
-        // location_id is optional; include only if you want
-        // location_id: '0d0f34a1-3f6f-4f7f-8a9e-0e1a2b3c4d5e',
-        contact_id: 'e9ded8b8-53e3-4747-aafa-d662458c2a65',
+        contact_id: contactId,
       },
     };
 
@@ -50,39 +76,11 @@ describe('GraphQL API - Nonprofits', () => {
     const nonprofit = response.body.data.createNonprofit;
     expect(nonprofit).toHaveProperty('nonprofit_id');
     expect(nonprofit.name).toBe('GraphQL Integration Test Nonprofit');
+
+    nonprofitId = nonprofit.nonprofit_id;
   });
 
-  it('should create and fetch a nonprofit by its ID via query', async () => {
-    const createMutation = `
-      mutation CreateNonprofit($input: CreateNonprofitInput!) {
-        createNonprofit(input: $input) {
-          nonprofit_id
-          name
-          mission
-          website
-          location_id
-          contact_id
-        }
-      }
-    `;
-    const createVariables = {
-      input: {
-        name: 'Test Nonprofit for Query',
-        mission: 'This is a test query mission for nonprofit',
-        website: 'https://example.com', // valid URL
-        // location_id: '0d0f34a1-3f6f-4f7f-8a9e-0e1a2b3c4d5e',
-        contact_id: 'e9ded8b8-53e3-4747-aafa-d662458c2a65',
-      },
-    };
-
-    const createResponse = await request(server)
-      .post('/')
-      .send({ query: createMutation, variables: createVariables });
-
-    expect(createResponse.status).toBe(200);
-    expect(createResponse.body.errors).toBeUndefined();
-    const nonprofitId = createResponse.body.data.createNonprofit.nonprofit_id;
-
+  it('should fetch a nonprofit by its ID via query', async () => {
     const query = `
       query Nonprofit($id: ID!) {
         nonprofit(id: $id) {
@@ -103,6 +101,42 @@ describe('GraphQL API - Nonprofits', () => {
     expect(response.body.errors).toBeUndefined();
     const nonprofit = response.body.data.nonprofit;
     expect(nonprofit.nonprofit_id).toBe(nonprofitId);
-    expect(nonprofit.name).toBe('Test Nonprofit for Query');
+    expect(nonprofit.name).toBe('GraphQL Integration Test Nonprofit');
+  });
+
+  it('should delete a nonprofit via mutation', async () => {
+    const mutation = `
+      mutation DeleteNonprofit($id: ID!) {
+        deleteNonprofit(id: $id) {
+          nonprofit_id
+        }
+      }
+    `;
+    const variables = { id: nonprofitId };
+
+    const response = await request(server)
+      .post('/')
+      .send({ query: mutation, variables: variables });
+
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.deleteNonprofit).toHaveProperty(
+      'nonprofit_id',
+      nonprofitId
+    );
+
+    // then delete the contact
+    const contactMutation = `
+      mutation DeleteContact($id: ID!) {
+        deleteContact(id: $id) {
+          contact_id
+        }
+      }
+    `;
+    const contactVariables = { id: contactId };
+
+    await request(server)
+      .post('/')
+      .send({ query: contactMutation, variables: contactVariables });
   });
 });
