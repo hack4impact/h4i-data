@@ -73,4 +73,27 @@ describe('GraphQL API - Contacts', () => {
     expect(contact.contact_id).toBe(contactId);
     expect(contact.name).toBe('GraphQL Integration Test Contact');
   });
+
+  it('should delete a contact by its ID via mutation', async () => {
+    const mutation = `
+      mutation DeleteContact($id: ID!) {
+        deleteContact(id: $id) {
+          contact_id
+        }
+      }
+    `;
+    const variables = { id: contactId };
+
+    const response = await request(server)
+      .post('/')
+      .send({ query: mutation, variables });
+
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.deleteContact).toHaveProperty(
+      'contact_id',
+      contactId
+    );
+  });
 });

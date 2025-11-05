@@ -103,4 +103,40 @@ describe('GraphQL API - Nonprofits', () => {
     expect(nonprofit.nonprofit_id).toBe(nonprofitId);
     expect(nonprofit.name).toBe('GraphQL Integration Test Nonprofit');
   });
+
+  it('should delete a nonprofit via mutation', async () => {
+    const mutation = `
+      mutation DeleteNonprofit($id: ID!) {
+        deleteNonprofit(id: $id) {
+          nonprofit_id
+        }
+      }
+    `;
+    const variables = { id: nonprofitId };
+
+    const response = await request(server)
+      .post('/')
+      .send({ query: mutation, variables: variables });
+
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.deleteNonprofit).toHaveProperty(
+      'nonprofit_id',
+      nonprofitId
+    );
+
+    // then delete the contact
+    const contactMutation = `
+      mutation DeleteContact($id: ID!) {
+        deleteContact(id: $id) {
+          contact_id
+        }
+      }
+    `;
+    const contactVariables = { id: contactId };
+
+    await request(server)
+      .post('/')
+      .send({ query: contactMutation, variables: contactVariables });
+  });
 });
