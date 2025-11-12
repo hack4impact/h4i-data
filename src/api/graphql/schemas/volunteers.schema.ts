@@ -1,5 +1,4 @@
 export const volunteerSchemaString = `
-  # Using the enum from your Prisma schema
   enum StatusType {
     STUDENT
     PROFESSIONAL
