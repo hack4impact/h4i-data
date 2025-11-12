@@ -11,6 +11,12 @@ export const volunteerSchemaString = `
     BOTH
   }
 
+  input VolunteerFilterInput {
+    chapters: [String!]
+    roles: [String!]
+    statuses: [String!]
+  }
+
   type Volunteer {
     volunteer_id: ID!
     first_name: String!
@@ -27,8 +33,18 @@ export const volunteerSchemaString = `
     updated_at: String!
   }
 
+  type VolunteerConnection {
+    nodes: [Volunteer!]!
+    totalCount: Int!
+  }
+
   type Query {
-    volunteers: [Volunteer!]!
+    volunteers(
+      filter: VolunteerFilterInput
+      limit: Int = 50
+      offset: Int = 0
+    ): VolunteerConnection!
+
     volunteer(id: ID!): Volunteer
   }
 
