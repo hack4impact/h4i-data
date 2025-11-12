@@ -8,17 +8,21 @@ import {
   updateVolunteer,
   updateVolunteerSchema,
 } from '../../../core';
-import { PrismaClient } from '@prisma/client';
+import {
+  PrismaClient,
+  Prisma,
+  volunteer_status as VStatus,
+} from '@prisma/client';
 const prisma = new PrismaClient();
 
 type CreateVolunteerInput = z.infer<typeof createVolunteerSchema>;
 type UpdateVolunteerInput = z.infer<typeof updateVolunteerSchema>;
 
-type VolunteerFilterInput = {
-  chapters?: string[]; // chapter names
-  roles?: string[]; // role
-  statuses?: string[]; // volunteer statuses
-};
+export interface VolunteerFilterInput {
+  chapters?: string[];
+  roles?: string[];
+  statuses?: (import('@prisma/client').volunteer_status | string)[];
+}
 
 export const volunteerResolvers = {
   Query: {
@@ -32,16 +36,26 @@ export const volunteerResolvers = {
     ) => {
       const { filter, limit = 50, offset = 0 } = args;
 
-      const where: any = {};
+      const where: Prisma.volunteersWhereInput = {};
 
       // status filter
       if (filter?.statuses?.length) {
-        where.volunteer_status = { in: filter.statuses };
+        const statuses = filter.statuses
+          .map((s) => (typeof s === 'string' ? s.toUpperCase() : s))
+          .filter((s): s is VStatus => s === 'STUDENT' || s === 'PROFESSIONAL');
+
+        if (statuses.length) {
+          where.volunteer_status = { in: statuses };
+        }
       }
 
       // chapter filter via chapters
       if (filter?.chapters?.length) {
-        where.chapters = { name: { in: filter.chapters } };
+        where.chapters = {
+          is: {
+            name: { in: filter.chapters },
+          },
+        };
       }
 
       // role filter via volunteers
