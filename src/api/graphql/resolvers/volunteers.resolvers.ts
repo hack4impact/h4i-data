@@ -16,7 +16,7 @@ type UpdateVolunteerInput = z.infer<typeof updateVolunteerSchema>;
 
 type VolunteerFilterInput = {
   chapters?: string[]; // chapter names
-  roles?: string[];    // role
+  roles?: string[]; // role
   statuses?: string[]; // volunteer statuses
 };
 
@@ -81,20 +81,34 @@ export const volunteerResolvers = {
     volunteer: async (_parent: unknown, { id }: { id: string }) => {
       const volunteer = await getVolunteerById(id);
       if (!volunteer) {
-        throw new GraphQLError('Volunteer not found', undefined, undefined, undefined, undefined, undefined, {
-          code: 'NOT_FOUND',
-        });
+        throw new GraphQLError(
+          'Volunteer not found',
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          {
+            code: 'NOT_FOUND',
+          }
+        );
       }
       return volunteer;
     },
   },
 
   Mutation: {
-    createVolunteer: (_parent: unknown, { input }: { input: CreateVolunteerInput }) => {
+    createVolunteer: (
+      _parent: unknown,
+      { input }: { input: CreateVolunteerInput }
+    ) => {
       const validatedInput = createVolunteerSchema.parse(input);
       return createVolunteer(validatedInput);
     },
-    updateVolunteer: (_parent: unknown, { id, input }: { id: string; input: UpdateVolunteerInput }) => {
+    updateVolunteer: (
+      _parent: unknown,
+      { id, input }: { id: string; input: UpdateVolunteerInput }
+    ) => {
       const validatedInput = updateVolunteerSchema.parse(input);
       return updateVolunteer(id, validatedInput);
     },
