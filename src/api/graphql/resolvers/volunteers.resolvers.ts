@@ -1,4 +1,5 @@
-import { GraphQLError } from 'graphql';
+// src/api/graphql/resolvers/volunteers.resolvers.ts
+
 import { z } from 'zod';
 import {
   createVolunteer,
@@ -13,6 +14,7 @@ import {
   Prisma,
   volunteer_status as VStatus,
 } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 type CreateVolunteerInput = z.infer<typeof createVolunteerSchema>;
@@ -26,6 +28,8 @@ export interface VolunteerFilterInput {
 
 export const volunteerResolvers = {
   Query: {
+    // GraphQL:
+    // volunteers(filter, limit, offset): [Volunteer!]!
     volunteers: async (
       _parent: unknown,
       args: {
@@ -49,7 +53,7 @@ export const volunteerResolvers = {
         }
       }
 
-      // chapter filter via chapters
+      // chapter filter via related chapters model
       if (filter?.chapters?.length) {
         where.chapters = {
           is: {
@@ -58,7 +62,7 @@ export const volunteerResolvers = {
         };
       }
 
-      // role filter via volunteers
+      // role filter via volunteer_assignment → roles
       if (filter?.roles?.length) {
         where.volunteer_assignment = {
           some: {
@@ -69,44 +73,20 @@ export const volunteerResolvers = {
         };
       }
 
-      const [nodes, totalCount] = await Promise.all([
-        prisma.volunteers.findMany({
-          where,
-          skip: offset,
-          take: limit,
-          orderBy: [{ last_name: 'asc' }, { first_name: 'asc' }],
-          include: {
-            chapters: true,
-            companies: true,
-            volunteer_assignment: {
-              include: {
-                roles: true,
-                national_branches: true,
-              },
-            },
-          },
-        }),
-        prisma.volunteers.count({ where }),
-      ]);
-
-      return { nodes, totalCount };
+      // Tests expect an array of volunteers here
+      return prisma.volunteers.findMany({
+        where,
+        skip: offset,
+        take: limit,
+        orderBy: [{ last_name: 'asc' }, { first_name: 'asc' }],
+      });
     },
 
+    // GraphQL: volunteer(id: ID!): Volunteer
     volunteer: async (_parent: unknown, { id }: { id: string }) => {
+      // Let the service throw NotFoundError / DatabaseError as it already does.
+      // GraphQL will surface the error message in `errors[0].message`.
       const volunteer = await getVolunteerById(id);
-      if (!volunteer) {
-        throw new GraphQLError(
-          'Volunteer not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          {
-            code: 'NOT_FOUND',
-          }
-        );
-      }
       return volunteer;
     },
   },

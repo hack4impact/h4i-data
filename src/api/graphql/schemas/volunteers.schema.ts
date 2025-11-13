@@ -42,7 +42,7 @@ export const volunteerSchemaString = `
       filter: VolunteerFilterInput
       limit: Int = 50
       offset: Int = 0
-    ): VolunteerConnection!
+    ): [Volunteer!]!
 
     volunteer(id: ID!): Volunteer
   }

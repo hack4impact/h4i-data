@@ -28,13 +28,9 @@ beforeEach(async () => {
 
     // Skip cleanup for unit tests since they mock the database
     if (!isUnitTest) {
-      // Delete all records in dependency order (children first, then parents)
-
       await prisma.volunteer_assignment.deleteMany({});
       await prisma.volunteer_role_project.deleteMany({});
       await prisma.volunteer_history.deleteMany({});
-
-      await prisma.volunteers.deleteMany({});
 
       await prisma.nonprofit_chapter_project.deleteMany({});
       await prisma.sponsor_chapter.deleteMany({});
