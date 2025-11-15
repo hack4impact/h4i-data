@@ -1,5 +1,4 @@
 export const volunteerSchemaString = `
-  # Using the enum from your Prisma schema
   enum StatusType {
     STUDENT
     PROFESSIONAL
@@ -9,6 +8,12 @@ export const volunteerSchemaString = `
     OPERATIONS
     CHAPTER
     BOTH
+  }
+
+  input VolunteerFilterInput {
+    chapters: [String!]
+    roles: [String!]
+    statuses: [String!]
   }
 
   type Volunteer {
@@ -27,8 +32,18 @@ export const volunteerSchemaString = `
     updated_at: String!
   }
 
+  type VolunteerConnection {
+    nodes: [Volunteer!]!
+    totalCount: Int!
+  }
+
   type Query {
-    volunteers: [Volunteer!]!
+    volunteers(
+      filter: VolunteerFilterInput
+      limit: Int = 50
+      offset: Int = 0
+    ): [Volunteer!]!
+
     volunteer(id: ID!): Volunteer
   }
 
