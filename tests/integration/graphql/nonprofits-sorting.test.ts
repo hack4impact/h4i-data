@@ -39,36 +39,6 @@ beforeAll(async () => {
     });
   contactId = contactResponse.body.data.createContact.contact_id;
 
-  const chapterMutation = `mutation CreateChapter($input: CreateChapterInput!) { createChapter(input: $input) { chapter_id } }`;
-  const chapterResponse = await request(server)
-    .post('/')
-    .send({
-      query: chapterMutation,
-      variables: {
-        input: {
-          name: 'Test Chapter for Sorting',
-          founded_date: '2020-01-01',
-          status_type: 'ACTIVE',
-        },
-      },
-    });
-  chapterId = chapterResponse.body.data.createChapter.chapter_id;
-
-  const projectMutation = `mutation CreateProject($input: CreateProjectInput!) { createProject(input: $input) { project_id } }`;
-  const projectResponse = await request(server)
-    .post('/')
-    .send({
-      query: projectMutation,
-      variables: {
-        input: {
-          name: 'Test Project for Sorting',
-          repo: 'https://github.com/test/sorting',
-          project_type: 'DESIGN_AND_DEVELOP',
-        },
-      },
-    });
-  projectId = projectResponse.body.data.createProject.project_id;
-
   const createNonprofitMutation = `mutation CreateNonprofit($input: CreateNonprofitInput!) { createNonprofit(input: $input) { nonprofit_id } }`;
   const np1 = await request(server)
     .post('/')
@@ -109,7 +79,44 @@ beforeAll(async () => {
       },
     });
   nonprofit3Id = np3.body.data.createNonprofit.nonprofit_id;
+});
 
+// Recreate chapter, project, and nonprofit_chapter_project records before each test
+// This is necessary because the global beforeEach in tests/setup.ts deletes them
+beforeEach(async () => {
+  // Recreate chapter
+  const chapterMutation = `mutation CreateChapter($input: CreateChapterInput!) { createChapter(input: $input) { chapter_id } }`;
+  const chapterResponse = await request(server)
+    .post('/')
+    .send({
+      query: chapterMutation,
+      variables: {
+        input: {
+          name: 'Test Chapter for Sorting',
+          founded_date: '2020-01-01T00:00:00.000Z',
+          status_type: 'ACTIVE',
+        },
+      },
+    });
+  chapterId = chapterResponse.body.data.createChapter.chapter_id;
+
+  // Recreate project
+  const projectMutation = `mutation CreateProject($input: CreateProjectInput!) { createProject(input: $input) { project_id } }`;
+  const projectResponse = await request(server)
+    .post('/')
+    .send({
+      query: projectMutation,
+      variables: {
+        input: {
+          name: 'Test Project for Sorting',
+          repo: 'https://github.com/test/sorting',
+          project_type: 'DESIGN_AND_DEVELOP',
+        },
+      },
+    });
+  projectId = projectResponse.body.data.createProject.project_id;
+
+  // Recreate nonprofit_chapter_project records
   await prisma.nonprofit_chapter_project.create({
     data: {
       nonprofit_id: nonprofit1Id,
@@ -149,15 +156,26 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await prisma.nonprofit_chapter_project.deleteMany({
-    where: { nonprofit_id: { in: [nonprofit1Id, nonprofit2Id, nonprofit3Id] } },
-  });
-  await prisma.nonprofits.deleteMany({
-    where: { nonprofit_id: { in: [nonprofit1Id, nonprofit2Id, nonprofit3Id] } },
-  });
-  await prisma.projects.deleteMany({ where: { project_id: projectId } });
-  await prisma.chapters.deleteMany({ where: { chapter_id: chapterId } });
-  await prisma.contacts.deleteMany({ where: { contact_id: contactId } });
+  const nonprofitIds = [nonprofit1Id, nonprofit2Id, nonprofit3Id].filter(
+    (id) => id !== undefined
+  );
+  if (nonprofitIds.length > 0) {
+    await prisma.nonprofit_chapter_project.deleteMany({
+      where: { nonprofit_id: { in: nonprofitIds } },
+    });
+    await prisma.nonprofits.deleteMany({
+      where: { nonprofit_id: { in: nonprofitIds } },
+    });
+  }
+  if (projectId) {
+    await prisma.projects.deleteMany({ where: { project_id: projectId } });
+  }
+  if (chapterId) {
+    await prisma.chapters.deleteMany({ where: { chapter_id: chapterId } });
+  }
+  if (contactId) {
+    await prisma.contacts.deleteMany({ where: { contact_id: contactId } });
+  }
   server.close();
 });
 

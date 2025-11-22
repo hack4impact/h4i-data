@@ -6,12 +6,6 @@ export const nonprofitSchemaString = `
     STATUS
   }
 
-  # Reuse StatusType from chapters schema
-  enum StatusType {
-    ACTIVE
-    INACTIVE
-  }
-
   type Nonprofit {
     nonprofit_id: ID!
     name: String!
