@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 dotenv.config({
   path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+  override: process.env.NODE_ENV === 'test',
 });
 
 // Define a schema for your environment variables
