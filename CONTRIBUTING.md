@@ -10,7 +10,7 @@ Here are all of the steps you should follow whenever contributing to this repo!
 
 1. Go to the project [repo](https://github.com/hack4impact/operations-api).
 2. Click the green "Code" button in the top right. Switch to the "HTTPS" tab.
-3. Click the "Copy URL to clipboard" button to the right of the URL.
+3. If you are using Github Desktop, click "Open with Github Desktop", otherwise click the "Copy URL to clipboard" button to the right of the URL.
 4. Go into your IDE/terminal and enter `git clone <paste-URL-here>`
 
 ### 2. Install Dependencies
@@ -33,6 +33,8 @@ PORT=3000
 REST_PORT=3001
 GRAPHQL_PORT=3002
 ```
+
+Access the important fields from Vaultwarden from this: https://vault.hack4impact.org/#/login
 
 ### 4. Database Setup
 
@@ -67,14 +69,15 @@ _See Style Guide: [STYLE_GUIDE.md](https://github.com/hack4impact/operations-api
 
 ### Branch Naming Convention
 
-Follow the pattern: `feature/issue-number-description`
+Follow the pattern listed in your issue: `feature/issue-number-description`
 
 - Example: `feature/1-add-volunteer-endpoints`
 - This automatically links branches to GitHub issues
+- Create your branch off of the "develop" branch, not the main.
 
 ### Making Changes
 
-1. Before you start making changes, always make sure you're on the main branch, then `git pull` and `npm i` to make sure your code is up to date
+1. Before you start making changes, always make sure you're on the develop branch, then `git pull` and `npm i` to make sure your code is up to date
 2. Create a branch `git checkout -b <name-of-branch>`
 3. Make changes to the code
 4. Run ESLint to ensure code standards (see in [style guide](https://github.com/hack4impact/operations-api/blob/main/STYLE_GUIDE.md#eslint)).
