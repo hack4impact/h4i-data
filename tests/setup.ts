@@ -2,20 +2,32 @@ import { prisma, connectDB, disconnectDB } from '../src/config/database';
 
 // Global test setup - runs once before all tests
 beforeAll(async () => {
-  try {
-    await connectDB();
-  } catch (error) {
-    console.error('Failed to connect to test database:', error);
-    process.exit(1);
+  // Only connect for integration tests, not unit tests
+  const testFilePath = expect.getState().testPath;
+  const isIntegrationTest = testFilePath?.includes('/integration/') ?? false;
+
+  if (isIntegrationTest) {
+    try {
+      await connectDB();
+    } catch (error) {
+      console.error('Failed to connect to test database:', error);
+      process.exit(1);
+    }
   }
 });
 
 // Global test teardown - runs once after all tests
 afterAll(async () => {
-  try {
-    await disconnectDB();
-  } catch (error) {
-    console.error('Failed to disconnect from test database:', error);
+  // Only disconnect for integration tests
+  const testFilePath = expect.getState().testPath;
+  const isIntegrationTest = testFilePath?.includes('/integration/') ?? false;
+
+  if (isIntegrationTest) {
+    try {
+      await disconnectDB();
+    } catch (error) {
+      console.error('Failed to disconnect from test database:', error);
+    }
   }
 });
 
