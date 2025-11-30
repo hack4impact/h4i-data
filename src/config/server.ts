@@ -2,8 +2,19 @@
 import dotenv from 'dotenv';
 import { z } from 'zod';
 
+const envFilePath = (() => {
+  switch (process.env.NODE_ENV) {
+    case 'production':
+      return '.env';
+    case 'test':
+      return '.env.test';
+    default:
+      return '.env.local';
+  }
+})();
+
 dotenv.config({
-  path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+  path: envFilePath,
   override: process.env.NODE_ENV === 'test',
 });
 
