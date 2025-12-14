@@ -519,3 +519,15 @@ export async function deleteNonprofit(id: string): Promise<EnrichedNonprofit> {
     throw new DatabaseError('Failed to delete nonprofit');
   }
 }
+
+export async function getChapterIdsByNames(names: string[]): Promise<string[]> {
+  const cleaned = [...new Set(names.map((n) => n.trim()).filter(Boolean))];
+  if (cleaned.length === 0) return [];
+
+  const chapters = await prisma.chapters.findMany({
+    where: { name: { in: cleaned } },
+    select: { chapter_id: true },
+  });
+
+  return chapters.map((c) => c.chapter_id);
+}
