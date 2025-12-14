@@ -66,6 +66,59 @@ npx prettier . --check
 
 - Use function declarations - not arrow functions
 
+### TypeScript Naming Conventions
+
+- Use **camelCase** (e.g. firstName, lastName) for variables and functions
+- Use **UPPER_CASE** (e.g. FIRST_NAME, LAST_NAME) with underscores between words for constants/globals
+- Use **PascalCase** (e.g. FirstName, LastName) for class, interface, enum, and type names
+
+### Variables
+
+- Use the `const` keyword for constant variables
+- Use the `let` keyword for local variables. `let` has scoping restrictions, `var`, does not.
+- Do NOT use the `var` keyword for variables
+- Use meaningful variable names. Better to have longer, useful names than shorter, confusing ones.
+- Do not use a variable if it will only be used once.
+- Booleans: don't use negative names for boolean variables (BAD: `const isNotEnabled = true`, GOOD: `const isEnabled = true`)
+
+### Commenting
+
+#### When to add Comments
+
+- Include comments for intricate or non-obvious code segments
+- Clarify how your code handles edge cases or exceptional scenarios
+- Document workarounds due to limitations or external dependencies
+- Mark areas where improvements or additional features are needed. Link to GitHub Issue, if possible.
+
+#### When NOT to add Comments
+
+- Avoid redundant comments that merely repeat what the code already expresses clearly.
+- If the code’s purpose is evident (e.g., simple variable assignments), skip unnecessary comments.
+- Remove temporary comments used for debugging once the issue is resolved.
+- Incorrect comments can mislead other developers, so ensure accuracy.
+
+### Organize Imports
+
+- With clean and easy to read import statements you can quickly see the dependencies of current code. Make sure you apply following good practices for import statements.
+- Unused imports should be removed.
+- Groups of imports are delineated by one blank line before and after.
+
+### Use TypeScript Aliases
+
+This will avoid long relative paths when doing imports.
+
+Bad:
+
+```
+import { UserService } from '../../../services/UserService';
+```
+
+Good:
+
+```
+import { UserService } from '@services/UserService';
+```
+
 ## Pull Request Instructions
 
 - Set base branch to "develop"
@@ -102,3 +155,7 @@ npx prettier . --check
 - **Run tests frequently** during development
 - **Use hot reloading** for fast feedback
 - **Implement CI/CD** for automated testing
+
+```
+
+```
