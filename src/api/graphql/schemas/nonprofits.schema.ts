@@ -21,6 +21,7 @@ export const nonprofitSchemaString = `
   type Query {
     nonprofits(
       chapterIds: [ID!]
+      chapterNames: [String!]
       statuses: [StatusType!]
       sort: [NonprofitSortOption!]
     ): [Nonprofit!]!
