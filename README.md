@@ -223,3 +223,15 @@ See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md
 - [Jest Documentation](https://jestjs.io/docs/getting-started)
 - [GraphQL Best Practices](https://graphql.org/learn/best-practices/)
 - [Express.js Guide](https://expressjs.com/en/guide/routing.html)
+
+## Docker
+
+Command to enter in terminal to access tables:
+
+- docker compose exec -T test-db psql -U postgres -d test_db
+- \dt
+- SQL commands such as (SELECT * FROM volunteers;)
+
+To pause test, insert this: await new Promise(() => {});
+
+It helps you see when data is created in the local database!
