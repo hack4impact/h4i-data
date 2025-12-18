@@ -14,6 +14,8 @@ import type {
   StatusType,
   NonprofitSortOption,
 } from '../../../core/services/nonprofits.service';
+import { prisma } from '../../../config/database';
+import { Prisma, status_type } from '@prisma/client';
 
 type CreateNonprofitInput = z.infer<typeof createNonprofitSchema>;
 type UpdateNonprofitInput = z.infer<typeof updateNonprofitSchema>;
@@ -25,6 +27,12 @@ interface NonprofitsQueryArgs {
   sort?: NonprofitSortOption[];
 }
 
+interface NonprofitChapterProjectsArgs {
+  nonprofitIds?: string[];
+  chapterIds?: string[];
+  projectStatuses?: StatusType[];
+}
+
 export const nonprofitResolvers = {
   Query: {
     nonprofits: async (
@@ -33,14 +41,11 @@ export const nonprofitResolvers = {
     ) => {
       let resolvedChapterIds = chapterIds;
 
-      // If frontend passes chapterNames, convert them to ids
       if (
         (!resolvedChapterIds || resolvedChapterIds.length === 0) &&
         chapterNames?.length
       ) {
         resolvedChapterIds = await getChapterIdsByNames(chapterNames);
-
-        // If user selected chapters but none matched, return empty list
         if (!resolvedChapterIds || resolvedChapterIds.length === 0) return [];
       }
 
@@ -65,6 +70,35 @@ export const nonprofitResolvers = {
         );
       }
       return nonprofit;
+    },
+
+    nonprofitChapterProjects: async (
+      _parent: unknown,
+      {
+        nonprofitIds,
+        chapterIds,
+        projectStatuses,
+      }: NonprofitChapterProjectsArgs
+    ) => {
+      const where: Prisma.nonprofit_chapter_projectWhereInput = {};
+
+      if (nonprofitIds?.length) where.nonprofit_id = { in: nonprofitIds };
+      if (chapterIds?.length) where.chapter_id = { in: chapterIds };
+
+      if (projectStatuses?.length) {
+        where.project_status = {
+          in: projectStatuses.map((s) =>
+            s === 'ACTIVE' ? status_type.ACTIVE : status_type.INACTIVE
+          ),
+        };
+      }
+
+      const rows = await prisma.nonprofit_chapter_project.findMany({
+        where,
+        orderBy: { created_at: 'desc' },
+      });
+
+      return rows ?? [];
     },
   },
 
