@@ -230,7 +230,7 @@ Command to enter in terminal to access tables:
 
 - docker compose exec -T test-db psql -U postgres -d test_db
 - \dt
-- SQL commands such as (SELECT * FROM volunteers;)
+- SQL commands such as (SELECT \* FROM volunteers;)
 
 To pause test, insert this: await new Promise(() => {});
 
