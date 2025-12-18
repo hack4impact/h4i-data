@@ -146,9 +146,7 @@ export async function getNonprofitsWithFilters(
     if (chapterIds && chapterIds.length > 0) {
       andConditions.push({
         nonprofit_chapter_project: {
-          some: {
-            chapter_id: { in: chapterIds },
-          },
+          some: { chapter_id: { in: chapterIds } },
         },
       });
     }
@@ -173,8 +171,12 @@ export async function getNonprofitsWithFilters(
       }
     }
 
-    const where: Prisma.nonprofitsWhereInput =
-      andConditions.length > 0 ? { AND: andConditions } : {};
+    let where: Prisma.nonprofitsWhereInput = {};
+    if (andConditions.length === 1) {
+      where = andConditions[0];
+    } else if (andConditions.length > 1) {
+      where = { AND: andConditions };
+    }
 
     const nonprofits = await prisma.nonprofits.findMany({
       where,
@@ -210,9 +212,13 @@ export async function getNonprofitsWithFilters(
     });
 
     let result = enrichedNonprofits;
+    if (statuses && statuses.length > 0) {
+      result = enrichedNonprofits.filter((np) => statuses.includes(np.status));
+    }
+
     if (sort && sort.length > 0) {
       const comparator = createNonprofitComparator(sort);
-      result = [...enrichedNonprofits].sort(comparator);
+      result = [...result].sort(comparator);
     }
 
     logger.info('Successfully retrieved and filtered nonprofits', {
