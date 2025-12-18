@@ -7,7 +7,7 @@ import {
   DatabaseError,
 } from '../../middleware/error.middleware';
 import { z } from 'zod';
-import { Prisma } from '@prisma/client';
+import { Prisma, status_type } from '@prisma/client';
 
 type CreateNonprofitInput = z.infer<typeof createNonprofitSchema>;
 type UpdateNonprofitInput = z.infer<typeof updateNonprofitSchema>;
@@ -133,20 +133,49 @@ export async function getNonprofitsWithFilters(
 
     logger.info('Fetching nonprofits with filters', { filters });
 
-    // Build Prisma where clause
-    const where: Prisma.nonprofitsWhereInput = {};
+    const now = new Date();
 
+    const activeProjectWhere: Prisma.nonprofit_chapter_projectWhereInput = {
+      project_status: status_type.ACTIVE,
+      OR: [{ end_date: null }, { end_date: { gt: now } }],
+    };
+
+    const andConditions: Prisma.nonprofitsWhereInput[] = [];
+
+    // Chapter filter
     if (chapterIds && chapterIds.length > 0) {
-      where.nonprofit_chapter_project = {
-        some: {
-          chapter_id: {
-            in: chapterIds,
+      andConditions.push({
+        nonprofit_chapter_project: {
+          some: {
+            chapter_id: { in: chapterIds },
           },
         },
-      };
+      });
     }
 
-    // Fetch nonprofits with related projects
+    // Status filter - ACTIVE / INACTIVE
+    if (statuses && statuses.length > 0) {
+      const wantsActive = statuses.includes('ACTIVE');
+      const wantsInactive = statuses.includes('INACTIVE');
+
+      if (wantsActive && !wantsInactive) {
+        andConditions.push({
+          nonprofit_chapter_project: {
+            some: activeProjectWhere,
+          },
+        });
+      } else if (wantsInactive && !wantsActive) {
+        andConditions.push({
+          nonprofit_chapter_project: {
+            none: activeProjectWhere,
+          },
+        });
+      }
+    }
+
+    const where: Prisma.nonprofitsWhereInput =
+      andConditions.length > 0 ? { AND: andConditions } : {};
+
     const nonprofits = await prisma.nonprofits.findMany({
       where,
       include: {
@@ -159,10 +188,9 @@ export async function getNonprofitsWithFilters(
           },
         },
       },
-      orderBy: { created_at: 'desc' }, // Default ordering
+      orderBy: { created_at: 'desc' },
     });
 
-    // Enrich nonprofits with derived fields
     const enrichedNonprofits: EnrichedNonprofit[] = nonprofits.map((np) => {
       const status = deriveNonprofitStatus(np.nonprofit_chapter_project);
       const latestStartDate = getLatestStartDate(np.nonprofit_chapter_project);
@@ -181,25 +209,17 @@ export async function getNonprofitsWithFilters(
       };
     });
 
-    // Apply status filter
-    let filteredNonprofits = enrichedNonprofits;
-    if (statuses && statuses.length > 0) {
-      filteredNonprofits = enrichedNonprofits.filter((np) =>
-        statuses.includes(np.status)
-      );
-    }
-
-    // Apply sorting
+    let result = enrichedNonprofits;
     if (sort && sort.length > 0) {
       const comparator = createNonprofitComparator(sort);
-      filteredNonprofits.sort(comparator);
+      result = [...enrichedNonprofits].sort(comparator);
     }
 
     logger.info('Successfully retrieved and filtered nonprofits', {
-      count: filteredNonprofits.length,
+      count: result.length,
     });
 
-    return filteredNonprofits;
+    return result;
   } catch (error) {
     logger.error('Failed to fetch nonprofits with filters', {
       error: error instanceof Error ? error.message : 'Unknown error',
