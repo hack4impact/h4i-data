@@ -9,6 +9,7 @@ import { prisma } from '../../../src/config/database';
 let server: Server;
 let app: express.Application;
 let contactId: string;
+let sponsorId: string;
 
 // beforeAll runs once before all tests in this file
 beforeAll(async () => {
@@ -46,32 +47,27 @@ describe('REST API - /sponsors', () => {
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('sponsor_id');
     expect(response.body.name).toBe('REST Integration Test Sponsor');
+
+    sponsorId = response.body.sponsor_id;
   });
 
-  it('should create and fetch a sponsor by its ID via GET', async () => {
-    // Create a sponsor for this specific test
-    const createResponse = await request(server).post('/sponsors').send({
-      name: 'Test Sponsor for Fetch',
-      contact_id: contactId,
-      founded_date: '2025-08-30T12:00:00.000Z',
-    });
-
-    expect(createResponse.status).toBe(201);
-    const sponsorId = createResponse.body.sponsor_id;
-
+  it('should fetch a sponsor by its ID via GET', async () => {
     // Now fetch it
     const response = await request(server).get(`/sponsors/${sponsorId}`);
 
     // Assertions
     expect(response.status).toBe(200);
     expect(response.body.sponsor_id).toBe(sponsorId);
-    expect(response.body.name).toBe('Test Sponsor for Fetch');
+    expect(response.body.name).toBe('REST Integration Test Sponsor');
+  });
+
+  it('should delete the sponsor', async () => {
+    const response = await request(server).delete(`/sponsors/${sponsorId}`);
+    expect(response.status).toBe(204);
   });
 
   it('should return 404 for a non-existent sponsor ID', async () => {
-    const response = await request(server).get(
-      '/sponsors/00000000-0000-0000-0000-000000000000'
-    );
+    const response = await request(server).get(`/sponsors/${sponsorId}`);
     expect(response.status).toBe(404);
   });
 });

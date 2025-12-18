@@ -9,6 +9,14 @@ export * from './services/roles.service';
 export * from './services/sponsors.service';
 export * from './services/volunteer.service';
 
+// Export types for GraphQL resolvers
+export type {
+  StatusType,
+  NonprofitSortOption,
+  GetNonprofitsFilters,
+  EnrichedNonprofit,
+} from './services/nonprofits.service';
+
 // Validators
 export * from './validators/chapters.validator';
 export * from './validators/companies.validator';

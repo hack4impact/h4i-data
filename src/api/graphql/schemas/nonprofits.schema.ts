@@ -1,4 +1,11 @@
 export const nonprofitSchemaString = `
+  enum NonprofitSortOption {
+    A_TO_Z
+    Z_TO_A
+    MOST_RECENT
+    STATUS
+  }
+
   type Nonprofit {
     nonprofit_id: ID!
     name: String!
@@ -8,10 +15,15 @@ export const nonprofitSchemaString = `
     contact_id: String!
     created_at: String!
     updated_at: String!
+    status: StatusType!
   }
 
   type Query {
-    nonprofits: [Nonprofit!]!
+    nonprofits(
+      chapterIds: [ID!]
+      statuses: [StatusType!]
+      sort: [NonprofitSortOption!]
+    ): [Nonprofit!]!
     nonprofit(id: ID!): Nonprofit
   }
 
@@ -34,6 +46,6 @@ export const nonprofitSchemaString = `
   type Mutation {
     createNonprofit(input: CreateNonprofitInput!): Nonprofit!
     updateNonprofit(nonprofit_id: ID!, input: UpdateNonprofitInput!): Nonprofit!
-    deleteNonprofit(nonprofit_id: ID!): Nonprofit
+    deleteNonprofit(id: ID!): Nonprofit
   }
 `;

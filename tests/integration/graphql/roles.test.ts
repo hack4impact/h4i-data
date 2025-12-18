@@ -7,6 +7,7 @@ import { level_type } from '@prisma/client';
 
 let server: Server;
 let app: express.Application;
+let roleId: string;
 
 beforeAll(() => {
   app = createGraphqlApp();
@@ -53,38 +54,11 @@ describe('GraphQL API - Roles', () => {
     expect(role.permissions).toEqual(
       expect.objectContaining({ manage_users: true, manage_events: true })
     );
+
+    roleId = role.role_id;
   });
 
-  it('should create and fetch a role by its ID via query', async () => {
-    // Create a role first
-    const createMutation = `
-      mutation CreateRole($input: CreateRoleInput!) {
-        createRole(input: $input) {
-          role_id
-          name
-          description
-          permissions
-          level_type
-        }
-      }
-    `;
-    const createVariables = {
-      input: {
-        name: `Editor-${Date.now()}`,
-        description: 'Can edit content',
-        permissions: { edit_content: true },
-        level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
-      },
-    };
-
-    const createResponse = await request(server)
-      .post('/')
-      .send({ query: createMutation, variables: createVariables });
-
-    expect(createResponse.status).toBe(200);
-    expect(createResponse.body.errors).toBeUndefined();
-    const roleId = createResponse.body.data.createRole.role_id;
-
+  it('should fetch a role by its ID via query', async () => {
     // Fetch it by ID
     const query = `
       query Role($id: ID!) {
@@ -106,9 +80,9 @@ describe('GraphQL API - Roles', () => {
     expect(response.body.errors).toBeUndefined();
     const role = response.body.data.role;
     expect(role.role_id).toBe(roleId);
-    expect(role.name).toMatch(/^Editor-/);
+    expect(role.name).toMatch(/^Admin-/);
     expect(role.permissions).toEqual(
-      expect.objectContaining({ edit_content: true })
+      expect.objectContaining({ manage_users: true, manage_events: true })
     );
   });
 
@@ -157,34 +131,6 @@ describe('GraphQL API - Roles', () => {
   });
 
   it('should update a role', async () => {
-    // Create a role to update
-    const createMutation = `
-      mutation CreateRole($input: CreateRoleInput!) {
-        createRole(input: $input) {
-          role_id
-          name
-          description
-          permissions
-        }
-      }
-    `;
-    const createVariables = {
-      input: {
-        name: `Contributor-${Date.now()}`,
-        description: 'Limited content permissions',
-        permissions: { create_posts: true },
-        level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
-      },
-    };
-
-    const createResponse = await request(server)
-      .post('/')
-      .send({ query: createMutation, variables: createVariables });
-
-    expect(createResponse.status).toBe(200);
-    expect(createResponse.body.errors).toBeUndefined();
-    const roleId = createResponse.body.data.createRole.role_id;
-
     // Update the role
     const updateMutation = `
       mutation UpdateRole($id: ID!, $input: UpdateRoleInput!) {
@@ -221,30 +167,6 @@ describe('GraphQL API - Roles', () => {
   });
 
   it('should delete a role', async () => {
-    // Create a role to delete
-    const createMutation = `
-      mutation CreateRole($input: CreateRoleInput!) {
-        createRole(input: $input) {
-          role_id
-        }
-      }
-    `;
-    const createVariables = {
-      input: {
-        name: `Temp-${Date.now()}`,
-        description: 'To be deleted',
-        permissions: { temp: true },
-        level_type: 'OPERATIONS_BOARD_LEVEL' as level_type,
-      },
-    };
-    const createResponse = await request(server)
-      .post('/')
-      .send({ query: createMutation, variables: createVariables });
-
-    expect(createResponse.status).toBe(200);
-    expect(createResponse.body.errors).toBeUndefined();
-    const roleId = createResponse.body.data.createRole.role_id;
-
     // Delete it
     const deleteMutation = `
       mutation DeleteRole($id: ID!) {

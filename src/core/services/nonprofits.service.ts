@@ -12,6 +12,202 @@ import { Prisma } from '@prisma/client';
 type CreateNonprofitInput = z.infer<typeof createNonprofitSchema>;
 type UpdateNonprofitInput = z.infer<typeof updateNonprofitSchema>;
 
+// Types for filtering and sorting
+export type StatusType = 'ACTIVE' | 'INACTIVE';
+export type NonprofitSortOption =
+  | 'A_TO_Z'
+  | 'Z_TO_A'
+  | 'MOST_RECENT'
+  | 'STATUS';
+
+export interface GetNonprofitsFilters {
+  chapterIds?: string[];
+  statuses?: StatusType[];
+  sort?: NonprofitSortOption[];
+}
+
+export interface EnrichedNonprofit {
+  nonprofit_id: string;
+  name: string;
+  mission: string;
+  website: string | null;
+  location_id: string | null;
+  contact_id: string;
+  created_at: Date;
+  updated_at: Date;
+  status: StatusType;
+  latestStartDate?: Date | null;
+}
+
+/**
+ * Helper function to determine if a nonprofit is ACTIVE based on its projects
+ */
+function deriveNonprofitStatus(
+  projects: {
+    project_status: string;
+    end_date: Date | null;
+  }[]
+): StatusType {
+  const now = new Date();
+  const hasOngoingProject = projects.some((project) => {
+    return (
+      project.project_status === 'ACTIVE' &&
+      (project.end_date === null || new Date(project.end_date) > now)
+    );
+  });
+  return hasOngoingProject ? 'ACTIVE' : 'INACTIVE';
+}
+
+/**
+ * Helper function to get the latest start_date from projects
+ */
+function getLatestStartDate(projects: { start_date: Date }[]): Date | null {
+  if (projects.length === 0) return null;
+  return projects.reduce(
+    (latest, project) => {
+      const startDate = new Date(project.start_date);
+      return !latest || startDate > latest ? startDate : latest;
+    },
+    null as Date | null
+  );
+}
+
+/**
+ * Comparator function for sorting nonprofits
+ */
+function createNonprofitComparator(
+  sortOptions: NonprofitSortOption[]
+): (a: EnrichedNonprofit, b: EnrichedNonprofit) => number {
+  return (a, b) => {
+    for (const option of sortOptions) {
+      let comparison = 0;
+
+      switch (option) {
+        case 'A_TO_Z':
+          comparison = a.name.localeCompare(b.name, undefined, {
+            sensitivity: 'base',
+          });
+          break;
+
+        case 'Z_TO_A':
+          comparison = b.name.localeCompare(a.name, undefined, {
+            sensitivity: 'base',
+          });
+          break;
+
+        case 'MOST_RECENT': {
+          // Sort by latest start date descending (newest first)
+          // Nonprofits without projects go last
+          const aDate = a.latestStartDate?.getTime() ?? -Infinity;
+          const bDate = b.latestStartDate?.getTime() ?? -Infinity;
+          comparison = bDate - aDate;
+          break;
+        }
+
+        case 'STATUS':
+          // ACTIVE before INACTIVE
+          if (a.status === 'ACTIVE' && b.status === 'INACTIVE') {
+            comparison = -1;
+          } else if (a.status === 'INACTIVE' && b.status === 'ACTIVE') {
+            comparison = 1;
+          }
+          break;
+      }
+
+      if (comparison !== 0) {
+        return comparison;
+      }
+    }
+    return 0;
+  };
+}
+
+/**
+ * Get nonprofits with optional filtering and sorting
+ */
+export async function getNonprofitsWithFilters(
+  filters: GetNonprofitsFilters = {}
+): Promise<EnrichedNonprofit[]> {
+  try {
+    const { chapterIds, statuses, sort } = filters;
+
+    logger.info('Fetching nonprofits with filters', { filters });
+
+    // Build Prisma where clause
+    const where: Prisma.nonprofitsWhereInput = {};
+
+    if (chapterIds && chapterIds.length > 0) {
+      where.nonprofit_chapter_project = {
+        some: {
+          chapter_id: {
+            in: chapterIds,
+          },
+        },
+      };
+    }
+
+    // Fetch nonprofits with related projects
+    const nonprofits = await prisma.nonprofits.findMany({
+      where,
+      include: {
+        nonprofit_chapter_project: {
+          select: {
+            start_date: true,
+            end_date: true,
+            project_status: true,
+            chapter_id: true,
+          },
+        },
+      },
+      orderBy: { created_at: 'desc' }, // Default ordering
+    });
+
+    // Enrich nonprofits with derived fields
+    const enrichedNonprofits: EnrichedNonprofit[] = nonprofits.map((np) => {
+      const status = deriveNonprofitStatus(np.nonprofit_chapter_project);
+      const latestStartDate = getLatestStartDate(np.nonprofit_chapter_project);
+
+      return {
+        nonprofit_id: np.nonprofit_id,
+        name: np.name,
+        mission: np.mission,
+        website: np.website,
+        location_id: np.location_id,
+        contact_id: np.contact_id,
+        created_at: np.created_at,
+        updated_at: np.updated_at,
+        status,
+        latestStartDate,
+      };
+    });
+
+    // Apply status filter
+    let filteredNonprofits = enrichedNonprofits;
+    if (statuses && statuses.length > 0) {
+      filteredNonprofits = enrichedNonprofits.filter((np) =>
+        statuses.includes(np.status)
+      );
+    }
+
+    // Apply sorting
+    if (sort && sort.length > 0) {
+      const comparator = createNonprofitComparator(sort);
+      filteredNonprofits.sort(comparator);
+    }
+
+    logger.info('Successfully retrieved and filtered nonprofits', {
+      count: filteredNonprofits.length,
+    });
+
+    return filteredNonprofits;
+  } catch (error) {
+    logger.error('Failed to fetch nonprofits with filters', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    throw new DatabaseError('Failed to retrieve nonprofits');
+  }
+}
+
 export async function getAllNonprofits() {
   try {
     logger.info('Fetching all nonprofits');
@@ -32,12 +228,22 @@ export async function getAllNonprofits() {
   }
 }
 
-export async function getNonprofitById(id: string) {
+export async function getNonprofitById(id: string): Promise<EnrichedNonprofit> {
   try {
     logger.info('Fetching nonprofit by ID', { nonprofitId: id });
 
     const nonprofit = await prisma.nonprofits.findUnique({
       where: { nonprofit_id: id },
+      include: {
+        nonprofit_chapter_project: {
+          select: {
+            start_date: true,
+            end_date: true,
+            project_status: true,
+            chapter_id: true,
+          },
+        },
+      },
     });
 
     if (!nonprofit) {
@@ -45,12 +251,30 @@ export async function getNonprofitById(id: string) {
       throw new NotFoundError('Nonprofit', id);
     }
 
+    // Derive status and latest start date
+    const status = deriveNonprofitStatus(nonprofit.nonprofit_chapter_project);
+    const latestStartDate = getLatestStartDate(
+      nonprofit.nonprofit_chapter_project
+    );
+
     logger.info('Successfully retrieved nonprofit', {
       nonprofitId: id,
       nonprofitName: nonprofit.name,
+      status,
     });
 
-    return nonprofit;
+    return {
+      nonprofit_id: nonprofit.nonprofit_id,
+      name: nonprofit.name,
+      mission: nonprofit.mission,
+      website: nonprofit.website,
+      location_id: nonprofit.location_id,
+      contact_id: nonprofit.contact_id,
+      created_at: nonprofit.created_at,
+      updated_at: nonprofit.updated_at,
+      status,
+      latestStartDate,
+    };
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw error;
@@ -64,7 +288,9 @@ export async function getNonprofitById(id: string) {
   }
 }
 
-export async function createNonprofit(input: CreateNonprofitInput) {
+export async function createNonprofit(
+  input: CreateNonprofitInput
+): Promise<EnrichedNonprofit> {
   try {
     logger.info('Creating new nonprofit', {
       nonprofitName: input.name,
@@ -82,14 +308,44 @@ export async function createNonprofit(input: CreateNonprofitInput) {
       ...(location_id === undefined ? {} : { location_id }), // include if not undefined (can be null)
     };
 
-    const nonprofit = await prisma.nonprofits.create({ data });
+    const nonprofit = await prisma.nonprofits.create({
+      data,
+      include: {
+        nonprofit_chapter_project: {
+          select: {
+            start_date: true,
+            end_date: true,
+            project_status: true,
+            chapter_id: true,
+          },
+        },
+      },
+    });
+
+    // Derive status and latest start date
+    const status = deriveNonprofitStatus(nonprofit.nonprofit_chapter_project);
+    const latestStartDate = getLatestStartDate(
+      nonprofit.nonprofit_chapter_project
+    );
 
     logger.info('Successfully created nonprofit', {
       nonprofitId: nonprofit.nonprofit_id,
       nonprofitName: nonprofit.name,
+      status,
     });
 
-    return nonprofit;
+    return {
+      nonprofit_id: nonprofit.nonprofit_id,
+      name: nonprofit.name,
+      mission: nonprofit.mission,
+      website: nonprofit.website,
+      location_id: nonprofit.location_id,
+      contact_id: nonprofit.contact_id,
+      created_at: nonprofit.created_at,
+      updated_at: nonprofit.updated_at,
+      status,
+      latestStartDate,
+    };
   } catch (error) {
     logger.error('Failed to create nonprofit', {
       nonprofitData: input,
@@ -99,7 +355,10 @@ export async function createNonprofit(input: CreateNonprofitInput) {
   }
 }
 
-export async function updateNonprofit(id: string, input: UpdateNonprofitInput) {
+export async function updateNonprofit(
+  id: string,
+  input: UpdateNonprofitInput
+): Promise<EnrichedNonprofit> {
   try {
     logger.info('Updating nonprofit', {
       nonprofitId: id,
@@ -119,14 +378,42 @@ export async function updateNonprofit(id: string, input: UpdateNonprofitInput) {
     const nonprofit = await prisma.nonprofits.update({
       where: { nonprofit_id: id },
       data,
+      include: {
+        nonprofit_chapter_project: {
+          select: {
+            start_date: true,
+            end_date: true,
+            project_status: true,
+            chapter_id: true,
+          },
+        },
+      },
     });
+
+    // Derive status and latest start date
+    const status = deriveNonprofitStatus(nonprofit.nonprofit_chapter_project);
+    const latestStartDate = getLatestStartDate(
+      nonprofit.nonprofit_chapter_project
+    );
 
     logger.info('Successfully updated nonprofit', {
       nonprofitId: id,
       nonprofitName: nonprofit.name,
+      status,
     });
 
-    return nonprofit;
+    return {
+      nonprofit_id: nonprofit.nonprofit_id,
+      name: nonprofit.name,
+      mission: nonprofit.mission,
+      website: nonprofit.website,
+      location_id: nonprofit.location_id,
+      contact_id: nonprofit.contact_id,
+      created_at: nonprofit.created_at,
+      updated_at: nonprofit.updated_at,
+      status,
+      latestStartDate,
+    };
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -152,21 +439,63 @@ export async function updateNonprofit(id: string, input: UpdateNonprofitInput) {
   }
 }
 
-export async function deleteNonprofit(id: string) {
+export async function deleteNonprofit(id: string): Promise<EnrichedNonprofit> {
   try {
     logger.info('Deleting nonprofit', { nonprofitId: id });
 
-    const nonprofit = await prisma.nonprofits.delete({
+    // Fetch the nonprofit with projects before deleting to return enriched data
+    const nonprofit = await prisma.nonprofits.findUnique({
+      where: { nonprofit_id: id },
+      include: {
+        nonprofit_chapter_project: {
+          select: {
+            start_date: true,
+            end_date: true,
+            project_status: true,
+            chapter_id: true,
+          },
+        },
+      },
+    });
+
+    if (!nonprofit) {
+      throw new NotFoundError('Nonprofit', id);
+    }
+
+    // Derive status and latest start date before deleting
+    const status = deriveNonprofitStatus(nonprofit.nonprofit_chapter_project);
+    const latestStartDate = getLatestStartDate(
+      nonprofit.nonprofit_chapter_project
+    );
+
+    // Now delete the nonprofit
+    await prisma.nonprofits.delete({
       where: { nonprofit_id: id },
     });
 
     logger.info('Successfully deleted nonprofit', {
       nonprofitId: id,
       nonprofitName: nonprofit.name,
+      status,
     });
 
-    return nonprofit;
+    return {
+      nonprofit_id: nonprofit.nonprofit_id,
+      name: nonprofit.name,
+      mission: nonprofit.mission,
+      website: nonprofit.website,
+      location_id: nonprofit.location_id,
+      contact_id: nonprofit.contact_id,
+      created_at: nonprofit.created_at,
+      updated_at: nonprofit.updated_at,
+      status,
+      latestStartDate,
+    };
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2025'

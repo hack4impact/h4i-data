@@ -11,7 +11,7 @@ export const projectSchemaString = `
   }
 
   type Query {
-    projects: [Project!]!
+    projects(sortOrder: String): [Project!]!
     project(id: ID!): Project
   }
 

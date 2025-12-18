@@ -248,7 +248,6 @@ curl -X DELETE http://localhost:3001/api/rest/volunteers/[volunteer-id]
 
 2. **Environment Variables**:
 
-
 Go to top right where it says "No environment" and create an environment to insert what's below
 
 ```json

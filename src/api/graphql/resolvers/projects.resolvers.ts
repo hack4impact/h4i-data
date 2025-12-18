@@ -28,9 +28,23 @@ function serializeProject(project: any) {
 
 export const projectResolvers = {
   Query: {
-    projects: async () => {
+    projects: async (_parent: unknown, args: { sortOrder?: string }) => {
       const projects = await getAllProjects();
-      return projects.map(serializeProject);
+
+      if (!args.sortOrder) {
+        return projects.map(serializeProject);
+      }
+
+      const order = (args.sortOrder || 'ASC').toUpperCase();
+
+      const sortedProjects = projects.sort((a, b) => {
+        if (order === 'DESC') {
+          return b.name.localeCompare(a.name);
+        }
+        return a.name.localeCompare(b.name);
+      });
+
+      return sortedProjects.map(serializeProject);
     },
     project: async (_parent: unknown, args: { id: string }) => {
       const project = await getProjectById(args.id);
