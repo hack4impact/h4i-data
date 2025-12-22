@@ -12,6 +12,7 @@
     "format": "prettier --write src/",
     "lint": "eslint src/ --ext .ts",
     "prepare": "husky",
+    "postinstall": "prisma generate",
     "seed:test": "docker compose exec -T test-db psql -U postgres -d test_db -f /docker-entrypoint-initdb.d/seed.sql",
     "start": "node src/app.js",
     "test": "npm run test:unit && npm run test:integration",
