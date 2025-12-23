@@ -4,7 +4,7 @@
   "description": "Backend API for volunteer management with GraphQL and REST endpoints",
   "main": "src/app.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && prisma generate",
     "dev": "ts-node src/app.ts",
     "dev:both": "concurrently \"npm run dev:graphql\" \"npm run dev:rest\"",
     "dev:graphql": "ts-node src/api/graphql/server.ts",
@@ -12,7 +12,6 @@
     "format": "prettier --write src/",
     "lint": "eslint src/ --ext .ts",
     "prepare": "husky",
-    "postinstall": "prisma generate",
     "seed:test": "docker compose exec -T test-db psql -U postgres -d test_db -f /docker-entrypoint-initdb.d/seed.sql",
     "start": "node src/app.js",
     "test": "npm run test:unit && npm run test:integration",
