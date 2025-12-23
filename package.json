@@ -13,7 +13,7 @@
     "lint": "eslint src/ --ext .ts",
     "prepare": "husky",
     "seed:test": "docker compose exec -T test-db psql -U postgres -d test_db -f /docker-entrypoint-initdb.d/seed.sql",
-    "start": "node dist/app.js",
+    "start": "npx prisma generate && node dist/app.js",
     "test": "npm run test:unit && npm run test:integration",
     "test:coverage": "jest --coverage --testPathIgnorePatterns=tests/integration",
     "test:integration": "jest tests/integration --runInBand",
