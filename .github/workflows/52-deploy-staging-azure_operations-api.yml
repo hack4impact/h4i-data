@@ -3,7 +3,7 @@ name: Deploy Node.js app to Azure Web App - operations-api
 on:
   push:
     branches:
-      - 52-deploy-staging-azure
+      - develop
   workflow_dispatch:
 
 jobs:
