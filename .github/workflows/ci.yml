@@ -69,3 +69,19 @@ jobs:
       - name: Stop test database
         if: always()
         run: docker compose down -v
+
+      - name: Build TypeScript + Prisma
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-app
+          path: |
+            dist
+            node_modules
+            package.json
+            package-lock.json
