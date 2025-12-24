@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - 52-deploy-staging-azure
   pull_request:
   workflow_dispatch:
 
