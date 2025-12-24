@@ -23,17 +23,11 @@ jobs:
         with:
           node-version: '24.x'
 
-      - name: Prisma generate
-        run: npx prisma generate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      - name: Build TypeScript + Prisma
+        run: npm run build
 
       - name: Verify Prisma client
         run: ls -la node_modules/.prisma/client
-
-      - name: Build TypeScript + Prisma
-        run: npm run build
       
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
