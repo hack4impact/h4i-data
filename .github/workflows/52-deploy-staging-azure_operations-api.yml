@@ -23,6 +23,12 @@ jobs:
         with:
           node-version: '24.x'
 
+      - name: Clear npm cache
+        run: npm cache clean --force
+
+      - name: Install deps
+        run: npm ci --fetch-retries=5
+
       - name: Build TypeScript + Prisma
         run: npm run build
 
