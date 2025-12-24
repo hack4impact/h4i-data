@@ -1,0 +1,31 @@
+name: Deploy Node.js app to Azure Web App - operations-api
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_16535DB0A5374AF2A5FFD0F538170C65 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_1ADF5126AE0E4076B47D70132DF2D709 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_D03F78C8B0E048FAA31639496352BBFC }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'operations-api'
+          slot-name: 'Production'
+          package: .

@@ -3,11 +3,15 @@ import { createRestApp } from './api/rest/server';
 import { createGraphqlApp } from './api/graphql/server';
 import { env } from './config/server';
 import { connectDB, disconnectDB } from './config/database'; // Import disconnectDB
+import cors from 'cors';
+import { corsConfig } from './config/cors';
 
 async function startServer() {
   await connectDB();
 
   const app = express();
+  // allows access to the api
+  app.use(cors(corsConfig));
 
   // Mount the REST API
   const restApp = createRestApp();
@@ -17,7 +21,8 @@ async function startServer() {
   const graphqlApp = createGraphqlApp();
   app.use('/api/graphql', graphqlApp);
 
-  const server = app.listen(env.PORT, () => {
+  const port = process.env.PORT || env.PORT || 3000;
+  const server = app.listen(port, () => {
     console.log(`Integrated server ready at http://localhost:${env.PORT}`);
     console.log(`REST API available at http://localhost:${env.PORT}/api/rest`);
     console.log(
