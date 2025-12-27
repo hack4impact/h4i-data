@@ -6,6 +6,12 @@ export const nonprofitSchemaString = `
     STATUS
   }
 
+  type NonprofitChapterInfo {
+    chapter_id: ID!
+    chapter_name: String!
+    project_status: StatusType!
+  }
+
   type Nonprofit {
     nonprofit_id: ID!
     name: String!
@@ -16,21 +22,9 @@ export const nonprofitSchemaString = `
     created_at: String!
     updated_at: String!
     status: StatusType!
-  }
 
-  type NonprofitChapterProject {
-    nonprofit_chapter_project_id: ID!
-    nonprofit_id: ID!
-    chapter_id: ID
-    project_id: ID!
-    project_contact_id: ID!
-    collab_contact_id: ID!
-    start_date: String!
-    end_date: String
-    notes: String
-    project_status: StatusType!
-    created_at: String!
-    updated_at: String!
+    # chapter + project status info (pulled internally from nonprofit_chapter_project)
+    chapters: [NonprofitChapterInfo!]!
   }
 
   type Query {
@@ -42,12 +36,6 @@ export const nonprofitSchemaString = `
     ): [Nonprofit!]!
 
     nonprofit(id: ID!): Nonprofit
-
-    nonprofitChapterProjects(
-      nonprofitIds: [ID!]
-      chapterIds: [ID!]
-      projectStatuses: [StatusType!]
-    ): [NonprofitChapterProject!]!
   }
 
   input CreateNonprofitInput {
