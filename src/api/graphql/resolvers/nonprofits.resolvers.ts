@@ -15,7 +15,7 @@ import type {
   NonprofitSortOption,
 } from '../../../core/services/nonprofits.service';
 import { prisma } from '../../../config/database';
-import { Prisma, status_type } from '@prisma/client';
+import { status_type } from '@prisma/client';
 
 type CreateNonprofitInput = z.infer<typeof createNonprofitSchema>;
 type UpdateNonprofitInput = z.infer<typeof updateNonprofitSchema>;
@@ -25,12 +25,6 @@ interface NonprofitsQueryArgs {
   chapterNames?: string[];
   statuses?: StatusType[];
   sort?: NonprofitSortOption[];
-}
-
-interface NonprofitChapterProjectsArgs {
-  nonprofitIds?: string[];
-  chapterIds?: string[];
-  projectStatuses?: StatusType[];
 }
 
 export const nonprofitResolvers = {
@@ -46,7 +40,7 @@ export const nonprofitResolvers = {
         chapterNames?.length
       ) {
         resolvedChapterIds = await getChapterIdsByNames(chapterNames);
-        if (!resolvedChapterIds || resolvedChapterIds.length === 0) return [];
+        if (!resolvedChapterIds.length) return [];
       }
 
       return getNonprofitsWithFilters({
@@ -71,34 +65,32 @@ export const nonprofitResolvers = {
       }
       return nonprofit;
     },
+  },
 
-    nonprofitChapterProjects: async (
-      _parent: unknown,
-      {
-        nonprofitIds,
-        chapterIds,
-        projectStatuses,
-      }: NonprofitChapterProjectsArgs
-    ) => {
-      const where: Prisma.nonprofit_chapter_projectWhereInput = {};
-
-      if (nonprofitIds?.length) where.nonprofit_id = { in: nonprofitIds };
-      if (chapterIds?.length) where.chapter_id = { in: chapterIds };
-
-      if (projectStatuses?.length) {
-        where.project_status = {
-          in: projectStatuses.map((s) =>
-            s === 'ACTIVE' ? status_type.ACTIVE : status_type.INACTIVE
-          ),
-        };
-      }
-
+  Nonprofit: {
+    chapters: async (parent: { nonprofit_id: string }) => {
       const rows = await prisma.nonprofit_chapter_project.findMany({
-        where,
+        where: { nonprofit_id: parent.nonprofit_id },
+        select: {
+          project_status: true,
+          chapters: {
+            select: {
+              chapter_id: true,
+              name: true,
+            },
+          },
+        },
         orderBy: { created_at: 'desc' },
       });
 
-      return rows ?? [];
+      return rows
+        .filter((r) => r.chapters !== null)
+        .map((r) => ({
+          chapter_id: r.chapters!.chapter_id,
+          chapter_name: r.chapters!.name,
+          project_status:
+            r.project_status === status_type.ACTIVE ? 'ACTIVE' : 'INACTIVE',
+        }));
     },
   },
 
