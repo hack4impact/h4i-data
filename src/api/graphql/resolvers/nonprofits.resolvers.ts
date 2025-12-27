@@ -84,10 +84,17 @@ export const nonprofitResolvers = {
       });
 
       return rows
-        .filter((r) => r.chapters !== null)
+        .filter(
+          (
+            r
+          ): r is {
+            project_status: status_type;
+            chapters: { chapter_id: string; name: string };
+          } => r.chapters !== null
+        )
         .map((r) => ({
-          chapter_id: r.chapters!.chapter_id,
-          chapter_name: r.chapters!.name,
+          chapter_id: r.chapters.chapter_id,
+          chapter_name: r.chapters.name,
           project_status:
             r.project_status === status_type.ACTIVE ? 'ACTIVE' : 'INACTIVE',
         }));
