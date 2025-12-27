@@ -1,4 +1,3 @@
-// src/core/services/nonprofits.service.ts
 import { prisma } from '../../config/database';
 import { createNonprofitSchema, updateNonprofitSchema } from '../validators';
 import { logger } from '../../config/logger';
@@ -140,46 +139,44 @@ export async function getNonprofitsWithFilters(
       OR: [{ end_date: null }, { end_date: { gt: now } }],
     };
 
-    const andConditions: Prisma.nonprofitsWhereInput[] = [];
+    const ncpWhere: Prisma.nonprofit_chapter_projectWhereInput = {};
 
-    // Chapter filter
-    if (chapterIds && chapterIds.length > 0) {
-      andConditions.push({
-        nonprofit_chapter_project: {
-          some: { chapter_id: { in: chapterIds } },
-        },
-      });
+    if (chapterIds?.length) {
+      ncpWhere.chapter_id = { in: chapterIds };
     }
 
-    // Status filter - ACTIVE / INACTIVE
-    if (statuses && statuses.length > 0) {
+    if (statuses?.length) {
       const wantsActive = statuses.includes('ACTIVE');
       const wantsInactive = statuses.includes('INACTIVE');
 
+      // Only ACTIVE
       if (wantsActive && !wantsInactive) {
-        andConditions.push({
-          nonprofit_chapter_project: {
-            some: activeProjectWhere,
-          },
-        });
-      } else if (wantsInactive && !wantsActive) {
-        andConditions.push({
-          nonprofit_chapter_project: {
-            none: activeProjectWhere,
-          },
-        });
+        Object.assign(ncpWhere, activeProjectWhere);
       }
+
+      // Only INACTIVE
+      if (wantsInactive && !wantsActive) {
+        ncpWhere.NOT = activeProjectWhere;
+      }
+
     }
 
-    let where: Prisma.nonprofitsWhereInput = {};
-    if (andConditions.length === 1) {
-      where = andConditions[0];
-    } else if (andConditions.length > 1) {
-      where = { AND: andConditions };
-    }
+    const joinRows = await prisma.nonprofit_chapter_project.findMany({
+      where: Object.keys(ncpWhere).length ? ncpWhere : undefined,
+      select: { nonprofit_id: true },
+    });
 
+    // if user provided any filter that relies on join table and have nothing, return []
+    const usedJoinFilters =
+      (chapterIds && chapterIds.length > 0) || (statuses && statuses.length > 0);
+
+    if (usedJoinFilters && joinRows.length === 0) return [];
+
+    const nonprofitIds = [...new Set(joinRows.map((r) => r.nonprofit_id))];
+
+    // fetch nonprofits by those ids (or fetch all if no join filters)
     const nonprofits = await prisma.nonprofits.findMany({
-      where,
+      where: usedJoinFilters ? { nonprofit_id: { in: nonprofitIds } } : undefined,
       include: {
         nonprofit_chapter_project: {
           select: {
@@ -212,11 +209,12 @@ export async function getNonprofitsWithFilters(
     });
 
     let result = enrichedNonprofits;
-    if (statuses && statuses.length > 0) {
-      result = enrichedNonprofits.filter((np) => statuses.includes(np.status));
+    if (statuses?.length) {
+      result = result.filter((np) => statuses.includes(np.status));
     }
 
-    if (sort && sort.length > 0) {
+    // sorting
+    if (sort?.length) {
       const comparator = createNonprofitComparator(sort);
       result = [...result].sort(comparator);
     }
@@ -328,8 +326,8 @@ export async function createNonprofit(
 
     const data: Prisma.nonprofitsUncheckedCreateInput = {
       name,
-      mission, // required string
-      contact_id, // required string
+      mission,
+      contact_id,
       ...(website === undefined ? {} : { website }), // include if not undefined (can be null)
       ...(location_id === undefined ? {} : { location_id }), // include if not undefined (can be null)
     };
