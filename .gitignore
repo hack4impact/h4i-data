@@ -9,3 +9,5 @@ logs/
 
 # Coverage files
 coverage/
+
+dist/

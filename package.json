@@ -4,7 +4,7 @@
   "description": "Backend API for volunteer management with GraphQL and REST endpoints",
   "main": "src/app.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && prisma generate",
     "dev": "ts-node src/app.ts",
     "dev:both": "concurrently \"npm run dev:graphql\" \"npm run dev:rest\"",
     "dev:graphql": "ts-node src/api/graphql/server.ts",
@@ -51,12 +51,13 @@
   "homepage": "https://github.com/hack4impact/test-backend#readme",
   "dependencies": {
     "@graphql-tools/schema": "^10.0.23",
-    "@prisma/client": "^6.15.0",
+    "@prisma/client": "^6.19.1",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-graphql": "^0.12.0",
     "express-rate-limit": "^8.1.0",
+    "graphql": "^15.8.0",
     "graphql-scalars": "^1.24.2",
     "helmet": "^8.1.0",
     "pg": "^8.15.6",
@@ -76,11 +77,12 @@
     "jest": "^29.7.0",
     "lint-staged": "^16.1.5",
     "prettier": "3.6.2",
-    "prisma": "^6.16.3",
+    "prisma": "^6.19.1",
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.41.0",
     "zod": "^4.1.5"
   }
