@@ -125,7 +125,7 @@ beforeEach(async () => {
       project_contact_id: contactId,
       collab_contact_id: contactId,
       start_date: new Date('2024-06-01'),
-      end_date: new Date('2025-12-31'),
+      end_date: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 365),
       project_status: 'ACTIVE',
     },
   });
