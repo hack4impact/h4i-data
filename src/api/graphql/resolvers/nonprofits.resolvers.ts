@@ -21,7 +21,6 @@ type CreateNonprofitInput = z.infer<typeof createNonprofitSchema>;
 type UpdateNonprofitInput = z.infer<typeof updateNonprofitSchema>;
 
 interface NonprofitsQueryArgs {
-  chapterIds?: string[];
   chapterNames?: string[];
   statuses?: StatusType[];
   sort?: NonprofitSortOption[];
@@ -31,23 +30,27 @@ export const nonprofitResolvers = {
   Query: {
     nonprofits: async (
       _parent: unknown,
-      { chapterIds, chapterNames, statuses, sort }: NonprofitsQueryArgs
+      { chapterNames, statuses, sort }: NonprofitsQueryArgs
     ) => {
-      let resolvedChapterIds = chapterIds;
+      let resolvedChapterIds: string[] | undefined;
 
-      if (
-        (!resolvedChapterIds || resolvedChapterIds.length === 0) &&
-        chapterNames?.length
-      ) {
+      if (chapterNames?.length) {
         resolvedChapterIds = await getChapterIdsByNames(chapterNames);
         if (!resolvedChapterIds.length) return [];
       }
 
-      return getNonprofitsWithFilters({
-        chapterIds: resolvedChapterIds,
+      const nonprofits = await getNonprofitsWithFilters({
         statuses,
         sort,
-      });
+        ...(resolvedChapterIds?.length
+          ? { chapterIds: resolvedChapterIds }
+          : {}),
+      } as any);
+
+      return nonprofits.map((np) => ({
+        ...np,
+        chapters: [],
+      }));
     },
 
     nonprofit: async (_parent: unknown, { id }: { id: string }) => {
@@ -63,7 +66,11 @@ export const nonprofitResolvers = {
           { code: 'NOT_FOUND' }
         );
       }
-      return nonprofit;
+
+      return {
+        ...nonprofit,
+        chapters: [],
+      };
     },
   },
 
@@ -73,6 +80,7 @@ export const nonprofitResolvers = {
         where: { nonprofit_id: parent.nonprofit_id },
         select: {
           project_status: true,
+          chapter_id: true,
           chapters: {
             select: {
               chapter_id: true,
@@ -83,18 +91,29 @@ export const nonprofitResolvers = {
         orderBy: { created_at: 'desc' },
       });
 
+      if (!rows.length) return [];
+
+      const seen = new Set<string>();
+
       return rows
         .filter(
           (
             r
           ): r is {
             project_status: status_type;
-            chapters: { chapter_id: string; name: string };
+            chapter_id: string;
+            chapters: { chapter_id: string; name: string } | null;
           } => r.chapters !== null
         )
+        .filter((r) => {
+          const id = r.chapters!.chapter_id;
+          if (seen.has(id)) return false;
+          seen.add(id);
+          return true;
+        })
         .map((r) => ({
-          chapter_id: r.chapters.chapter_id,
-          chapter_name: r.chapters.name,
+          chapter_id: r.chapters!.chapter_id,
+          chapter_name: r.chapters!.name,
           project_status:
             r.project_status === status_type.ACTIVE ? 'ACTIVE' : 'INACTIVE',
         }));
