@@ -64,7 +64,10 @@ describe('Nonprofit Service', () => {
     it('should return a single nonprofit when a valid ID is provided', async () => {
       const nonprofitId = '1';
       const baseDate = new Date();
-      const futureDate = new Date('2026-12-31');
+      // get current time
+      const futureDate = new Date(
+        baseDate.getTime() + 1000 * 60 * 60 * 24 * 365
+      ); // 1 year in the future
       const mockNonprofit = {
         nonprofit_id: '1',
         name: 'Test Nonprofit 1',
@@ -92,7 +95,6 @@ describe('Nonprofit Service', () => {
 
       expect(result.nonprofit_id).toBe(mockNonprofit.nonprofit_id);
       expect(result.name).toBe(mockNonprofit.name);
-      expect(result.status).toBe('ACTIVE');
       expect(prisma.nonprofits.findUnique).toHaveBeenCalledWith({
         where: { nonprofit_id: nonprofitId },
         include: {
@@ -106,6 +108,8 @@ describe('Nonprofit Service', () => {
           },
         },
       });
+
+      expect(result.status).toBe('ACTIVE');
     });
 
     it('should throw NotFoundError if no nonprofit is found', async () => {
@@ -173,7 +177,10 @@ describe('Nonprofit Service', () => {
       const nonprofitId = '1';
       const updateData = { name: 'Updated Nonprofit Name' };
       const baseDate = new Date();
-      const futureDate = new Date('2026-12-31');
+      // get current time
+      const futureDate = new Date(
+        baseDate.getTime() + 1000 * 60 * 60 * 24 * 365
+      ); // 1 year in the future
 
       const updatedNonprofit = {
         nonprofit_id: '1',
@@ -269,7 +276,9 @@ describe('Nonprofit Service', () => {
 
   describe('getNonprofitsWithFilters', () => {
     const baseDate = new Date('2024-01-01');
-    const futureDate = new Date('2026-12-31');
+    const now = new Date();
+    // get current time
+    const futureDate = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 365); // 1 year in the future
     const pastDate = new Date('2023-01-01');
 
     it('should return all nonprofits with derived status when no filters are provided', async () => {
