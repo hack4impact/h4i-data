@@ -20,7 +20,6 @@ export type NonprofitSortOption =
   | 'STATUS';
 
 export interface GetNonprofitsFilters {
-  chapterIds?: string[];
   statuses?: StatusType[];
   sort?: NonprofitSortOption[];
 }
@@ -43,16 +42,20 @@ export interface EnrichedNonprofit {
  */
 function deriveNonprofitStatus(
   projects: {
-    project_status: string;
+    project_status: status_type | string;
     end_date: Date | null;
   }[]
 ): StatusType {
   const now = new Date();
   const hasOngoingProject = projects.some((project) => {
-    return (
-      project.project_status === 'ACTIVE' &&
-      (project.end_date === null || new Date(project.end_date) > now)
-    );
+    const isActive =
+      project.project_status === status_type.ACTIVE ||
+      project.project_status === 'ACTIVE';
+
+    const notEnded =
+      project.end_date === null || new Date(project.end_date) > now;
+
+    return isActive && notEnded;
   });
   return hasOngoingProject ? 'ACTIVE' : 'INACTIVE';
 }
@@ -128,7 +131,7 @@ export async function getNonprofitsWithFilters(
   filters: GetNonprofitsFilters = {}
 ): Promise<EnrichedNonprofit[]> {
   try {
-    const { chapterIds, statuses, sort } = filters;
+    const { statuses, sort } = filters;
 
     logger.info('Fetching nonprofits with filters', { filters });
 
@@ -139,18 +142,12 @@ export async function getNonprofitsWithFilters(
       OR: [{ end_date: null }, { end_date: { gt: now } }],
     };
 
-    const hasJoinFilters =
-      (chapterIds && chapterIds.length > 0) ||
-      (statuses && statuses.length > 0);
+    const hasJoinFilters = statuses && statuses.length > 0;
 
     let nonprofitIdFilter: Prisma.nonprofitsWhereInput | undefined;
 
     if (hasJoinFilters) {
       const ncpWhere: Prisma.nonprofit_chapter_projectWhereInput = {};
-
-      if (chapterIds?.length) {
-        ncpWhere.chapter_id = { in: chapterIds };
-      }
 
       if (statuses?.length) {
         const wantsActive = statuses.includes('ACTIVE');
