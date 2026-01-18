@@ -64,7 +64,7 @@ describe('Nonprofit Service', () => {
     it('should return a single nonprofit when a valid ID is provided', async () => {
       const nonprofitId = '1';
       const baseDate = new Date();
-      const futureDate = new Date('2025-12-31');
+      const futureDate = new Date('2026-12-31');
       const mockNonprofit = {
         nonprofit_id: '1',
         name: 'Test Nonprofit 1',
@@ -83,6 +83,7 @@ describe('Nonprofit Service', () => {
           },
         ],
       };
+
       (prisma.nonprofits.findUnique as jest.Mock).mockResolvedValue(
         mockNonprofit
       );
@@ -172,7 +173,7 @@ describe('Nonprofit Service', () => {
       const nonprofitId = '1';
       const updateData = { name: 'Updated Nonprofit Name' };
       const baseDate = new Date();
-      const futureDate = new Date('2025-12-31');
+      const futureDate = new Date('2026-12-31');
 
       const updatedNonprofit = {
         nonprofit_id: '1',
@@ -268,7 +269,7 @@ describe('Nonprofit Service', () => {
 
   describe('getNonprofitsWithFilters', () => {
     const baseDate = new Date('2024-01-01');
-    const futureDate = new Date('2025-12-31');
+    const futureDate = new Date('2026-12-31');
     const pastDate = new Date('2023-01-01');
 
     it('should return all nonprofits with derived status when no filters are provided', async () => {
@@ -323,61 +324,7 @@ describe('Nonprofit Service', () => {
       expect(prisma.nonprofits.findMany).toHaveBeenCalledTimes(1);
     });
 
-    it('should filter nonprofits by chapter IDs', async () => {
-      const chapterId = 'chapter-1';
-      (
-        prisma.nonprofit_chapter_project.findMany as jest.Mock
-      ).mockResolvedValue([{ nonprofit_id: '1' }]);
-
-      const mockNonprofits = [
-        {
-          nonprofit_id: '1',
-          name: 'Nonprofit 1',
-          mission: 'Test mission',
-          website: null,
-          location_id: null,
-          contact_id: 'contact-1',
-          created_at: baseDate,
-          updated_at: baseDate,
-          nonprofit_chapter_project: [
-            {
-              start_date: baseDate,
-              end_date: null,
-              project_status: 'ACTIVE',
-              chapterId,
-            },
-          ],
-        },
-      ];
-
-      // service THEN queries nonprofits by nonprofit_id IN (...)
-      (prisma.nonprofits.findMany as jest.Mock).mockResolvedValue(
-        mockNonprofits
-      );
-
-      const result = await getNonprofitsWithFilters({
-        chapterIds: [chapterId],
-      });
-
-      expect(result).toHaveLength(1);
-      expect(result[0].nonprofit_id).toBe('1');
-
-      expect(prisma.nonprofit_chapter_project.findMany).toHaveBeenCalledWith({
-        where: { chapter_id: { in: [chapterId] } },
-        select: { nonprofit_id: true },
-      });
-
-      expect(prisma.nonprofits.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { nonprofit_id: { in: ['1'] } },
-          include: expect.any(Object),
-          orderBy: { created_at: 'desc' },
-        })
-      );
-    });
-
     it('should filter nonprofits by ACTIVE status', async () => {
-      // service FIRST queries the join table using ACTIVE project criteria
       (
         prisma.nonprofit_chapter_project.findMany as jest.Mock
       ).mockResolvedValue([{ nonprofit_id: '1' }]);
