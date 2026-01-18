@@ -22,14 +22,11 @@ export const nonprofitSchemaString = `
     created_at: String!
     updated_at: String!
     status: StatusType!
-
-    # chapter + project status info (pulled internally from nonprofit_chapter_project)
     chapters: [NonprofitChapterInfo!]!
   }
 
   type Query {
     nonprofits(
-      chapterIds: [ID!]
       chapterNames: [String!]
       statuses: [StatusType!]
       sort: [NonprofitSortOption!]
