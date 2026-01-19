@@ -26,6 +26,22 @@ interface NonprofitsQueryArgs {
   sort?: NonprofitSortOption[];
 }
 
+interface GetNonprofitsWithFiltersArgs {
+  statuses?: StatusType[];
+  sort?: NonprofitSortOption[];
+  chapterIds?: string[];
+}
+
+interface NonprofitParent {
+  nonprofit_id: string;
+}
+
+interface ChapterRow {
+  project_status: status_type;
+  chapter_id: string | null;
+  chapters: { chapter_id: string; name: string } | null;
+}
+
 export const nonprofitResolvers = {
   Query: {
     nonprofits: async (
@@ -39,13 +55,15 @@ export const nonprofitResolvers = {
         if (!resolvedChapterIds.length) return [];
       }
 
-      const nonprofits = await getNonprofitsWithFilters({
+      const serviceArgs: GetNonprofitsWithFiltersArgs = {
         statuses,
         sort,
         ...(resolvedChapterIds?.length
           ? { chapterIds: resolvedChapterIds }
           : {}),
-      } as any);
+      };
+
+      const nonprofits = await getNonprofitsWithFilters(serviceArgs);
 
       return nonprofits.map((np) => ({
         ...np,
@@ -75,8 +93,8 @@ export const nonprofitResolvers = {
   },
 
   Nonprofit: {
-    chapters: async (parent: { nonprofit_id: string }) => {
-      const rows = await prisma.nonprofit_chapter_project.findMany({
+    chapters: async (parent: NonprofitParent) => {
+      const rows = (await prisma.nonprofit_chapter_project.findMany({
         where: { nonprofit_id: parent.nonprofit_id },
         select: {
           project_status: true,
@@ -89,34 +107,32 @@ export const nonprofitResolvers = {
           },
         },
         orderBy: { created_at: 'desc' },
-      });
+      })) as ChapterRow[];
 
       if (!rows.length) return [];
 
-      const seen = new Set<string>();
+      const rowsWithChapter = rows.filter(
+        (
+          r
+        ): r is ChapterRow & {
+          chapters: { chapter_id: string; name: string };
+        } => r.chapters !== null
+      );
 
-      return rows
-        .filter(
-          (
-            r
-          ): r is {
-            project_status: status_type;
-            chapter_id: string;
-            chapters: { chapter_id: string; name: string } | null;
-          } => r.chapters !== null
-        )
-        .filter((r) => {
-          const id = r.chapters!.chapter_id;
-          if (seen.has(id)) return false;
-          seen.add(id);
-          return true;
-        })
-        .map((r) => ({
-          chapter_id: r.chapters!.chapter_id,
-          chapter_name: r.chapters!.name,
-          project_status:
-            r.project_status === status_type.ACTIVE ? 'ACTIVE' : 'INACTIVE',
-        }));
+      const seen = new Set<string>();
+      const deduped = rowsWithChapter.filter((r) => {
+        const id = r.chapters.chapter_id;
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+
+      return deduped.map((r) => ({
+        chapter_id: r.chapters.chapter_id,
+        chapter_name: r.chapters.name,
+        project_status:
+          r.project_status === status_type.ACTIVE ? 'ACTIVE' : 'INACTIVE',
+      }));
     },
   },
 
