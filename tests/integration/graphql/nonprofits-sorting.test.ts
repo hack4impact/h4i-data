@@ -15,6 +15,7 @@ let server: Server;
 let app: express.Application;
 let contactId: string;
 let chapterId: string;
+let chapterName: string;
 let projectId: string;
 let nonprofit1Id: string;
 let nonprofit2Id: string;
@@ -24,7 +25,14 @@ beforeAll(async () => {
   app = createGraphqlApp();
   server = app.listen(env.GRAPHQL_PORT);
 
-  const contactMutation = `mutation CreateContact($input: CreateContactInput!) { createContact(input: $input) { contact_id } }`;
+  const contactMutation = `
+    mutation CreateContact($input: CreateContactInput!) {
+      createContact(input: $input) {
+        contact_id
+      }
+    }
+  `;
+
   const contactResponse = await request(server)
     .post('/')
     .send({
@@ -37,9 +45,17 @@ beforeAll(async () => {
         },
       },
     });
-  contactId = contactResponse.body.data.createContact.contact_id;
 
-  const createNonprofitMutation = `mutation CreateNonprofit($input: CreateNonprofitInput!) { createNonprofit(input: $input) { nonprofit_id } }`;
+  contactId = contactResponse.body.data.createContact.contact_id as string;
+
+  const createNonprofitMutation = `
+    mutation CreateNonprofit($input: CreateNonprofitInput!) {
+      createNonprofit(input: $input) {
+        nonprofit_id
+      }
+    }
+  `;
+
   const np1 = await request(server)
     .post('/')
     .send({
@@ -52,7 +68,8 @@ beforeAll(async () => {
         },
       },
     });
-  nonprofit1Id = np1.body.data.createNonprofit.nonprofit_id;
+  nonprofit1Id = np1.body.data.createNonprofit.nonprofit_id as string;
+
   const np2 = await request(server)
     .post('/')
     .send({
@@ -65,7 +82,8 @@ beforeAll(async () => {
         },
       },
     });
-  nonprofit2Id = np2.body.data.createNonprofit.nonprofit_id;
+  nonprofit2Id = np2.body.data.createNonprofit.nonprofit_id as string;
+
   const np3 = await request(server)
     .post('/')
     .send({
@@ -78,30 +96,43 @@ beforeAll(async () => {
         },
       },
     });
-  nonprofit3Id = np3.body.data.createNonprofit.nonprofit_id;
+  nonprofit3Id = np3.body.data.createNonprofit.nonprofit_id as string;
 });
 
-// Recreate chapter, project, and nonprofit_chapter_project records before each test
-// This is necessary because the global beforeEach in tests/setup.ts deletes them
 beforeEach(async () => {
-  // Recreate chapter
-  const chapterMutation = `mutation CreateChapter($input: CreateChapterInput!) { createChapter(input: $input) { chapter_id } }`;
+  chapterName = 'Test Chapter for Sorting';
+
+  const chapterMutation = `
+    mutation CreateChapter($input: CreateChapterInput!) {
+      createChapter(input: $input) {
+        chapter_id
+      }
+    }
+  `;
+
   const chapterResponse = await request(server)
     .post('/')
     .send({
       query: chapterMutation,
       variables: {
         input: {
-          name: 'Test Chapter for Sorting',
+          name: chapterName,
           founded_date: '2020-01-01T00:00:00.000Z',
           status_type: 'ACTIVE',
         },
       },
     });
-  chapterId = chapterResponse.body.data.createChapter.chapter_id;
 
-  // Recreate project
-  const projectMutation = `mutation CreateProject($input: CreateProjectInput!) { createProject(input: $input) { project_id } }`;
+  chapterId = chapterResponse.body.data.createChapter.chapter_id as string;
+
+  const projectMutation = `
+    mutation CreateProject($input: CreateProjectInput!) {
+      createProject(input: $input) {
+        project_id
+      }
+    }
+  `;
+
   const projectResponse = await request(server)
     .post('/')
     .send({
@@ -114,9 +145,9 @@ beforeEach(async () => {
         },
       },
     });
-  projectId = projectResponse.body.data.createProject.project_id;
 
-  // Recreate nonprofit_chapter_project records
+  projectId = projectResponse.body.data.createProject.project_id as string;
+
   await prisma.nonprofit_chapter_project.create({
     data: {
       nonprofit_id: nonprofit1Id,
@@ -129,6 +160,7 @@ beforeEach(async () => {
       project_status: 'ACTIVE',
     },
   });
+
   await prisma.nonprofit_chapter_project.create({
     data: {
       nonprofit_id: nonprofit2Id,
@@ -141,6 +173,7 @@ beforeEach(async () => {
       project_status: 'INACTIVE',
     },
   });
+
   await prisma.nonprofit_chapter_project.create({
     data: {
       nonprofit_id: nonprofit3Id,
@@ -159,6 +192,7 @@ afterAll(async () => {
   const nonprofitIds = [nonprofit1Id, nonprofit2Id, nonprofit3Id].filter(
     (id) => id !== undefined
   );
+
   if (nonprofitIds.length > 0) {
     await prisma.nonprofit_chapter_project.deleteMany({
       where: { nonprofit_id: { in: nonprofitIds } },
@@ -167,6 +201,7 @@ afterAll(async () => {
       where: { nonprofit_id: { in: nonprofitIds } },
     });
   }
+
   if (projectId) {
     await prisma.projects.deleteMany({ where: { project_id: projectId } });
   }
@@ -176,23 +211,39 @@ afterAll(async () => {
   if (contactId) {
     await prisma.contacts.deleteMany({ where: { contact_id: contactId } });
   }
+
   server.close();
 });
 
 describe('GraphQL API - Nonprofits Sorting and Filtering', () => {
-  const nonprofitsQuery = `query Nonprofits($chapterIds: [ID!], $statuses: [StatusType!], $sort: [NonprofitSortOption!]) { nonprofits(chapterIds: $chapterIds, statuses: $statuses, sort: $sort) { nonprofit_id name status } }`;
+  const nonprofitsQuery = `
+    query Nonprofits(
+      $chapterNames: [String!]
+      $statuses: [StatusType!]
+      $sort: [NonprofitSortOption!]
+    ) {
+      nonprofits(chapterNames: $chapterNames, statuses: $statuses, sort: $sort) {
+        nonprofit_id
+        name
+        status
+      }
+    }
+  `;
 
   it('should sort nonprofits A to Z by name', async () => {
     const response = await request(server)
       .post('/')
       .send({ query: nonprofitsQuery, variables: { sort: ['A_TO_Z'] } });
+
     expect(response.status).toBe(200);
+
     const testNPs = response.body.data.nonprofits.filter(
       (np: NonprofitResponse) =>
         ['Alpha Nonprofit', 'Beta Nonprofit', 'Zebra Nonprofit'].includes(
           np.name
         )
     );
+
     expect(testNPs[0].name).toBe('Alpha Nonprofit');
     expect(testNPs[1].name).toBe('Beta Nonprofit');
     expect(testNPs[2].name).toBe('Zebra Nonprofit');
@@ -202,12 +253,16 @@ describe('GraphQL API - Nonprofits Sorting and Filtering', () => {
     const response = await request(server)
       .post('/')
       .send({ query: nonprofitsQuery, variables: { sort: ['Z_TO_A'] } });
+
+    expect(response.status).toBe(200);
+
     const testNPs = response.body.data.nonprofits.filter(
       (np: NonprofitResponse) =>
         ['Alpha Nonprofit', 'Beta Nonprofit', 'Zebra Nonprofit'].includes(
           np.name
         )
     );
+
     expect(testNPs[0].name).toBe('Zebra Nonprofit');
     expect(testNPs[2].name).toBe('Alpha Nonprofit');
   });
@@ -216,12 +271,16 @@ describe('GraphQL API - Nonprofits Sorting and Filtering', () => {
     const response = await request(server)
       .post('/')
       .send({ query: nonprofitsQuery, variables: { sort: ['MOST_RECENT'] } });
+
+    expect(response.status).toBe(200);
+
     const testNPs = response.body.data.nonprofits.filter(
       (np: NonprofitResponse) =>
         ['Alpha Nonprofit', 'Beta Nonprofit', 'Zebra Nonprofit'].includes(
           np.name
         )
     );
+
     expect(testNPs[0].name).toBe('Zebra Nonprofit');
   });
 
@@ -229,12 +288,16 @@ describe('GraphQL API - Nonprofits Sorting and Filtering', () => {
     const response = await request(server)
       .post('/')
       .send({ query: nonprofitsQuery, variables: { sort: ['STATUS'] } });
+
+    expect(response.status).toBe(200);
+
     const testNPs = response.body.data.nonprofits.filter(
       (np: NonprofitResponse) =>
         ['Alpha Nonprofit', 'Beta Nonprofit', 'Zebra Nonprofit'].includes(
           np.name
         )
     );
+
     expect(
       testNPs.filter((np: NonprofitResponse) => np.status === 'ACTIVE').length
     ).toBe(2);
@@ -244,12 +307,16 @@ describe('GraphQL API - Nonprofits Sorting and Filtering', () => {
     const response = await request(server)
       .post('/')
       .send({ query: nonprofitsQuery, variables: { statuses: ['ACTIVE'] } });
+
+    expect(response.status).toBe(200);
+
     const testNPs = response.body.data.nonprofits.filter(
       (np: NonprofitResponse) =>
         ['Alpha Nonprofit', 'Beta Nonprofit', 'Zebra Nonprofit'].includes(
           np.name
         )
     );
+
     expect(testNPs.length).toBe(2);
     expect(
       testNPs.every((np: NonprofitResponse) => np.status === 'ACTIVE')
@@ -259,14 +326,20 @@ describe('GraphQL API - Nonprofits Sorting and Filtering', () => {
   it('should filter by chapter', async () => {
     const response = await request(server)
       .post('/')
-      .send({ query: nonprofitsQuery, variables: { chapterIds: [chapterId] } });
+      .send({
+        query: nonprofitsQuery,
+        variables: { chapterNames: [chapterName] },
+      });
+
     expect(response.status).toBe(200);
+
     const testNPs = response.body.data.nonprofits.filter(
       (np: NonprofitResponse) =>
         ['Alpha Nonprofit', 'Beta Nonprofit', 'Zebra Nonprofit'].includes(
           np.name
         )
     );
+
     expect(testNPs.length).toBe(3);
   });
 
@@ -277,12 +350,16 @@ describe('GraphQL API - Nonprofits Sorting and Filtering', () => {
         query: nonprofitsQuery,
         variables: { sort: ['STATUS', 'MOST_RECENT'] },
       });
+
+    expect(response.status).toBe(200);
+
     const testNPs = response.body.data.nonprofits.filter(
       (np: NonprofitResponse) =>
         ['Alpha Nonprofit', 'Beta Nonprofit', 'Zebra Nonprofit'].includes(
           np.name
         )
     );
+
     expect(testNPs[0].status).toBe('ACTIVE');
     expect(testNPs[0].name).toBe('Zebra Nonprofit');
   });
