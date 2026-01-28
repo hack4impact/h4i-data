@@ -227,7 +227,9 @@ export async function getNonprofitsWithFilters(
     return result;
   } catch (error) {
     logger.error('Failed to fetch nonprofits with filters', {
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
     });
     throw new DatabaseError('Failed to retrieve nonprofits');
   }
