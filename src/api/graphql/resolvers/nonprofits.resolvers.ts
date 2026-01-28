@@ -32,16 +32,6 @@ interface GetNonprofitsWithFiltersArgs {
   chapterIds?: string[];
 }
 
-interface NonprofitParent {
-  nonprofit_id: string;
-}
-
-interface ChapterRow {
-  project_status: status_type;
-  chapter_id: string | null;
-  chapters: { chapter_id: string; name: string } | null;
-}
-
 export const nonprofitResolvers = {
   Query: {
     nonprofits: async (
@@ -63,16 +53,12 @@ export const nonprofitResolvers = {
           : {}),
       };
 
-      const nonprofits = await getNonprofitsWithFilters(serviceArgs);
-
-      return nonprofits.map((np) => ({
-        ...np,
-        chapters: [],
-      }));
+      return getNonprofitsWithFilters(serviceArgs);
     },
 
     nonprofit: async (_parent: unknown, { id }: { id: string }) => {
       const nonprofit = await getNonprofitById(id);
+
       if (!nonprofit) {
         throw new GraphQLError(
           'Nonprofit not found',
@@ -85,54 +71,99 @@ export const nonprofitResolvers = {
         );
       }
 
-      return {
-        ...nonprofit,
-        chapters: [],
-      };
+      return nonprofit;
     },
   },
 
   Nonprofit: {
-    chapters: async (parent: NonprofitParent) => {
-      const rows = (await prisma.nonprofit_chapter_project.findMany({
-        where: { nonprofit_id: parent.nonprofit_id },
+    chapter_projects: async (parent: { nonprofit_id: string }) => {
+      const joinRows = await prisma.nonprofit_chapter_project.findMany({
+        where: {
+          nonprofit_id: parent.nonprofit_id,
+          chapter_id: { not: null },
+        },
         select: {
-          project_status: true,
           chapter_id: true,
-          chapters: {
-            select: {
-              chapter_id: true,
-              name: true,
-            },
-          },
+          project_id: true,
+          project_status: true,
+          start_date: true,
+          end_date: true,
+          created_at: true,
         },
         orderBy: { created_at: 'desc' },
-      })) as ChapterRow[];
+      });
 
-      if (!rows.length) return [];
+      console.log('[chapter_projects] nonprofit:', parent.nonprofit_id);
+      console.log('[chapter_projects] joinRows length:', joinRows.length);
+      if (joinRows.length > 0) {
+        console.log('[chapter_projects] sample row:', joinRows[0]);
+      }
 
-      const rowsWithChapter = rows.filter(
-        (
-          r
-        ): r is ChapterRow & {
-          chapters: { chapter_id: string; name: string };
-        } => r.chapters !== null
-      );
+      if (joinRows.length === 0) return [];
 
       const seen = new Set<string>();
-      const deduped = rowsWithChapter.filter((r) => {
-        const id = r.chapters.chapter_id;
-        if (seen.has(id)) return false;
-        seen.add(id);
+      const deduped = joinRows.filter((r) => {
+        const chapterId = r.chapter_id;
+        if (!chapterId) return false;
+        const key = `${chapterId}::${r.project_id}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
         return true;
       });
 
-      return deduped.map((r) => ({
-        chapter_id: r.chapters.chapter_id,
-        chapter_name: r.chapters.name,
-        project_status:
-          r.project_status === status_type.ACTIVE ? 'ACTIVE' : 'INACTIVE',
-      }));
+      const chapterIds = Array.from(
+        new Set(deduped.map((r) => r.chapter_id).filter(Boolean) as string[])
+      );
+      const projectIds = Array.from(new Set(deduped.map((r) => r.project_id)));
+
+      const [chapters, projects] = await Promise.all([
+        prisma.chapters.findMany({
+          where: { chapter_id: { in: chapterIds } },
+          select: { chapter_id: true, name: true },
+        }),
+        prisma.projects.findMany({
+          where: { project_id: { in: projectIds } },
+          select: { project_id: true, name: true, repo: true },
+        }),
+      ]);
+
+      console.log('[chapter_projects] chapters found:', chapters.length);
+      console.log('[chapter_projects] projects found:', projects.length);
+
+      const chapterNameById = new Map(
+        chapters.map((c) => [c.chapter_id, c.name])
+      );
+      const projectById = new Map(projects.map((p) => [p.project_id, p]));
+
+      return deduped.map((r) => {
+        const chapterId = r.chapter_id as string;
+
+        const chapterName = chapterNameById.get(chapterId);
+        const project = projectById.get(r.project_id);
+
+        if (!chapterName) {
+          throw new GraphQLError(
+            `Data issue: chapter_id ${chapterId} exists in nonprofit_chapter_project but no matching chapters row`
+          );
+        }
+        if (!project) {
+          throw new GraphQLError(
+            `Data issue: project_id ${r.project_id} exists in nonprofit_chapter_project but no matching projects row`
+          );
+        }
+
+        return {
+          chapter_id: chapterId,
+          chapter_name: chapterName,
+          project_id: project.project_id,
+          project_name: project.name,
+          repo: project.repo,
+          project_status:
+            r.project_status === status_type.ACTIVE ? 'ACTIVE' : 'INACTIVE',
+          start_date: r.start_date.toISOString(),
+          end_date: r.end_date ? r.end_date.toISOString() : null,
+        };
+      });
     },
   },
 
