@@ -6,10 +6,16 @@ export const nonprofitSchemaString = `
     STATUS
   }
 
-  type NonprofitChapterInfo {
+  type NonprofitChapterProjectInfo {
     chapter_id: ID!
     chapter_name: String!
+    project_id: ID!
+    project_name: String!
+    repo: String
+    project_type: String
     project_status: StatusType!
+    start_date: String!
+    end_date: String
   }
 
   type Nonprofit {
@@ -22,7 +28,7 @@ export const nonprofitSchemaString = `
     created_at: String!
     updated_at: String!
     status: StatusType!
-    chapters: [NonprofitChapterInfo!]!
+    chapter_projects: [NonprofitChapterProjectInfo!]!
   }
 
   type Query {
