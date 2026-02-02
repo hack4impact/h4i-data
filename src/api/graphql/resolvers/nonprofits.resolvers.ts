@@ -15,7 +15,6 @@ import type {
   NonprofitSortOption,
 } from '../../../core/services/nonprofits.service';
 import { prisma } from '../../../config/database';
-import { status_type } from '@prisma/client';
 
 type CreateNonprofitInput = z.infer<typeof createNonprofitSchema>;
 type UpdateNonprofitInput = z.infer<typeof updateNonprofitSchema>;
@@ -88,16 +87,12 @@ export const nonprofitResolvers = {
           project_status: true,
           start_date: true,
           end_date: true,
+          project_contact_id: true,
+          collab_contact_id: true,
           created_at: true,
         },
         orderBy: { created_at: 'desc' },
       });
-
-      console.log('[chapter_projects] nonprofit:', parent.nonprofit_id);
-      console.log('[chapter_projects] joinRows length:', joinRows.length);
-      if (joinRows.length > 0) {
-        console.log('[chapter_projects] sample row:', joinRows[0]);
-      }
 
       if (joinRows.length === 0) return [];
 
@@ -116,32 +111,39 @@ export const nonprofitResolvers = {
       );
       const projectIds = Array.from(new Set(deduped.map((r) => r.project_id)));
 
-      const [chapters, projects] = await Promise.all([
+      const contactIds = Array.from(
+        new Set(
+          deduped
+            .flatMap((r) => [r.project_contact_id, r.collab_contact_id])
+            .filter(Boolean) as string[]
+        )
+      );
+      const [chapters, projects, contacts] = await Promise.all([
         prisma.chapters.findMany({
           where: { chapter_id: { in: chapterIds } },
-          select: { chapter_id: true, name: true },
         }),
         prisma.projects.findMany({
           where: { project_id: { in: projectIds } },
           select: { project_id: true, name: true, repo: true },
         }),
+        contactIds.length
+          ? prisma.contacts.findMany({
+              where: { contact_id: { in: contactIds } },
+            })
+          : Promise.resolve([]),
       ]);
 
-      console.log('[chapter_projects] chapters found:', chapters.length);
-      console.log('[chapter_projects] projects found:', projects.length);
-
-      const chapterNameById = new Map(
-        chapters.map((c) => [c.chapter_id, c.name])
-      );
+      const chapterById = new Map(chapters.map((c) => [c.chapter_id, c]));
       const projectById = new Map(projects.map((p) => [p.project_id, p]));
+      const contactById = new Map(contacts.map((c) => [c.contact_id, c]));
 
       return deduped.map((r) => {
         const chapterId = r.chapter_id as string;
 
-        const chapterName = chapterNameById.get(chapterId);
+        const chapter = chapterById.get(chapterId);
         const project = projectById.get(r.project_id);
 
-        if (!chapterName) {
+        if (!chapter) {
           throw new GraphQLError(
             `Data issue: chapter_id ${chapterId} exists in nonprofit_chapter_project but no matching chapters row`
           );
@@ -152,16 +154,41 @@ export const nonprofitResolvers = {
           );
         }
 
+        const projectContact = r.project_contact_id
+          ? (contactById.get(r.project_contact_id) ?? null)
+          : null;
+
+        const collabContact = r.collab_contact_id
+          ? (contactById.get(r.collab_contact_id) ?? null)
+          : null;
+
         return {
-          chapter_id: chapterId,
-          chapter_name: chapterName,
-          project_id: project.project_id,
-          project_name: project.name,
-          repo: project.repo,
-          project_status:
-            r.project_status === status_type.ACTIVE ? 'ACTIVE' : 'INACTIVE',
+          chapter: {
+            ...chapter,
+            created_at: chapter.created_at.toISOString(),
+            updated_at: chapter.updated_at.toISOString(),
+          },
+
+          project,
+          project_status: r.project_status,
           start_date: r.start_date.toISOString(),
           end_date: r.end_date ? r.end_date.toISOString() : null,
+
+          project_contact: projectContact
+            ? {
+                ...projectContact,
+                created_at: projectContact.created_at.toISOString(),
+                updated_at: projectContact.updated_at.toISOString(),
+              }
+            : null,
+
+          collab_contact: collabContact
+            ? {
+                ...collabContact,
+                created_at: collabContact.created_at.toISOString(),
+                updated_at: collabContact.updated_at.toISOString(),
+              }
+            : null,
         };
       });
     },
