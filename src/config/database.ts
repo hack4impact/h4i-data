@@ -88,7 +88,7 @@ export async function connectDB() {
   }
 }
 
-//  isconnect from the DB, used at shutdown
+// Disconnect from the DB, used at shutdown
 export async function disconnectDB() {
   try {
     await prisma.$disconnect();

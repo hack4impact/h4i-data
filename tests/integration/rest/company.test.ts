@@ -1,64 +1,98 @@
 import request from 'supertest';
-import express from 'express';
-import { Server } from 'http';
 import { createRestApp } from '../../../src/api/rest/server';
-import { env } from '../../../src/config/server';
 
-// Hold the server instance to close it after tests
-let server: Server;
-let app: express.Application;
-let createdCompanyId: string;
+const app = createRestApp();
 
-// beforeAll runs once before all tests in this file
-beforeAll(() => {
-  app = createRestApp();
-  // Start the server on the port defined in .env.test
-  server = app.listen(env.REST_PORT);
-});
-
-// afterAll runs once after all tests in this file
-afterAll(() => {
-  // Close the server
-  server.close();
-});
+// Helper to create a company for tests
+const createTestCompany = async (name = 'Test Co') => {
+  const response = await request(app).post('/companies').send({ name });
+  return response.body;
+};
 
 describe('REST API - /companies', () => {
   it('should create a new company via POST', async () => {
-    const response = await request(server).post('/companies').send({
-      name: 'REST Integration Test Company',
-      founded_date: '2025-08-30T12:00:00.000Z',
-    });
+    // Act
+    const company = await createTestCompany('REST Test Company');
 
-    // Assertions
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('company_id');
-    expect(response.body.name).toBe('REST Integration Test Company');
-    createdCompanyId = response.body.company_id;
+    // Assert
+    expect(company).toHaveProperty('company_id');
+    expect(company.name).toBe('REST Test Company');
+  });
+
+  it('should fetch all companies via GET', async () => {
+    // Arrange
+    await createTestCompany('Company for List');
+
+    // Act
+    const response = await request(app).get('/companies');
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body.length).toBeGreaterThan(0);
   });
 
   it('should fetch a company by its ID via GET', async () => {
-    // Now fetch it
-    const response = await request(server).get(
-      `/companies/${createdCompanyId}`
-    );
+    // Arrange
+    const company = await createTestCompany();
 
-    // Assertions
+    // Act
+    const response = await request(app).get(`/companies/${company.company_id}`);
+
+    // Assert
     expect(response.status).toBe(200);
-    expect(response.body.company_id).toBe(createdCompanyId);
-    expect(response.body.name).toBe('REST Integration Test Company');
-  });
-
-  it('should delete the company', async () => {
-    const response = await request(server).delete(
-      `/companies/${createdCompanyId}`
-    );
-    expect(response.status).toBe(204);
+    expect(response.body.company_id).toBe(company.company_id);
   });
 
   it('should return 404 for a non-existent company ID', async () => {
-    const response = await request(server).get(
-      `/companies/${createdCompanyId}`
+    // Act
+    const response = await request(app).get(
+      '/companies/00000000-0000-0000-0000-000000000000'
     );
+
+    // Assert
     expect(response.status).toBe(404);
+  });
+
+  it('should return 400 for invalid data', async () => {
+    // Act - empty name should be invalid
+    const response = await request(app).post('/companies').send({ name: '' });
+
+    // Assert
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty('error');
+  });
+
+  it('should update a company via PATCH', async () => {
+    // Arrange
+    const company = await createTestCompany('Company for Update');
+
+    // Act
+    const response = await request(app)
+      .patch(`/companies/${company.company_id}`)
+      .send({ name: 'Updated Company Name' });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.name).toBe('Updated Company Name');
+  });
+
+  it('should delete a company via DELETE', async () => {
+    // Arrange
+    const company = await createTestCompany();
+
+    // Act
+    const response = await request(app).delete(
+      `/companies/${company.company_id}`
+    );
+
+    // Assert
+    expect(response.status).toBe(204);
+
+    // Verify deletion
+    const getResponse = await request(app).get(
+      `/companies/${company.company_id}`
+    );
+    expect(getResponse.status).toBe(404);
   });
 });

@@ -1,95 +1,111 @@
 import request from 'supertest';
-import express from 'express';
-import { Server } from 'http';
 import { createGraphqlApp } from '../../../src/api/graphql/server';
-import { env } from '../../../src/config/server';
 
-let server: Server;
-let app: express.Application;
+const app = createGraphqlApp();
 
-beforeAll(() => {
-  app = createGraphqlApp();
-  server = app.listen(env.GRAPHQL_PORT);
-});
-
-afterAll(() => {
-  server.close();
-});
+// Helper to create a company for tests
+const createTestCompany = async (name = 'Test Co') => {
+  const mutation = {
+    query: `
+      mutation Create($input: CompanyCreateInput!) {
+        createCompany(input: $input) { company_id name }
+      }
+    `,
+    variables: { input: { name, location_id: null } },
+  };
+  const res = await request(app).post('/').send(mutation);
+  return res.body.data.createCompany;
+};
 
 describe('GraphQL Companies CRUD', () => {
-  let createdId: string;
-
   it('creates a company', async () => {
-    const mutation = {
-      query: `
-        mutation Create($input: CompanyCreateInput!) {
-          createCompany(input: $input) { company_id name location_id }
-        }
-      `,
-      variables: { input: { name: 'Test Co', location_id: null } },
-    };
+    // Act
+    const company = await createTestCompany('New Test Co');
 
-    const res = await request(server).post('/').send(mutation);
-    expect(res.status).toBe(200);
-    const company = res.body.data.createCompany;
-    expect(company.name).toBe('Test Co');
+    // Assert
+    expect(company.name).toBe('New Test Co');
     expect(company.company_id).toBeDefined();
-    createdId = company.company_id;
   });
 
   it('reads a company by id', async () => {
+    // Arrange
+    const company = await createTestCompany();
     const query = {
       query: `
-        query One($id: ID!) { company(company_id: $id) { company_id name location_id } }
+        query One($id: ID!) { company(company_id: $id) { company_id name } }
       `,
-      variables: { id: createdId },
+      variables: { id: company.company_id },
     };
 
-    const res = await request(server).post('/').send(query);
+    // Act
+    const res = await request(app).post('/').send(query);
+
+    // Assert
     expect(res.status).toBe(200);
-    expect(res.body.data.company.company_id).toBe(createdId);
+    expect(res.body.data.company.company_id).toBe(company.company_id);
   });
 
   it('updates a company', async () => {
+    // Arrange
+    const company = await createTestCompany();
     const mutation = {
       query: `
         mutation Update($id: ID!, $input: CompanyUpdateInput!) {
           updateCompany(company_id: $id, input: $input) { company_id name }
         }
       `,
-      variables: { id: createdId, input: { name: 'Test Co Updated' } },
+      variables: {
+        id: company.company_id,
+        input: { name: 'Test Co Updated' },
+      },
     };
 
-    const res = await request(server).post('/').send(mutation);
+    // Act
+    const res = await request(app).post('/').send(mutation);
+
+    // Assert
     expect(res.status).toBe(200);
     expect(res.body.data.updateCompany.name).toBe('Test Co Updated');
   });
 
   it('lists companies', async () => {
+    // Arrange
+    await createTestCompany('Company A');
+    await createTestCompany('Company B');
+
+    // Act
     const query = { query: `query { companies { company_id name } }` };
-    const res = await request(server).post('/').send(query);
+    const res = await request(app).post('/').send(query);
+
+    // Assert
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.data.companies)).toBe(true);
+    expect(res.body.data.companies.length).toBeGreaterThanOrEqual(2);
   });
 
   it('deletes a company', async () => {
+    // Arrange
+    const company = await createTestCompany();
     const mutation = {
       query: `
         mutation Delete($id: ID!) { deleteCompany(company_id: $id) }
       `,
-      variables: { id: createdId },
+      variables: { id: company.company_id },
     };
-    const res = await request(server).post('/').send(mutation);
+
+    // Act
+    const res = await request(app).post('/').send(mutation);
     expect(res.status).toBe(200);
     expect(res.body.data.deleteCompany).toBe(true);
 
-    const verify = await request(server)
+    // Assert: Verify it's gone
+    const verifyRes = await request(app)
       .post('/')
       .send({
         query: `query($id: ID!) { company(company_id: $id) { company_id } }`,
-        variables: { id: createdId },
+        variables: { id: company.company_id },
       });
-    expect(verify.status).toBe(200);
-    expect(verify.body.data.company).toBeNull();
+    expect(verifyRes.status).toBe(200);
+    expect(verifyRes.body.data.company).toBeNull();
   });
 });
