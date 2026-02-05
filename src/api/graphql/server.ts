@@ -1,5 +1,5 @@
 import express from 'express';
-import { graphqlHTTP } from 'express-graphql';
+import { createHandler } from 'graphql-http/lib/use/express';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import { typeDefs } from './schemas';
@@ -44,13 +44,8 @@ export function createGraphqlApp() {
     });
   });
 
-  app.use(
-    '/', // Mount at the root of this server
-    graphqlHTTP({
-      schema: graphqlSchema,
-      graphiql: env.NODE_ENV === 'development',
-    })
-  );
+  // GraphQL endpoint
+  app.all('/', createHandler({ schema: graphqlSchema }));
 
   // Error handling middleware (must be last)
   app.use(notFoundHandler);

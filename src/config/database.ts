@@ -1,31 +1,27 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 import { env } from './server';
 
-// Build database URL with connection pool parameters
-function buildDatabaseUrl() {
-  const baseUrl = env.DATABASE_URL;
-  const url = new URL(baseUrl);
+// Create connection pool for Prisma adapter
+const pool = new pg.Pool({
+  connectionString: env.DATABASE_URL,
+  max: env.DB_CONNECTION_LIMIT,
+  idleTimeoutMillis: env.DB_POOL_TIMEOUT,
+});
 
-  // Add connection pool parameters to the database URL
-  url.searchParams.set('connection_limit', env.DB_CONNECTION_LIMIT.toString());
-  url.searchParams.set('pool_timeout', env.DB_POOL_TIMEOUT.toString());
+// Create Prisma adapter
+const adapter = new PrismaPg(pool);
 
-  return url.toString();
-}
-
-// Create Prisma client with connection pooling and enhanced configuration
+// Create Prisma client with adapter (Prisma 7+ configuration)
 export const prisma = new PrismaClient({
+  adapter,
   log: [
     { level: 'query', emit: 'event' },
     { level: 'info', emit: 'stdout' },
     { level: 'warn', emit: 'stdout' },
     { level: 'error', emit: 'stdout' },
   ],
-  datasources: {
-    db: {
-      url: buildDatabaseUrl(),
-    },
-  },
 });
 
 // Query performance monitoring (only in development)

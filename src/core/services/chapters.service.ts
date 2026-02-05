@@ -16,7 +16,7 @@ export async function getAllChapters() {
   try {
     logger.info('Fetching all chapters');
     const chapters = await prisma.chapters.findMany({
-      orderBy: { created_at: 'desc' },
+      orderBy: { name: 'asc' },
     });
 
     logger.info('Successfully retrieved chapters', {

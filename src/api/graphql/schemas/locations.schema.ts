@@ -1,12 +1,10 @@
 export const locationSchemaString = `
   type Location {
     location_id: ID!
-    name: String!
-    address: String!
-    country_code: String!
-    subdivision_code: String!
-    created_at: String!
-    updated_at: String!
+    name: String
+    address_line: String
+    state_code: String
+    country_code: String
   }
 
   type Query {
@@ -16,16 +14,16 @@ export const locationSchemaString = `
 
   input CreateLocationInput {
     name: String!
-    address: String!
-    country_code: String!
-    subdivision_code: String!
+    address_line: String
+    state_code: String
+    country_code: String
   }
 
   input UpdateLocationInput {
     name: String
-    address: String
+    address_line: String
+    state_code: String
     country_code: String
-    subdivision_code: String
   }
 
   type Mutation {

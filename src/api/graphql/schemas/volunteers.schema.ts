@@ -1,76 +1,71 @@
 export const volunteerSchemaString = `
-  enum StatusType {
-    STUDENT
-    PROFESSIONAL
+  enum VolunteerClass {
+    COLLEGIATE
+    ALUMNI
+    ASSOCIATE
   }
 
-  enum VolunteerType {
-    OPERATIONS
-    CHAPTER
-    BOTH
+  enum EngagementTrack {
+    PROGRAMS
+    CENTRAL
+    ADVISORY
   }
 
-  input VolunteerFilterInput {
-    chapters: [String!]
-    roles: [String!]
-    statuses: [String!]
+  enum EducationLevel {
+    UNDERGRADUATE
+    GRADUATE
+    BOOTCAMP
+    SELF_TAUGHT
+    OTHER
   }
 
   type Volunteer {
     volunteer_id: ID!
-    first_name: String!
-    last_name: String!
-    email: String!
-    graduation_date: String!
-    university_id: ID!
-    volunteer_status: StatusType!
-    h4i_email: String
-    chapter_id: ID
-    company_id: ID
-    volunteer_type: VolunteerType!
-    created_at: String!
-    updated_at: String!
-  }
-
-  type VolunteerConnection {
-    nodes: [Volunteer!]!
-    totalCount: Int!
+    org_email: String
+    active_status: Boolean
+    volunteer_class: VolunteerClass
+    engagement_track: EngagementTrack
+    major: String
+    education_level: EducationLevel
+    graduation_term_id: ID
+    university_id: ID
+    home_chapter_id: ID
+    employer_id: ID
+    created_at: String
+    updated_at: String
+    constituent: Constituent
   }
 
   type Query {
-    volunteers(
-      filter: VolunteerFilterInput
-      limit: Int = 50
-      offset: Int = 0
-    ): [Volunteer!]!
-
+    volunteers: [Volunteer!]!
     volunteer(id: ID!): Volunteer
   }
 
   input CreateVolunteerInput {
-    first_name: String
-    last_name: String
-    email: String
-    graduation_date: String
+    volunteer_id: ID!
+    org_email: String
+    active_status: Boolean
+    volunteer_class: VolunteerClass
+    engagement_track: EngagementTrack
+    major: String
+    education_level: EducationLevel
+    graduation_term_id: ID
     university_id: ID
-    volunteer_status: StatusType
-    volunteer_type: VolunteerType
-    h4i_email: String
-    chapter_id: ID
-    company_id: ID
+    home_chapter_id: ID
+    employer_id: ID
   }
 
   input UpdateVolunteerInput {
-    first_name: String
-    last_name: String
-    email: String
-    graduation_date: String
+    org_email: String
+    active_status: Boolean
+    volunteer_class: VolunteerClass
+    engagement_track: EngagementTrack
+    major: String
+    education_level: EducationLevel
+    graduation_term_id: ID
     university_id: ID
-    volunteer_status: StatusType
-    volunteer_type: VolunteerType
-    h4i_email: String
-    chapter_id: ID
-    company_id: ID
+    home_chapter_id: ID
+    employer_id: ID
   }
 
   type Mutation {

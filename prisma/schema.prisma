@@ -3,270 +3,309 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
 model chapters {
-  chapter_id                String                      @id(map: "chapter_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                      String
-  location_id               String?                     @db.Uuid
-  founded_date              DateTime                    @db.Date
-  status_type               status_type                 @default(ACTIVE)
-  created_at                DateTime                    @default(now()) @db.Timestamptz(6)
-  updated_at                DateTime                    @default(now()) @db.Timestamptz(6)
-  locations                 locations?                  @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
-  nonprofit_chapter_project nonprofit_chapter_project[]
-  sponsor_chapter           sponsor_chapter[]
-  volunteers                volunteers[]
+  chapter_id          String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String?               @db.VarChar
+  university_id       String?               @db.Uuid
+  location_id         String?               @db.Uuid
+  founded_date        DateTime?             @db.Date
+  locations           locations?            @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
+  officer_assignments officer_assignments[]
+  project_engagements project_engagements[]
+  volunteers          volunteers[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model companies {
   company_id  String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String
+  name        String?      @db.VarChar
+  industry    String?      @db.VarChar
   location_id String?      @db.Uuid
   locations   locations?   @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
-  sponsors    sponsors[]
   volunteers  volunteers[]
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model contacts {
-  contact_id                                                                       String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                                                                             String
-  email                                                                            String
-  phone_number                                                                     String?
-  created_at                                                                       DateTime                    @default(now()) @db.Timestamptz(6)
-  updated_at                                                                       DateTime                    @default(now()) @db.Timestamptz(6)
-  nonprofit_chapter_project_nonprofit_chapter_project_collab_contact_idTocontacts  nonprofit_chapter_project[] @relation("nonprofit_chapter_project_collab_contact_idTocontacts")
-  nonprofit_chapter_project_nonprofit_chapter_project_project_contact_idTocontacts nonprofit_chapter_project[] @relation("nonprofit_chapter_project_project_contact_idTocontacts")
-  nonprofits                                                                       nonprofits[]
-  sponsors                                                                         sponsors[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model locations {
-  location_id      String       @id(map: "university_pkey1") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String
-  address          String
-  country_code     String       @default("US") @db.Char(2)
-  subdivision_code String
-  created_at       DateTime     @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime     @default(now()) @db.Timestamptz(6)
-  chapters         chapters[]
-  companies        companies[]
-  nonprofits       nonprofits[]
-  sponsors         sponsors[]
-  volunteers       volunteers[]
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model nonprofit_chapter_project {
-  nonprofit_chapter_project_id                                    String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nonprofit_id                                                    String      @db.Uuid
-  chapter_id                                                      String?     @db.Uuid
-  project_id                                                      String      @db.Uuid
-  project_contact_id                                              String      @db.Uuid
-  collab_contact_id                                               String      @db.Uuid
-  start_date                                                      DateTime    @db.Date
-  end_date                                                        DateTime?   @db.Date
-  notes                                                           String?
-  project_status                                                  status_type @default(ACTIVE)
-  created_at                                                      DateTime    @default(now()) @db.Timestamptz(6)
-  updated_at                                                      DateTime    @default(now()) @db.Timestamptz(6)
-  chapters                                                        chapters?   @relation(fields: [chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction)
-  contacts_nonprofit_chapter_project_collab_contact_idTocontacts  contacts    @relation("nonprofit_chapter_project_collab_contact_idTocontacts", fields: [collab_contact_id], references: [contact_id], onDelete: NoAction, onUpdate: NoAction)
-  nonprofits                                                      nonprofits  @relation(fields: [nonprofit_id], references: [nonprofit_id], onDelete: NoAction, onUpdate: NoAction)
-  contacts_nonprofit_chapter_project_project_contact_idTocontacts contacts    @relation("nonprofit_chapter_project_project_contact_idTocontacts", fields: [project_contact_id], references: [contact_id], onDelete: NoAction, onUpdate: NoAction)
-  projects                                                        projects    @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model nonprofits {
-  nonprofit_id              String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                      String
-  mission                   String
-  website                   String?
-  location_id               String?                     @db.Uuid
-  contact_id                String                      @db.Uuid
-  created_at                DateTime                    @default(now()) @db.Timestamptz(6)
-  updated_at                DateTime                    @default(now()) @db.Timestamptz(6)
-  nonprofit_chapter_project nonprofit_chapter_project[]
-  contacts                  contacts                    @relation(fields: [contact_id], references: [contact_id], onDelete: NoAction, onUpdate: NoAction)
-  locations                 locations?                  @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
+  location_id  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String?        @db.VarChar
+  address_line String?        @db.VarChar
+  state_code   String?        @db.VarChar(2)
+  country_code String?        @default("USA") @db.VarChar(3)
+  chapters     chapters[]
+  companies    companies[]
+  universities universities[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model projects {
-  project_id                String                      @id(map: "project_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                      String
-  description               String?
-  budget                    Decimal?                    @default(0) @db.Decimal(12, 2)
-  repo                      String
-  created_at                DateTime                    @default(now()) @db.Timestamptz(6)
-  updated_at                DateTime                    @default(now()) @db.Timestamptz(6)
-  project_type              project_type                @default(DESIGN_AND_DEVELOP)
-  nonprofit_chapter_project nonprofit_chapter_project[]
-  volunteer_role_project    volunteer_role_project[]
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model roles {
-  role_id                String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                   String
-  description            String
-  permissions            Json
-  level_type             level_type               @default(REGULAR_CHAPTER_VOLUNTEER_LEVEL)
-  volunteer_assignment   volunteer_assignment[]
-  volunteer_role_project volunteer_role_project[]
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model sponsor_chapter {
-  sponsor_chapter_id String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sponsor_id         String    @db.Uuid
-  chapter_id         String?   @db.Uuid
-  year_sponsored     DateTime  @db.Date
-  created_at         DateTime  @default(now()) @db.Timestamptz(6)
-  updated_date       DateTime  @default(now()) @db.Timestamptz(6)
-  chapters           chapters? @relation(fields: [chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction)
-  sponsors           sponsors  @relation(fields: [sponsor_id], references: [sponsor_id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model sponsors {
-  sponsor_id      String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name            String
-  location_id     String?           @db.Uuid
-  contact_id      String            @db.Uuid
-  created_at      DateTime          @default(now()) @db.Timestamptz(6)
-  updated_date    DateTime          @default(now()) @db.Timestamptz(6)
-  company_id      String?           @db.Uuid
-  sponsor_chapter sponsor_chapter[]
-  companies       companies?        @relation(fields: [company_id], references: [company_id], onDelete: NoAction, onUpdate: NoAction)
-  contacts        contacts          @relation(fields: [contact_id], references: [contact_id], onDelete: NoAction, onUpdate: NoAction)
-  locations       locations?        @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model volunteer_assignment {
-  volunteer_assignment_id String               @id(map: "member_assignment_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  volunteer_id            String               @db.Uuid
-  role_id                 String               @db.Uuid
-  branch_id               String?              @db.Uuid
-  start_date              DateTime             @db.Date
-  end_date                DateTime             @db.Date
-  status                  status_type          @default(ACTIVE)
-  created_at              DateTime             @default(now()) @db.Timestamptz(6)
-  updated_at              DateTime             @default(now()) @db.Timestamptz(6)
-  national_branches       operations_branches? @relation(fields: [branch_id], references: [branch_id], onDelete: NoAction, onUpdate: NoAction, map: "member_assignment_branch_id_fkey")
-  roles                   roles                @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction, map: "member_assignment_role_id_fkey")
-  volunteers              volunteers           @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
+  project_id           String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String?                @db.VarChar
+  github_url           String?                @db.VarChar
+  financial            financial_type?        @default(PRO_BONO)
+  created_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  project_deliverables project_deliverables[]
+  project_engagements  project_engagements[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model volunteer_history {
-  history_id   String      @id(map: "membership_history_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  volunteer_id String      @db.Uuid
-  action_type  action_type @default(JOINED)
-  reason       String?
-  action_date  DateTime    @db.Date
-  created_at   DateTime    @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime    @default(now()) @db.Timestamptz(6)
-  volunteers   volunteers  @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model volunteer_role_project {
-  volunteer_role_project_id String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  volunteer_id              String     @db.Uuid
-  role_id                   String     @db.Uuid
-  project_id                String     @db.Uuid
-  start_date                DateTime   @db.Date
-  end_date                  DateTime?  @db.Date
-  notes                     String?
-  created_at                DateTime   @default(now()) @db.Timestamptz(6)
-  updated_at                DateTime   @default(now()) @db.Timestamptz(6)
-  projects                  projects   @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction, map: "member_role_project_id_fkey")
-  roles                     roles      @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction, map: "member_role_role_id_fkey")
-  volunteers                volunteers @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
+  history_id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  volunteer_id         String?      @db.Uuid
+  action_type          action_type?
+  related_entity_id    String?      @db.Uuid
+  previous_value_label String?      @db.VarChar
+  new_value_label      String?      @db.VarChar
+  effective_date       DateTime?    @db.Date
+  volunteers           volunteers?  @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model volunteers {
-  volunteer_id           String                   @id(map: "members_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  first_name             String
-  last_name              String
-  email                  String                   @unique(map: "person_email_key")
-  graduation_date        DateTime                 @db.Date
-  university_id          String                   @db.Uuid
-  volunteer_status       volunteer_status         @default(STUDENT)
-  H4I_email              String?
-  chapter_id             String?                  @db.Uuid
-  volunteer_type         volunteer_type           @default(CHAPTER)
-  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
-  updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
-  company_id             String?                  @db.Uuid
-  volunteer_assignment   volunteer_assignment[]
-  volunteer_history      volunteer_history[]
-  volunteer_role_project volunteer_role_project[]
-  chapters               chapters?                @relation(fields: [chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction, map: "members_chapter_id_fkey")
-  companies              companies?               @relation(fields: [company_id], references: [company_id], onDelete: NoAction, onUpdate: NoAction)
-  locations              locations                @relation(fields: [university_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
+  volunteer_id        String                @id @db.Uuid
+  org_email           String?               @db.VarChar
+  active_status       Boolean?              @default(true)
+  volunteer_class     volunteer_class?      @default(COLLEGIATE)
+  engagement_track    engagement_track?     @default(PROGRAMS)
+  major               String?               @db.VarChar
+  education_level     education_level?
+  graduation_term_id  String?               @db.Uuid
+  university_id       String?               @db.Uuid
+  home_chapter_id     String?               @db.Uuid
+  employer_id         String?               @db.Uuid
+  created_at          DateTime?             @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?             @default(now()) @db.Timestamptz(6)
+  officer_assignments officer_assignments[]
+  project_staffing    project_staffing[]
+  volunteer_history   volunteer_history[]
+  companies           companies?            @relation(fields: [employer_id], references: [company_id], onDelete: NoAction, onUpdate: NoAction)
+  academic_terms      academic_terms?       @relation(fields: [graduation_term_id], references: [term_id], onDelete: NoAction, onUpdate: NoAction)
+  chapters            chapters?             @relation(fields: [home_chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction)
+  locations           universities?         @relation(fields: [university_id], references: [university_id], onDelete: NoAction, onUpdate: NoAction)
+  constituents        constituents          @relation(fields: [volunteer_id], references: [constituent_id], onDelete: Cascade, onUpdate: NoAction)
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model operations_branches {
-  branch_id            String                 @id(map: "national_branches_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                 String
-  volunteer_assignment volunteer_assignment[]
+model academic_terms {
+  term_id             String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  university_id       String?               @db.Uuid
+  name                String?               @db.VarChar
+  canonical_label     String?               @db.VarChar
+  type                term_type?
+  start_date          DateTime?             @db.Date
+  end_date            DateTime?             @db.Date
+  universities        universities?         @relation(fields: [university_id], references: [university_id], onDelete: NoAction, onUpdate: NoAction)
+  project_engagements project_engagements[]
+  volunteers          volunteers[]
+}
+
+model constituents {
+  constituent_id                                  String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name                                      String?               @db.VarChar
+  last_name                                       String?               @db.VarChar
+  primary_email                                   String                @unique @db.VarChar
+  phone_number                                    String?               @db.VarChar
+  created_at                                      DateTime?             @default(now()) @db.Timestamptz(6)
+  updated_at                                      DateTime?             @default(now()) @db.Timestamptz(6)
+  mentorships_mentorships_mentee_idToconstituents mentorships[]         @relation("mentorships_mentee_idToconstituents")
+  mentorships_mentorships_mentor_idToconstituents mentorships[]         @relation("mentorships_mentor_idToconstituents")
+  project_engagements                             project_engagements[]
+  social_links                                    social_links[]
+  volunteers                                      volunteers?
+}
+
+model mentorships {
+  mentorship_id                                    String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mentor_id                                        String?            @db.Uuid
+  mentee_id                                        String?            @db.Uuid
+  program_type                                     String?            @db.VarChar
+  status                                           engagement_status? @default(ACTIVE)
+  start_date                                       DateTime?          @db.Date
+  end_date                                         DateTime?          @db.Date
+  notes                                            String?
+  constituents_mentorships_mentee_idToconstituents constituents?      @relation("mentorships_mentee_idToconstituents", fields: [mentee_id], references: [constituent_id], onDelete: NoAction, onUpdate: NoAction)
+  constituents_mentorships_mentor_idToconstituents constituents?      @relation("mentorships_mentor_idToconstituents", fields: [mentor_id], references: [constituent_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model officer_assignments {
+  assignment_id String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  volunteer_id  String?        @db.Uuid
+  role_id       String?        @db.Uuid
+  chapter_id    String?        @db.Uuid
+  start_date    DateTime?      @db.Date
+  end_date      DateTime?      @db.Date
+  chapters      chapters?      @relation(fields: [chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction)
+  officer_roles officer_roles? @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
+  volunteers    volunteers?    @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model officer_roles {
+  role_id             String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String?               @unique @db.VarChar
+  scope               role_scope?
+  rank_level          Int?
+  officer_assignments officer_assignments[]
+}
+
+model partners {
+  partner_id            String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  legal_name            String?               @db.VarChar
+  mission_statement     String?
+  website_url           String?               @db.VarChar
+  pcs_organization_type String?               @db.VarChar
+  pcs_subject           String?               @db.VarChar
+  pcs_population        String?               @db.VarChar
+  created_at            DateTime?             @default(now()) @db.Timestamptz(6)
+  project_engagements   project_engagements[]
+}
+
+model project_deliverables {
+  deliverable_id String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id     String?           @db.Uuid
+  label          String?           @db.VarChar
+  url            String?           @db.VarChar
+  category       deliverable_type?
+  projects       projects?         @relation(fields: [project_id], references: [project_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model project_engagements {
+  engagement_id     String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id        String?            @db.Uuid
+  partner_id        String?            @db.Uuid
+  chapter_id        String?            @db.Uuid
+  academic_term_id  String?            @db.Uuid
+  client_contact_id String?            @db.Uuid
+  status            engagement_status? @default(ACTIVE)
+  domain            domain_type?       @default(FULL_STACK)
+  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?          @default(now()) @db.Timestamptz(6)
+  academic_terms    academic_terms?    @relation(fields: [academic_term_id], references: [term_id], onDelete: NoAction, onUpdate: NoAction)
+  chapters          chapters?          @relation(fields: [chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction)
+  constituents      constituents?      @relation(fields: [client_contact_id], references: [constituent_id], onDelete: NoAction, onUpdate: NoAction)
+  partners          partners?          @relation(fields: [partner_id], references: [partner_id], onDelete: NoAction, onUpdate: NoAction)
+  projects          projects?          @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction)
+  project_staffing  project_staffing[]
+}
+
+model project_roles {
+  role_id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String?            @db.VarChar
+  is_leadership    Boolean?           @default(false)
+  project_staffing project_staffing[]
+}
+
+model project_staffing {
+  staffing_id         String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  volunteer_id        String?              @db.Uuid
+  engagement_id       String?              @db.Uuid
+  role_id             String?              @db.Uuid
+  is_lead_contact     Boolean?             @default(false)
+  start_date          DateTime?            @db.Date
+  end_date            DateTime?            @db.Date
+  project_engagements project_engagements? @relation(fields: [engagement_id], references: [engagement_id], onDelete: NoAction, onUpdate: NoAction)
+  project_roles       project_roles?       @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
+  volunteers          volunteers?          @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model social_links {
+  link_id        String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  constituent_id String?               @db.Uuid
+  platform       social_platform_type?
+  url            String?               @db.VarChar
+  is_featured    Boolean?              @default(false)
+  constituents   constituents?         @relation(fields: [constituent_id], references: [constituent_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model universities {
+  university_id  String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String?          @db.VarChar
+  email_domain   String?          @db.VarChar
+  location_id    String?          @db.Uuid
+  academic_terms academic_terms[]
+  locations      locations?       @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
+  volunteers     volunteers[]
 }
 
 /// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 enum action_type {
-  JOINED
-  LEFT
-  ON_HIATUS @map("ON HIATUS")
+  ENROLLED
+  PROMOTED
+  DEMOTED
+  ROLE_CHANGE
+  GRADUATED
+  RESIGNED
+  HIATUS
 }
 
-/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-enum level_type {
-  REGULAR_CHAPTER_VOLUNTEER_LEVEL    @map("1 - REGULAR CHAPTER VOLUNTEER LEVEL")
-  CHAPTER_BOARD_LEVEL                @map("2 - CHAPTER BOARD LEVEL")
-  REGULAR_OPERATIONS_VOLUNTEER_LEVEL @map("3 - REGULAR OPERATIONS VOLUNTEER LEVEL")
-  OPERATIONS_BOARD_LEVEL             @map("4 - OPERATIONS BOARD LEVEL")
+enum deliverable_type {
+  REPO
+  DESIGN_SPEC
+  LIVE_URL
+  DOCUMENTATION
 }
 
-/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-enum status_type {
+enum domain_type {
+  DESIGN_ONLY
+  DEVELOP_ONLY
+  FULL_STACK
+  STRATEGY_CONSULT
+  MAINTENANCE
+}
+
+enum education_level {
+  UNDERGRADUATE
+  GRADUATE
+  BOOTCAMP
+  SELF_TAUGHT
+  OTHER
+}
+
+enum engagement_status {
+  PROSPECT
   ACTIVE
-  INACTIVE
+  COMPLETED
+  ON_HOLD
 }
 
-/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-enum volunteer_status {
-  STUDENT
-  PROFESSIONAL
+enum engagement_track {
+  PROGRAMS
+  CENTRAL
+  ADVISORY
 }
 
-/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-enum volunteer_type {
+enum financial_type {
+  PRO_BONO
+  INTERNAL
+  PAID_CONSULT
+}
+
+enum role_scope {
   CHAPTER
-  OPERATIONS
-  BOTH
+  CENTRAL
 }
 
-/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-enum project_type {
-  DESIGN_ONLY        @map("DESIGN-ONLY")
-  DEVELOP_ONLY       @map("DEVELOP-ONLY")
-  DESIGN_AND_DEVELOP @map("DESIGN AND DEVELOP")
-  CONSULT
-  MAINTAIN
+enum social_platform_type {
+  GITHUB
+  LINKEDIN
+  PORTFOLIO
+  TWITTER
+  DRIBBBLE
+  OTHER
+}
+
+enum term_type {
+  SEMESTER
+  QUARTER
+  TRIMESTER
+}
+
+enum volunteer_class {
+  COLLEGIATE
+  ALUMNI
+  ASSOCIATE
 }

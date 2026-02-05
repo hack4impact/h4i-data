@@ -39,9 +39,9 @@ export const projectResolvers = {
 
       const sortedProjects = projects.sort((a, b) => {
         if (order === 'DESC') {
-          return b.name.localeCompare(a.name);
+          return (b.name ?? '').localeCompare(a.name ?? '');
         }
-        return a.name.localeCompare(b.name);
+        return (a.name ?? '').localeCompare(b.name ?? '');
       });
 
       return sortedProjects.map(serializeProject);

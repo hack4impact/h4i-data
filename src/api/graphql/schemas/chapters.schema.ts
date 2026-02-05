@@ -1,18 +1,10 @@
 export const chapterSchemaString = `
-  # Using the enum from your Prisma schema
-  enum StatusType {
-    ACTIVE
-    INACTIVE
-  }
-
   type Chapter {
     chapter_id: ID!
-    name: String!
-    location_id: String
-    founded_date: String!
-    status_type: StatusType!
-    created_at: String!
-    updated_at: String!
+    name: String
+    university_id: ID
+    location_id: ID
+    founded_date: String
   }
 
   type Query {
@@ -22,16 +14,16 @@ export const chapterSchemaString = `
 
   input CreateChapterInput {
     name: String!
-    founded_date: String! # Using String for dates is common
-    status_type: StatusType
-    location_id: String
+    university_id: ID
+    location_id: ID
+    founded_date: String
   }
 
   input UpdateChapterInput {
     name: String
+    university_id: ID
+    location_id: ID
     founded_date: String
-    status_type: StatusType
-    location_id: String
   }
 
   type Mutation {

@@ -7,7 +7,6 @@ import {
 } from '../../middleware/error.middleware';
 import { z } from 'zod';
 
-// Define types based on Zod schemas for better type safety
 type CreateVolunteerInput = z.infer<typeof createVolunteerSchema>;
 type UpdateVolunteerInput = z.infer<typeof updateVolunteerSchema>;
 
@@ -16,6 +15,9 @@ export async function getAllVolunteers() {
     logger.info('Fetching all volunteers');
     const volunteers = await prisma.volunteers.findMany({
       orderBy: { created_at: 'desc' },
+      include: {
+        constituents: true,
+      },
     });
 
     logger.info('Successfully retrieved volunteers', {
@@ -37,6 +39,9 @@ export async function getVolunteerById(id: string) {
 
     const volunteer = await prisma.volunteers.findUnique({
       where: { volunteer_id: id },
+      include: {
+        constituents: true,
+      },
     });
 
     if (!volunteer) {
@@ -46,7 +51,6 @@ export async function getVolunteerById(id: string) {
 
     logger.info('Successfully retrieved volunteer', {
       volunteerId: id,
-      volunteerName: volunteer.first_name + ' ' + volunteer.last_name,
     });
 
     return volunteer;
@@ -66,19 +70,35 @@ export async function getVolunteerById(id: string) {
 export async function createVolunteer(data: CreateVolunteerInput) {
   try {
     logger.info('Creating new volunteer', {
-      volunteerName: data.first_name + ' ' + data.last_name,
       volunteerData: data,
     });
 
-    const volunteer = await prisma.volunteers.create({ data });
+    // The volunteer_id must reference an existing constituent
+    const constituent = await prisma.constituents.findUnique({
+      where: { constituent_id: data.volunteer_id },
+    });
+
+    if (!constituent) {
+      throw new NotFoundError('Constituent', data.volunteer_id);
+    }
+
+    const volunteer = await prisma.volunteers.create({
+      data,
+      include: {
+        constituents: true,
+      },
+    });
 
     logger.info('Successfully created volunteer', {
       volunteerId: volunteer.volunteer_id,
-      volunteerName: volunteer.first_name + ' ' + volunteer.last_name,
     });
 
     return volunteer;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+
     logger.error('Failed to create volunteer', {
       volunteerData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -97,11 +117,13 @@ export async function updateVolunteer(id: string, data: UpdateVolunteerInput) {
     const volunteer = await prisma.volunteers.update({
       where: { volunteer_id: id },
       data,
+      include: {
+        constituents: true,
+      },
     });
 
     logger.info('Successfully updated volunteer', {
       volunteerId: id,
-      volunteerName: volunteer.first_name + ' ' + volunteer.last_name,
     });
 
     return volunteer;
@@ -112,7 +134,6 @@ export async function updateVolunteer(id: string, data: UpdateVolunteerInput) {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
 
-    // Check if volunteer doesn't exist
     if (
       error instanceof Error &&
       error.message.includes('Record to update not found')
@@ -130,11 +151,13 @@ export async function deleteVolunteer(id: string) {
 
     const volunteer = await prisma.volunteers.delete({
       where: { volunteer_id: id },
+      include: {
+        constituents: true,
+      },
     });
 
     logger.info('Successfully deleted volunteer', {
       volunteerId: id,
-      volunteerName: volunteer.first_name + ' ' + volunteer.last_name,
     });
 
     return volunteer;
@@ -144,7 +167,6 @@ export async function deleteVolunteer(id: string) {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
 
-    // Check if volunteer doesn't exist
     if (
       error instanceof Error &&
       error.message.includes('Record to delete does not exist')

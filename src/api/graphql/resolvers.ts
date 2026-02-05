@@ -1,35 +1,81 @@
+// Core Entity Resolvers
 import { chapterResolvers } from './resolvers/chapters.resolvers';
-import { sponsorResolvers } from './resolvers/sponsors.resolvers';
-import { volunteerResolvers } from './resolvers/volunteers.resolvers';
-import { contactResolvers } from './resolvers/contacts.resolvers';
-import { roleResolvers } from './resolvers/roles.resolvers';
-import { projectResolvers } from './resolvers/projects.resolvers';
-import { nonprofitResolvers } from './resolvers/nonprofits.resolvers';
 import { companyResolvers } from './resolvers/companies.resolvers';
+import { constituentResolvers } from './resolvers/constituents.resolvers';
 import { locationResolvers } from './resolvers/locations.resolvers';
+import { partnerResolvers } from './resolvers/partners.resolvers';
+import { projectResolvers } from './resolvers/projects.resolvers';
+import { officerRoleResolvers } from './resolvers/officer-roles.resolvers';
+import { volunteerResolvers } from './resolvers/volunteers.resolvers';
+
+// Supporting Entity Resolvers
+import { universityResolvers } from './resolvers/universities.resolvers';
+import { academicTermResolvers } from './resolvers/academic-terms.resolvers';
+import { projectRoleResolvers } from './resolvers/project-roles.resolvers';
+import { socialLinkResolvers } from './resolvers/social-links.resolvers';
+
+// Relation Entity Resolvers
+import { volunteerHistoryResolvers } from './resolvers/volunteer-history.resolvers';
+import { officerAssignmentResolvers } from './resolvers/officer-assignments.resolvers';
+import { mentorshipResolvers } from './resolvers/mentorships.resolvers';
+import { projectDeliverableResolvers } from './resolvers/project-deliverables.resolvers';
+import { projectEngagementResolvers } from './resolvers/project-engagements.resolvers';
+import { projectStaffingResolvers } from './resolvers/project-staffing.resolvers';
 
 // Merge multiple resolver objects here
 export const resolvers = {
   Query: {
+    // Core Entities
     ...chapterResolvers.Query,
-    ...sponsorResolvers.Query,
-    ...volunteerResolvers.Query,
-    ...contactResolvers.Query,
-    ...roleResolvers.Query,
-    ...locationResolvers.Query,
-    ...projectResolvers.Query,
-    ...nonprofitResolvers.Query,
     ...companyResolvers.Query,
+    ...constituentResolvers.Query,
+    ...locationResolvers.Query,
+    ...partnerResolvers.Query,
+    ...projectResolvers.Query,
+    ...officerRoleResolvers.Query,
+    ...volunteerResolvers.Query,
+
+    // Supporting Entities
+    ...universityResolvers.Query,
+    ...academicTermResolvers.Query,
+    ...projectRoleResolvers.Query,
+    ...socialLinkResolvers.Query,
+
+    // Relation Entities
+    ...volunteerHistoryResolvers.Query,
+    ...officerAssignmentResolvers.Query,
+    ...mentorshipResolvers.Query,
+    ...projectDeliverableResolvers.Query,
+    ...projectEngagementResolvers.Query,
+    ...projectStaffingResolvers.Query,
   },
   Mutation: {
+    // Core Entities
     ...chapterResolvers.Mutation,
-    ...sponsorResolvers.Mutation,
-    ...volunteerResolvers.Mutation,
-    ...contactResolvers.Mutation,
-    ...roleResolvers.Mutation,
-    ...locationResolvers.Mutation,
-    ...projectResolvers.Mutation,
-    ...nonprofitResolvers.Mutation,
     ...companyResolvers.Mutation,
+    ...constituentResolvers.Mutation,
+    ...locationResolvers.Mutation,
+    ...partnerResolvers.Mutation,
+    ...projectResolvers.Mutation,
+    ...officerRoleResolvers.Mutation,
+    ...volunteerResolvers.Mutation,
+
+    // Supporting Entities
+    ...universityResolvers.Mutation,
+    ...academicTermResolvers.Mutation,
+    ...projectRoleResolvers.Mutation,
+    ...socialLinkResolvers.Mutation,
+
+    // Relation Entities
+    ...volunteerHistoryResolvers.Mutation,
+    ...officerAssignmentResolvers.Mutation,
+    ...mentorshipResolvers.Mutation,
+    ...projectDeliverableResolvers.Mutation,
+    ...projectEngagementResolvers.Mutation,
+    ...projectStaffingResolvers.Mutation,
   },
+  // Type Resolvers
+  ...(volunteerResolvers.Volunteer && {
+    Volunteer: volunteerResolvers.Volunteer,
+  }),
 };

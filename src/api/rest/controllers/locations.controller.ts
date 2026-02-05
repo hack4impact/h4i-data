@@ -28,8 +28,9 @@ export const locationController = {
   }),
 
   getLocationById: asyncHandler(async (req: RequestWithId, res: Response) => {
+    const id = req.params.id as string;
     try {
-      const location = await getLocationById(req.params.id);
+      const location = await getLocationById(id);
       if (location) {
         res.json(location);
       } else {
@@ -50,12 +51,10 @@ export const locationController = {
   }),
 
   updateLocation: asyncHandler(async (req: RequestWithId, res: Response) => {
+    const id = req.params.id as string;
     try {
       const validatedData = updateLocationSchema.parse(req.body);
-      const updatedLocation = await updateLocation(
-        req.params.id,
-        validatedData
-      );
+      const updatedLocation = await updateLocation(id, validatedData);
       res.json(updatedLocation);
     } catch (error) {
       if (error instanceof Error && error.message.includes('validation')) {
@@ -78,8 +77,9 @@ export const locationController = {
   }),
 
   deleteLocation: asyncHandler(async (req: RequestWithId, res: Response) => {
+    const id = req.params.id as string;
     try {
-      await deleteLocation(req.params.id);
+      await deleteLocation(id);
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
