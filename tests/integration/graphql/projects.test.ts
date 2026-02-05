@@ -23,20 +23,16 @@ describe('GraphQL API - Projects', () => {
         createProject(input: $input) {
           project_id
           name
-          description
-          repo
-          budget
-          project_type
+          github_url
+          financial
         }
       }
     `;
     const variables = {
       input: {
         name: 'GraphQL Integration Test Project',
-        description: 'This is a test description for project',
-        repo: 'test repo link',
-        budget: 100,
-        project_type: 'DESIGN_ONLY',
+        github_url: 'https://github.com/test/project',
+        financial: 'PRO_BONO',
       },
     };
 
@@ -59,20 +55,16 @@ describe('GraphQL API - Projects', () => {
         createProject(input: $input) {
           project_id
           name
-          description
-          repo
-          budget
-          project_type
+          github_url
+          financial
         }
       }
     `;
     const createVariables = {
       input: {
         name: 'Test Project for Query',
-        description: 'Test description for project query',
-        repo: 'test repo link project query',
-        budget: 100,
-        project_type: 'DESIGN_ONLY',
+        github_url: 'https://github.com/test/query-project',
+        financial: 'PRO_BONO',
       },
     };
 
@@ -90,10 +82,8 @@ describe('GraphQL API - Projects', () => {
         project(id: $id) {
           project_id
           name
-          description
-          repo
-          budget
-          project_type
+          github_url
+          financial
         }
       }
     `;

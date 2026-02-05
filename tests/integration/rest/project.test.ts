@@ -26,15 +26,15 @@ describe('REST API - /projects', () => {
   it('should create a new project via POST', async () => {
     const response = await request(server).post('/projects').send({
       name: 'REST Integration Test Project',
-      repo: 'REPO URL',
-      project_type: 'DESIGN_ONLY',
+      github_url: 'https://github.com/test/project',
+      financial: 'PRO_BONO',
     });
 
     // Assertions
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('project_id');
     expect(response.body.name).toBe('REST Integration Test Project');
-    expect(response.body.repo).toBe('REPO URL');
+    expect(response.body.github_url).toBe('https://github.com/test/project');
 
     projectId = response.body.project_id;
   });

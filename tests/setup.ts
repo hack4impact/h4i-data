@@ -40,15 +40,25 @@ beforeEach(async () => {
 
     // Skip cleanup for unit tests since they mock the database
     if (!isUnitTest) {
-      await prisma.volunteer_assignment.deleteMany({});
-      await prisma.volunteer_role_project.deleteMany({});
+      // Delete in order respecting foreign key constraints
+      await prisma.project_staffing.deleteMany({});
+      await prisma.project_deliverables.deleteMany({});
+      await prisma.project_engagements.deleteMany({});
+      await prisma.officer_assignments.deleteMany({});
       await prisma.volunteer_history.deleteMany({});
-
-      await prisma.nonprofit_chapter_project.deleteMany({});
-      await prisma.sponsor_chapter.deleteMany({});
-
+      await prisma.mentorships.deleteMany({});
+      await prisma.social_links.deleteMany({});
+      await prisma.volunteers.deleteMany({});
+      await prisma.academic_terms.deleteMany({});
+      await prisma.universities.deleteMany({});
+      await prisma.project_roles.deleteMany({});
+      await prisma.officer_roles.deleteMany({});
       await prisma.projects.deleteMany({});
       await prisma.chapters.deleteMany({});
+      await prisma.partners.deleteMany({});
+      await prisma.constituents.deleteMany({});
+      await prisma.companies.deleteMany({});
+      await prisma.locations.deleteMany({});
     }
   } catch (error) {
     console.error('Failed to clean database between tests:', error);

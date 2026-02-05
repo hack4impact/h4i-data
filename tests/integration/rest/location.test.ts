@@ -29,9 +29,9 @@ describe('REST API - /locations', () => {
     it('should create a new location', async () => {
       const locationData = {
         name: 'Headquarters',
-        address: '123 Main Street',
-        country_code: 'US',
-        subdivision_code: 'CA',
+        address_line: '123 Main Street',
+        state_code: 'CA',
+        country_code: 'USA',
       };
 
       const response = await request(server)
@@ -41,9 +41,9 @@ describe('REST API - /locations', () => {
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('location_id');
       expect(response.body.name).toBe('Headquarters');
-      expect(response.body.address).toBe('123 Main Street');
-      expect(response.body.country_code).toBe('US');
-      expect(response.body.subdivision_code).toBe('CA');
+      expect(response.body.address_line).toBe('123 Main Street');
+      expect(response.body.state_code).toBe('CA');
+      expect(response.body.country_code).toBe('USA');
 
       createdLocationId = response.body.location_id;
     });
@@ -51,8 +51,8 @@ describe('REST API - /locations', () => {
     it('should return 400 for invalid data', async () => {
       const invalidData = {
         name: 'A', // Too short
-        address: 'No street',
-        country_code: 'ABC', // Invalid format
+        address_line: 'No',
+        state_code: 'ABC', // Invalid format (should be 2 chars)
       };
 
       const response = await request(server)
@@ -102,7 +102,7 @@ describe('REST API - /locations', () => {
 
       const updateData = {
         name: 'New York Office',
-        subdivision_code: 'NY',
+        state_code: 'NY',
       };
 
       const response = await request(server)
@@ -111,8 +111,8 @@ describe('REST API - /locations', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.name).toBe('New York Office');
-      expect(response.body.subdivision_code).toBe('NY');
-      expect(response.body.address).toBe('123 Main Street'); // Unchanged
+      expect(response.body.state_code).toBe('NY');
+      expect(response.body.address_line).toBe('123 Main Street'); // Unchanged
     });
   });
 

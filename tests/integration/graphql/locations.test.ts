@@ -24,9 +24,9 @@ describe('GraphQL API - Locations', () => {
         createLocation(input: $input) {
           location_id
           name
-          address
+          address_line
+          state_code
           country_code
-          subdivision_code
         }
       }
     `;
@@ -34,9 +34,9 @@ describe('GraphQL API - Locations', () => {
     const variables = {
       input: {
         name: 'Test Location',
-        address: '123 Test St',
-        country_code: 'US',
-        subdivision_code: 'NY',
+        address_line: '123 Test St',
+        state_code: 'NY',
+        country_code: 'USA',
       },
     };
 
@@ -50,9 +50,9 @@ describe('GraphQL API - Locations', () => {
     const location = response.body.data.createLocation;
     expect(location).toHaveProperty('location_id');
     expect(location.name).toBe(variables.input.name);
-    expect(location.address).toBe('123 Test St');
-    expect(location.country_code).toBe('US');
-    expect(location.subdivision_code).toBe('NY');
+    expect(location.address_line).toBe('123 Test St');
+    expect(location.state_code).toBe('NY');
+    expect(location.country_code).toBe('USA');
 
     locationId = location.location_id;
   });
@@ -64,7 +64,7 @@ describe('GraphQL API - Locations', () => {
         location(id: $id) {
           location_id
           name
-          address
+          address_line
         }
       }
     `;
@@ -82,7 +82,7 @@ describe('GraphQL API - Locations', () => {
     // Verify the fetched data matches the created data
     expect(location.location_id).toBe(locationId);
     expect(location.name).toBe('Test Location');
-    expect(location.address).toBe('123 Test St');
+    expect(location.address_line).toBe('123 Test St');
   });
 
   it('should delete a location by its ID via mutation', async () => {

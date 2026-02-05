@@ -6,40 +6,40 @@ import { env } from '../../../src/config/server';
 
 let server: Server;
 let app: express.Application;
-let universityId: string;
+let constituentId: string;
 let volunteerId: string;
 
 beforeAll(async () => {
   app = createGraphqlApp();
   server = app.listen(env.GRAPHQL_PORT);
 
-  // create a university location and get its id
-  const universityMutation = `
-    mutation CreateLocation($input: CreateLocationInput!) {
-      createLocation(input: $input) {
-        location_id
-        name
-        address
-        country_code
-        subdivision_code
+  // Create a constituent first (required for volunteer)
+  const constituentMutation = `
+    mutation CreateConstituent($input: CreateConstituentInput!) {
+      createConstituent(input: $input) {
+        constituent_id
+        first_name
+        last_name
+        primary_email
       }
     }
   `;
 
-  const universityVariables = {
+  const uniqueEmail = `test.volunteer.${Date.now()}@example.com`;
+  const constituentVariables = {
     input: {
-      name: 'Test Location ',
-      address: '123 Test St',
-      country_code: 'US',
-      subdivision_code: 'NY',
+      first_name: 'John',
+      last_name: 'Doe',
+      primary_email: uniqueEmail,
     },
   };
 
-  const universityResponse = await request(server)
-    .post('/') // GraphQL server is at the root
-    .send({ query: universityMutation, variables: universityVariables });
+  const constituentResponse = await request(server)
+    .post('/')
+    .send({ query: constituentMutation, variables: constituentVariables });
 
-  universityId = universityResponse.body.data.createLocation.location_id;
+  constituentId =
+    constituentResponse.body.data.createConstituent.constituent_id;
 });
 
 afterAll(() => {
@@ -52,37 +52,29 @@ describe('GraphQL API - Volunteers', () => {
       mutation CreateVolunteer($input: CreateVolunteerInput!) {
         createVolunteer(input: $input) {
           volunteer_id
-          first_name
-          last_name
-          email
-          graduation_date
-          university_id
-          volunteer_status
-          volunteer_type
-          h4i_email
-          chapter_id
-          company_id
+          org_email
+          active_status
+          volunteer_class
+          engagement_track
+          major
+          education_level
         }
       }
     `;
     const variables = {
       input: {
-        first_name: 'John',
-        last_name: 'Doe',
-        email:
-          'john.doe' +
-          Date.now() +
-          Math.floor(Math.random() * 1000) +
-          '@example.com',
-        graduation_date: new Date('2026-06-18').toISOString(),
-        volunteer_status: 'STUDENT',
-        volunteer_type: 'BOTH',
-        university_id: universityId, // Test UUID from Supabase
+        volunteer_id: constituentId,
+        org_email: 'john@org.edu',
+        active_status: true,
+        volunteer_class: 'COLLEGIATE',
+        engagement_track: 'PROGRAMS',
+        major: 'Computer Science',
+        education_level: 'UNDERGRADUATE',
       },
     };
 
     const response = await request(server)
-      .post('/') // GraphQL server is at the root
+      .post('/')
       .send({ query: mutation, variables });
 
     // Assertions
@@ -90,21 +82,20 @@ describe('GraphQL API - Volunteers', () => {
     expect(response.body.errors).toBeUndefined();
     const volunteer = response.body.data.createVolunteer;
     expect(volunteer).toHaveProperty('volunteer_id');
-    expect(volunteer.first_name).toBe('John');
+    expect(volunteer.volunteer_id).toBe(constituentId);
+    expect(volunteer.org_email).toBe('john@org.edu');
 
     volunteerId = volunteer.volunteer_id;
   });
 
   it('should fetch a volunteer by their ID via query', async () => {
-    // Now fetch it
     const query = `
       query Volunteer($id: ID!) {
         volunteer(id: $id) {
           volunteer_id
-          first_name
-          last_name
-          email
-          volunteer_status
+          org_email
+          active_status
+          volunteer_class
         }
       }
     `;
@@ -117,19 +108,16 @@ describe('GraphQL API - Volunteers', () => {
     expect(response.body.errors).toBeUndefined();
     const volunteer = response.body.data.volunteer;
     expect(volunteer.volunteer_id).toBe(volunteerId);
-    expect(volunteer.first_name).toBe('John');
+    expect(volunteer.org_email).toBe('john@org.edu');
   });
 
   it('should fetch all volunteers', async () => {
-    // Now fetch it
     const query = `
       query {
         volunteers {
           volunteer_id
-          first_name
-          last_name
-          email
-          volunteer_status
+          org_email
+          active_status
         }
       }
     `;
@@ -142,12 +130,13 @@ describe('GraphQL API - Volunteers', () => {
     const volunteers = response.body.data.volunteers;
     expect(Array.isArray(volunteers)).toBe(true);
   });
+
   it("should provide an error if volunteer doesn't exist", async () => {
     const query = `
       query {
-        volunteer(id: "non-existent-id") {
+        volunteer(id: "00000000-0000-0000-0000-000000000000") {
           volunteer_id
-          first_name
+          org_email
         }
       }
     `;
@@ -158,19 +147,16 @@ describe('GraphQL API - Volunteers', () => {
     expect(response.status).toBe(200);
     expect(response.body.data.volunteer).toBeNull();
     expect(response.body.errors).toBeDefined();
-    expect(response.body.errors[0].message).toMatch(
-      /Database error: Failed to retrieve volunteer/
-    );
   });
 
-  it('should update a new volunteer', async () => {
-    // Now update the volunteer
+  it('should update a volunteer', async () => {
     const updateMutation = `
       mutation UpdateVolunteer($id: ID!, $input: UpdateVolunteerInput!) {
         updateVolunteer(id: $id, input: $input) {
           volunteer_id
-          first_name
-          last_name
+          org_email
+          active_status
+          major
         }
       }
     `;
@@ -178,25 +164,24 @@ describe('GraphQL API - Volunteers', () => {
     const updateVariables = {
       id: volunteerId,
       input: {
-        first_name: 'New Updated John',
-        last_name: 'New Updated Smith',
+        active_status: false,
+        major: 'Software Engineering',
       },
     };
 
     const updateResponse = await request(server)
-      .post('/') // GraphQL server is at the root
+      .post('/')
       .send({ query: updateMutation, variables: updateVariables });
 
     expect(updateResponse.status).toBe(200);
     expect(updateResponse.body.errors).toBeUndefined();
     const updatedVolunteer = updateResponse.body.data.updateVolunteer;
     expect(updatedVolunteer.volunteer_id).toBe(volunteerId);
-    expect(updatedVolunteer.first_name).toBe('New Updated John');
-    expect(updatedVolunteer.last_name).toBe('New Updated Smith');
+    expect(updatedVolunteer.active_status).toBe(false);
+    expect(updatedVolunteer.major).toBe('Software Engineering');
   });
 
   it('should delete a volunteer', async () => {
-    // Now delete the volunteer
     const deleteMutation = `
       mutation DeleteVolunteer($id: ID!) {
         deleteVolunteer(id: $id) {
@@ -206,7 +191,7 @@ describe('GraphQL API - Volunteers', () => {
     `;
     const deleteVariables = { id: volunteerId };
     const deleteResponse = await request(server)
-      .post('/') // GraphQL server is at the root
+      .post('/')
       .send({ query: deleteMutation, variables: deleteVariables });
 
     // Assertions

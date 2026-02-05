@@ -23,7 +23,7 @@ describe('GraphQL API - Chapters', () => {
         createChapter(input: $input) {
           chapter_id
           name
-          status_type
+          founded_date
         }
       }
     `;
@@ -31,7 +31,6 @@ describe('GraphQL API - Chapters', () => {
       input: {
         name: 'GraphQL Integration Test Chapter',
         founded_date: '2025-08-30T12:00:00.000Z',
-        status_type: 'ACTIVE',
       },
     };
 
@@ -54,7 +53,7 @@ describe('GraphQL API - Chapters', () => {
         createChapter(input: $input) {
           chapter_id
           name
-          status_type
+          founded_date
         }
       }
     `;
@@ -62,7 +61,6 @@ describe('GraphQL API - Chapters', () => {
       input: {
         name: 'Test Chapter for Query',
         founded_date: '2025-08-30T12:00:00.000Z',
-        status_type: 'ACTIVE',
       },
     };
 

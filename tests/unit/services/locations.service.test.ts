@@ -7,7 +7,6 @@ import {
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
 
-// Mock prisma client
 jest.mock('../../../src/config/database', () => ({
   prisma: {
     locations: {
@@ -31,11 +30,9 @@ describe('Location Service', () => {
         {
           location_id: '1',
           name: 'Test Location 1',
-          address: '123 Test Street',
-          country_code: 'US',
-          subdivision_code: 'CA',
-          created_at: new Date(),
-          updated_at: new Date(),
+          address_line: '123 Test Street',
+          state_code: 'CA',
+          country_code: 'USA',
         },
       ];
       (prisma.locations.findMany as jest.Mock).mockResolvedValue(mockLocations);
@@ -53,11 +50,9 @@ describe('Location Service', () => {
       const mockLocation = {
         location_id: '1',
         name: 'Test Location 1',
-        address: '123 Test Street',
-        country_code: 'US',
-        subdivision_code: 'CA',
-        created_at: new Date(),
-        updated_at: new Date(),
+        address_line: '123 Test Street',
+        state_code: 'CA',
+        country_code: 'USA',
       };
       (prisma.locations.findUnique as jest.Mock).mockResolvedValue(
         mockLocation
@@ -76,16 +71,14 @@ describe('Location Service', () => {
     it('should create and return a new location', async () => {
       const inputData = {
         name: 'Test Location 1',
-        address: '123 Test Street',
-        country_code: 'US',
-        subdivision_code: 'CA',
+        address_line: '123 Test Street',
+        state_code: 'CA',
+        country_code: 'USA',
       };
 
       const createdLocation = {
         location_id: '1',
         ...inputData,
-        created_at: new Date(),
-        updated_at: new Date(),
       };
 
       (prisma.locations.create as jest.Mock).mockResolvedValue(createdLocation);
@@ -97,9 +90,9 @@ describe('Location Service', () => {
       expect(prisma.locations.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           name: inputData.name,
-          address: inputData.address,
+          address_line: inputData.address_line,
+          state_code: inputData.state_code,
           country_code: inputData.country_code,
-          subdivision_code: inputData.subdivision_code,
         }),
       });
     });
@@ -113,11 +106,9 @@ describe('Location Service', () => {
       const updatedLocation = {
         location_id: '1',
         name: 'Updated Location Name',
-        address: '123 Test Street',
-        country_code: 'US',
-        subdivision_code: 'CA',
-        created_at: new Date(),
-        updated_at: new Date(),
+        address_line: '123 Test Street',
+        state_code: 'CA',
+        country_code: 'USA',
       };
 
       (prisma.locations.update as jest.Mock).mockResolvedValue(updatedLocation);
@@ -138,11 +129,9 @@ describe('Location Service', () => {
       const deletedLocation = {
         location_id: locationId,
         name: 'Test Location 1',
-        address: '123 Test Street',
-        country_code: 'US',
-        subdivision_code: 'CA',
-        created_at: new Date(),
-        updated_at: new Date(),
+        address_line: '123 Test Street',
+        state_code: 'CA',
+        country_code: 'USA',
       };
 
       (prisma.locations.delete as jest.Mock).mockResolvedValue(deletedLocation);

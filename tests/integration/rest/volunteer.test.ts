@@ -7,27 +7,28 @@ import { env } from '../../../src/config/server';
 let server: Server;
 let app: express.Application;
 let createdVolunteerId: string;
-let universityId: string;
+let constituentId: string;
 
 beforeAll(async () => {
   app = createRestApp();
-  // Start the server on the port defined in .env.test
   server = app.listen(env.REST_PORT);
 
-  const locationData = {
-    name: 'Headquarters',
-    address: '123 Main Street',
-    country_code: 'US',
-    subdivision_code: 'CA',
+  // Create a constituent first (required for volunteer)
+  const uniqueEmail = `test.volunteer.rest.${Date.now()}@example.com`;
+  const constituentData = {
+    first_name: 'John',
+    last_name: 'Doe',
+    primary_email: uniqueEmail,
   };
 
-  const response = await request(server).post('/locations').send(locationData);
+  const constituentResponse = await request(server)
+    .post('/constituents')
+    .send(constituentData);
 
-  universityId = response.body.location_id;
+  constituentId = constituentResponse.body.constituent_id;
 });
 
 afterAll(async () => {
-  // Close the server
   server.close();
 });
 
@@ -35,34 +36,32 @@ describe('REST API - /volunteers', () => {
   describe('POST /volunteers', () => {
     it('should create a new volunteer', async () => {
       const volunteerData = {
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'john.doe@example.com',
-        graduation_date: new Date('2026-06-18').toISOString(),
-        volunteer_status: 'STUDENT',
-        volunteer_type: 'BOTH',
-        university_id: universityId,
+        volunteer_id: constituentId,
+        org_email: 'john@org.edu',
+        active_status: true,
+        volunteer_class: 'COLLEGIATE',
+        engagement_track: 'PROGRAMS',
+        major: 'Computer Science',
+        education_level: 'UNDERGRADUATE',
       };
 
       const response = await request(server)
         .post('/volunteers')
         .send(volunteerData);
 
-      // This will fail initially - RED phase
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('volunteer_id');
-      expect(response.body.first_name).toBe('John');
-      expect(response.body.last_name).toBe('Doe');
-      expect(response.body.email).toBe('john.doe@example.com');
-      expect(response.body.volunteer_status).toBe('STUDENT');
+      expect(response.body.volunteer_id).toBe(constituentId);
+      expect(response.body.org_email).toBe('john@org.edu');
+      expect(response.body.volunteer_class).toBe('COLLEGIATE');
 
       createdVolunteerId = response.body.volunteer_id;
     });
 
     it('should return 400 for invalid data', async () => {
       const invalidData = {
-        first_name: 'A', // Too short
-        email: 'invalid-email', // Invalid format
+        // Missing volunteer_id which is required
+        org_email: 'invalid-email', // Invalid format
       };
 
       const response = await request(server)
@@ -93,7 +92,7 @@ describe('REST API - /volunteers', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.volunteer_id).toBe(createdVolunteerId);
-      expect(response.body.first_name).toBe('John');
+      expect(response.body.org_email).toBe('john@org.edu');
     });
 
     it('should return 404 for non-existent volunteer', async () => {
@@ -111,8 +110,8 @@ describe('REST API - /volunteers', () => {
       expect(createdVolunteerId).toBeDefined();
 
       const updateData = {
-        first_name: 'Jane',
-        volunteer_status: 'PROFESSIONAL',
+        active_status: false,
+        major: 'Software Engineering',
       };
 
       const response = await request(server)
@@ -120,9 +119,9 @@ describe('REST API - /volunteers', () => {
         .send(updateData);
 
       expect(response.status).toBe(200);
-      expect(response.body.first_name).toBe('Jane');
-      expect(response.body.volunteer_status).toBe('PROFESSIONAL');
-      expect(response.body.last_name).toBe('Doe'); // Unchanged
+      expect(response.body.active_status).toBe(false);
+      expect(response.body.major).toBe('Software Engineering');
+      expect(response.body.org_email).toBe('john@org.edu'); // Unchanged
     });
   });
 

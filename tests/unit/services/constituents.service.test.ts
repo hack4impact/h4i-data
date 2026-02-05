@@ -1,0 +1,163 @@
+import {
+  getAllConstituents,
+  getConstituentById,
+  createConstituent,
+  updateConstituent,
+  deleteConstituent,
+} from '../../../src/core';
+import { prisma } from '../../../src/config/database';
+
+jest.mock('../../../src/config/database', () => ({
+  prisma: {
+    constituents: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+  },
+}));
+
+describe('Constituent Service', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('getAllConstituents', () => {
+    it('should return an array of constituents', async () => {
+      const mockConstituents = [
+        {
+          constituent_id: '1',
+          first_name: 'John',
+          last_name: 'Doe',
+          primary_email: 'john@example.com',
+          phone_number: '555-1234',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ];
+      (prisma.constituents.findMany as jest.Mock).mockResolvedValue(
+        mockConstituents
+      );
+
+      const result = await getAllConstituents();
+
+      expect(result).toEqual(mockConstituents);
+      expect(prisma.constituents.findMany).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getConstituentById', () => {
+    it('should return a single constituent when a valid ID is provided', async () => {
+      const constituentId = '1';
+      const mockConstituent = {
+        constituent_id: constituentId,
+        first_name: 'John',
+        last_name: 'Doe',
+        primary_email: 'john@example.com',
+        phone_number: '555-1234',
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+      (prisma.constituents.findUnique as jest.Mock).mockResolvedValue(
+        mockConstituent
+      );
+
+      const result = await getConstituentById(constituentId);
+
+      expect(result).toEqual(mockConstituent);
+      expect(prisma.constituents.findUnique).toHaveBeenCalledWith({
+        where: { constituent_id: constituentId },
+      });
+    });
+
+    it('should throw NotFoundError if no constituent is found', async () => {
+      const constituentId = 'non-existent-id';
+      (prisma.constituents.findUnique as jest.Mock).mockResolvedValue(null);
+
+      await expect(getConstituentById(constituentId)).rejects.toThrow(
+        "Constituent with id 'non-existent-id' not found"
+      );
+    });
+  });
+
+  describe('createConstituent', () => {
+    it('should create and return a new constituent', async () => {
+      const inputData = {
+        first_name: 'Jane',
+        last_name: 'Smith',
+        primary_email: 'jane@example.com',
+      };
+      const createdConstituent = {
+        constituent_id: 'new-id-123',
+        ...inputData,
+        phone_number: null,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+      (prisma.constituents.create as jest.Mock).mockResolvedValue(
+        createdConstituent
+      );
+
+      const result = await createConstituent(inputData);
+
+      expect(result).toEqual(createdConstituent);
+      expect(prisma.constituents.create).toHaveBeenCalledWith({
+        data: inputData,
+      });
+    });
+  });
+
+  describe('updateConstituent', () => {
+    it('should update and return the constituent', async () => {
+      const constituentId = '1';
+      const updateData = { first_name: 'Updated Name' };
+      const updatedConstituent = {
+        constituent_id: constituentId,
+        first_name: 'Updated Name',
+        last_name: 'Doe',
+        primary_email: 'john@example.com',
+        phone_number: '555-1234',
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+      (prisma.constituents.update as jest.Mock).mockResolvedValue(
+        updatedConstituent
+      );
+
+      const result = await updateConstituent(constituentId, updateData);
+
+      expect(result).toEqual(updatedConstituent);
+      expect(prisma.constituents.update).toHaveBeenCalledWith({
+        where: { constituent_id: constituentId },
+        data: updateData,
+      });
+    });
+  });
+
+  describe('deleteConstituent', () => {
+    it('should call delete with the correct ID and return the deleted constituent', async () => {
+      const constituentId = '1';
+      const deletedConstituent = {
+        constituent_id: constituentId,
+        first_name: 'John',
+        last_name: 'Doe',
+        primary_email: 'john@example.com',
+        phone_number: '555-1234',
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+      (prisma.constituents.delete as jest.Mock).mockResolvedValue(
+        deletedConstituent
+      );
+
+      const result = await deleteConstituent(constituentId);
+
+      expect(result).toEqual(deletedConstituent);
+      expect(prisma.constituents.delete).toHaveBeenCalledWith({
+        where: { constituent_id: constituentId },
+      });
+    });
+  });
+});
