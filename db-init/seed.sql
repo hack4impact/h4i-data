@@ -6,252 +6,231 @@ CREATE SCHEMA public;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Create Enums
-CREATE TYPE public.action_type AS ENUM ('JOINED', 'LEFT', 'ON HIATUS');
+CREATE TYPE public.action_type AS ENUM ('ENROLLED', 'PROMOTED', 'DEMOTED', 'ROLE_CHANGE', 'GRADUATED', 'RESIGNED', 'HIATUS');
+CREATE TYPE public.deliverable_type AS ENUM ('REPO', 'DESIGN_SPEC', 'LIVE_URL', 'DOCUMENTATION');
+CREATE TYPE public.domain_type AS ENUM ('DESIGN_ONLY', 'DEVELOP_ONLY', 'FULL_STACK', 'STRATEGY_CONSULT', 'MAINTENANCE');
+CREATE TYPE public.education_level AS ENUM ('UNDERGRADUATE', 'GRADUATE', 'BOOTCAMP', 'SELF_TAUGHT', 'OTHER');
+CREATE TYPE public.engagement_status AS ENUM ('PROSPECT', 'ACTIVE', 'COMPLETED', 'ON_HOLD');
+CREATE TYPE public.engagement_track AS ENUM ('PROGRAMS', 'CENTRAL', 'ADVISORY');
+CREATE TYPE public.financial_type AS ENUM ('PRO_BONO', 'INTERNAL', 'PAID_CONSULT');
+CREATE TYPE public.role_scope AS ENUM ('CHAPTER', 'CENTRAL');
+CREATE TYPE public.social_platform_type AS ENUM ('GITHUB', 'LINKEDIN', 'PORTFOLIO', 'TWITTER', 'DRIBBBLE', 'OTHER');
+CREATE TYPE public.term_type AS ENUM ('SEMESTER', 'QUARTER', 'TRIMESTER');
+CREATE TYPE public.volunteer_class AS ENUM ('COLLEGIATE', 'ALUMNI', 'ASSOCIATE');
 
-CREATE TYPE public.level_type AS ENUM (
-  '1 - REGULAR CHAPTER VOLUNTEER LEVEL',
-  '2 - CHAPTER BOARD LEVEL',
-  '3 - REGULAR OPERATIONS VOLUNTEER LEVEL',
-  '4 - OPERATIONS BOARD LEVEL'
-);
+-- Create Tables (in an order that respects foreign keys)
 
-CREATE TYPE public.status_type AS ENUM ('ACTIVE', 'INACTIVE');
-
-CREATE TYPE public.volunteer_status AS ENUM ('STUDENT', 'PROFESSIONAL');
-
-CREATE TYPE public.volunteer_type AS ENUM ('CHAPTER', 'OPERATIONS', 'BOTH');
-
-CREATE TYPE public.project_type AS ENUM (
-  'DESIGN-ONLY',
-  'DEVELOP-ONLY',
-  'DESIGN AND DEVELOP',
-  'CONSULT',
-  'MAINTAIN'
-);
-
--- Create Tables (Order: * first, then 1, then 2)
-
--- Table: contacts (*)
-CREATE TABLE public.contacts (
-  contact_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  email text NOT NULL,
-  phone_number text NULL,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT contacts_pkey PRIMARY KEY (contact_id),
-  CONSTRAINT contacts_contact_id_key UNIQUE (contact_id)
-) TABLESPACE pg_default;
-
--- Table: locations (*)
+-- Tables with no or few dependencies
 CREATE TABLE public.locations (
-  location_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  address text NOT NULL,
-  country_code character(2) NOT NULL DEFAULT 'US'::bpchar,
-  subdivision_code text NOT NULL,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT university_pkey1 PRIMARY KEY (location_id),
-  CONSTRAINT locations_location_id_key UNIQUE (location_id)
-) TABLESPACE pg_default;
+    location_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    name varchar NULL,
+    address_line varchar NULL,
+    state_code varchar(2) NULL,
+    country_code varchar(3) NULL DEFAULT 'USA',
+    PRIMARY KEY (location_id)
+);
 
--- Table: operations_branches (*)
-CREATE TABLE public.operations_branches (
-  branch_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  CONSTRAINT operations_branches_pkey PRIMARY KEY (branch_id),
-  CONSTRAINT operations_branches_branch_id_key UNIQUE (branch_id)
-) TABLESPACE pg_default;
+CREATE TABLE public.constituents (
+    constituent_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    first_name varchar NULL,
+    last_name varchar NULL,
+    primary_email varchar NOT NULL,
+    phone_number varchar NULL,
+    created_at timestamptz(6) NULL DEFAULT now(),
+    updated_at timestamptz(6) NULL DEFAULT now(),
+    PRIMARY KEY (constituent_id),
+    UNIQUE (primary_email)
+);
 
--- Table: projects (*)
 CREATE TABLE public.projects (
-  project_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  description text NULL,
-  budget numeric(12, 2) NULL DEFAULT '0'::numeric,
-  repo text NOT NULL,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  project_type public.project_type NOT NULL DEFAULT 'DESIGN AND DEVELOP'::project_type,
-  CONSTRAINT project_pkey PRIMARY KEY (project_id),
-  CONSTRAINT projects_project_id_key UNIQUE (project_id)
-) TABLESPACE pg_default;
+    project_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    name varchar NULL,
+    github_url varchar NULL,
+    financial financial_type NULL DEFAULT 'PRO_BONO',
+    created_at timestamptz(6) NULL DEFAULT now(),
+    updated_at timestamptz(6) NULL DEFAULT now(),
+    PRIMARY KEY (project_id)
+);
 
--- Table: roles (*)
-CREATE TABLE public.roles (
-  role_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  description text NOT NULL,
-  permissions jsonb NOT NULL,
-  level_type public.level_type NOT NULL DEFAULT '1 - REGULAR CHAPTER VOLUNTEER LEVEL'::level_type,
-  CONSTRAINT roles_pkey PRIMARY KEY (role_id),
-  CONSTRAINT roles_role_id_key UNIQUE (role_id)
-) TABLESPACE pg_default;
+CREATE TABLE public.officer_roles (
+    role_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    name varchar NULL,
+    scope role_scope NULL,
+    rank_level int NULL,
+    PRIMARY KEY (role_id),
+    UNIQUE (name)
+);
 
--- Table: companies (1)
+CREATE TABLE public.project_roles (
+    role_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    name varchar NULL,
+    is_leadership boolean NULL DEFAULT false,
+    PRIMARY KEY (role_id)
+);
+
+CREATE TABLE public.partners (
+    partner_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    legal_name varchar NULL,
+    mission_statement text NULL,
+    website_url varchar NULL,
+    pcs_organization_type varchar NULL,
+    pcs_subject varchar NULL,
+    pcs_population varchar NULL,
+    created_at timestamptz(6) NULL DEFAULT now(),
+    PRIMARY KEY (partner_id)
+);
+
+-- Tables with dependencies
+CREATE TABLE public.universities (
+    university_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    name varchar NULL,
+    email_domain varchar NULL,
+    location_id uuid NULL,
+    PRIMARY KEY (university_id),
+    FOREIGN KEY (location_id) REFERENCES public.locations(location_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
 CREATE TABLE public.companies (
-  company_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  location_id uuid NULL,
-  CONSTRAINT companies_pkey PRIMARY KEY (company_id),
-  CONSTRAINT companies_company_id_key UNIQUE (company_id),
-  CONSTRAINT companies_location_id_fkey FOREIGN KEY (location_id) REFERENCES public.locations (location_id)
-) TABLESPACE pg_default;
+    company_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    name varchar NULL,
+    industry varchar NULL,
+    location_id uuid NULL,
+    PRIMARY KEY (company_id),
+    FOREIGN KEY (location_id) REFERENCES public.locations(location_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+);
 
--- Table: chapters (1)
+CREATE TABLE public.academic_terms (
+    term_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    university_id uuid NULL,
+    name varchar NULL,
+    canonical_label varchar NULL,
+    type term_type NULL,
+    start_date date NULL,
+    end_date date NULL,
+    PRIMARY KEY (term_id),
+    FOREIGN KEY (university_id) REFERENCES public.universities(university_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
 CREATE TABLE public.chapters (
-  chapter_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  location_id uuid NULL,
-  founded_date date NOT NULL,
-  status_type public.status_type NOT NULL DEFAULT 'ACTIVE'::public.status_type,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT chapter_pkey PRIMARY KEY (chapter_id),
-  CONSTRAINT chapters_chapter_id_key UNIQUE (chapter_id),
-  CONSTRAINT chapters_location_id_fkey FOREIGN KEY (location_id) REFERENCES public.locations (location_id)
-) TABLESPACE pg_default;
+    chapter_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    name varchar NULL,
+    university_id uuid NULL,
+    location_id uuid NULL,
+    founded_date date NULL,
+    PRIMARY KEY (chapter_id),
+    FOREIGN KEY (location_id) REFERENCES public.locations(location_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+);
 
--- Table: nonprofits (1)
-CREATE TABLE public.nonprofits (
-  nonprofit_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  mission text NOT NULL,
-  website text NULL,
-  location_id uuid NULL,
-  contact_id uuid NOT NULL,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT nonprofits_pkey PRIMARY KEY (nonprofit_id),
-  CONSTRAINT nonprofits_nonprofit_id_key UNIQUE (nonprofit_id),
-  CONSTRAINT nonprofits_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES public.contacts (contact_id),
-  CONSTRAINT nonprofits_location_id_fkey FOREIGN KEY (location_id) REFERENCES public.locations (location_id)
-) TABLESPACE pg_default;
+CREATE TABLE public.social_links (
+    link_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    constituent_id uuid NULL,
+    platform social_platform_type NULL,
+    url varchar NULL,
+    is_featured boolean NULL DEFAULT false,
+    PRIMARY KEY (link_id),
+    FOREIGN KEY (constituent_id) REFERENCES public.constituents(constituent_id) ON UPDATE NO ACTION ON DELETE CASCADE
+);
 
--- Table: sponsors (1)
-CREATE TABLE public.sponsors (
-  sponsor_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  location_id uuid NULL,
-  contact_id uuid NOT NULL,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_date timestamp with time zone NOT NULL DEFAULT now(),
-  company_id uuid NULL,
-  CONSTRAINT sponsors_pkey PRIMARY KEY (sponsor_id),
-  CONSTRAINT sponsors_sponsor_id_key UNIQUE (sponsor_id),
-  CONSTRAINT sponsors_company_id_fkey FOREIGN KEY (company_id) REFERENCES public.companies (company_id),
-  CONSTRAINT sponsors_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES public.contacts (contact_id),
-  CONSTRAINT sponsors_location_id_fkey FOREIGN KEY (location_id) REFERENCES public.locations (location_id)
-) TABLESPACE pg_default;
-
--- Table: volunteers (1)
 CREATE TABLE public.volunteers (
-  volunteer_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  first_name text NOT NULL,
-  last_name text NOT NULL,
-  email text NOT NULL,
-  graduation_date date NOT NULL,
-  university_id uuid NOT NULL,
-  volunteer_status public.volunteer_status NOT NULL DEFAULT 'STUDENT'::volunteer_status,
-  "H4I_email" text NULL,
-  chapter_id uuid NULL,
-  volunteer_type public.volunteer_type NOT NULL DEFAULT 'CHAPTER'::volunteer_type,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  company_id uuid NULL,
-  CONSTRAINT members_pkey PRIMARY KEY (volunteer_id),
-  CONSTRAINT person_email_key UNIQUE (email),
-  CONSTRAINT volunteers_volunteer_id_key UNIQUE (volunteer_id),
-  CONSTRAINT members_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES public.chapters (chapter_id),
-  CONSTRAINT volunteers_company_id_fkey FOREIGN KEY (company_id) REFERENCES public.companies (company_id),
-  CONSTRAINT volunteers_university_id_fkey FOREIGN KEY (university_id) REFERENCES public.locations (location_id)
-) TABLESPACE pg_default;
+    volunteer_id uuid NOT NULL,
+    org_email varchar NULL,
+    active_status boolean NULL DEFAULT true,
+    volunteer_class volunteer_class NULL DEFAULT 'COLLEGIATE',
+    engagement_track engagement_track NULL DEFAULT 'PROGRAMS',
+    major varchar NULL,
+    education_level education_level NULL,
+    graduation_term_id uuid NULL,
+    university_id uuid NULL,
+    home_chapter_id uuid NULL,
+    employer_id uuid NULL,
+    created_at timestamptz(6) NULL DEFAULT now(),
+    updated_at timestamptz(6) NULL DEFAULT now(),
+    PRIMARY KEY (volunteer_id),
+    FOREIGN KEY (volunteer_id) REFERENCES public.constituents(constituent_id) ON UPDATE NO ACTION ON DELETE CASCADE,
+    FOREIGN KEY (employer_id) REFERENCES public.companies(company_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (graduation_term_id) REFERENCES public.academic_terms(term_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (home_chapter_id) REFERENCES public.chapters(chapter_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (university_id) REFERENCES public.universities(university_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+);
 
--- Table: nonprofit_chapter_project (2)
-CREATE TABLE public.nonprofit_chapter_project (
-  nonprofit_chapter_project_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  nonprofit_id uuid NOT NULL,
-  chapter_id uuid NULL,
-  project_id uuid NOT NULL,
-  project_contact_id uuid NOT NULL,
-  collab_contact_id uuid NOT NULL,
-  start_date date NOT NULL,
-  end_date date NULL,
-  notes text NULL,
-  project_status public.status_type NOT NULL DEFAULT 'ACTIVE'::status_type,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT nonprofit_chapter_project_pkey PRIMARY KEY (nonprofit_chapter_project_id),
-  CONSTRAINT nonprofit_chapter_project_nonprofit_chapter_project_id_key UNIQUE (nonprofit_chapter_project_id),
-  CONSTRAINT nonprofit_chapter_project_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES public.chapters (chapter_id),
-  CONSTRAINT nonprofit_chapter_project_collab_contact_id_fkey FOREIGN KEY (collab_contact_id) REFERENCES public.contacts (contact_id),
-  CONSTRAINT nonprofit_chapter_project_nonprofit_id_fkey FOREIGN KEY (nonprofit_id) REFERENCES public.nonprofits (nonprofit_id),
-  CONSTRAINT nonprofit_chapter_project_project_contact_id_fkey FOREIGN KEY (project_contact_id) REFERENCES public.contacts (contact_id),
-  CONSTRAINT nonprofit_chapter_project_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects (project_id)
-) TABLESPACE pg_default;
+CREATE TABLE public.mentorships (
+    mentorship_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    mentor_id uuid NULL,
+    mentee_id uuid NULL,
+    program_type varchar NULL,
+    status engagement_status NULL DEFAULT 'ACTIVE',
+    start_date date NULL,
+    end_date date NULL,
+    notes text NULL,
+    PRIMARY KEY (mentorship_id),
+    FOREIGN KEY (mentor_id) REFERENCES public.constituents(constituent_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (mentee_id) REFERENCES public.constituents(constituent_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+);
 
--- Table: sponsor_chapter (2)
-CREATE TABLE public.sponsor_chapter (
-  sponsor_chapter_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  sponsor_id uuid NOT NULL,
-  chapter_id uuid NULL,
-  year_sponsored date NOT NULL,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_date timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT sponsor_chapter_pkey PRIMARY KEY (sponsor_chapter_id),
-  CONSTRAINT sponsor_chapter_sponsor_chapter_id_key UNIQUE (sponsor_chapter_id),
-  CONSTRAINT sponsor_chapter_chapter_id_fkey FOREIGN KEY (chapter_id) REFERENCES public.chapters (chapter_id),
-  CONSTRAINT sponsor_chapter_sponsor_id_fkey FOREIGN KEY (sponsor_id) REFERENCES public.sponsors (sponsor_id)
-) TABLESPACE pg_default;
+CREATE TABLE public.project_deliverables (
+    deliverable_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    project_id uuid NULL,
+    label varchar NULL,
+    url varchar NULL,
+    category deliverable_type NULL,
+    PRIMARY KEY (deliverable_id),
+    FOREIGN KEY (project_id) REFERENCES public.projects(project_id) ON UPDATE NO ACTION ON DELETE CASCADE
+);
 
--- Table: volunteer_assignment (2)
-CREATE TABLE public.volunteer_assignment (
-  volunteer_assignment_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  volunteer_id uuid NOT NULL,
-  role_id uuid NOT NULL,
-  branch_id uuid NULL,
-  start_date date NOT NULL,
-  end_date date NOT NULL,
-  status public.status_type NOT NULL DEFAULT 'ACTIVE'::status_type,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT member_assignment_pkey PRIMARY KEY (volunteer_assignment_id),
-  CONSTRAINT volunteer_assignment_volunteer_assignment_id_key UNIQUE (volunteer_assignment_id),
-  CONSTRAINT member_assignment_branch_id_fkey FOREIGN KEY (branch_id) REFERENCES public.operations_branches (branch_id),
-  CONSTRAINT member_assignment_role_id_fkey FOREIGN KEY (role_id) REFERENCES public.roles (role_id),
-  CONSTRAINT volunteer_assignment_volunteer_id_fkey FOREIGN KEY (volunteer_id) REFERENCES public.volunteers (volunteer_id)
-) TABLESPACE pg_default;
+CREATE TABLE public.project_engagements (
+    engagement_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    project_id uuid NULL,
+    partner_id uuid NULL,
+    chapter_id uuid NULL,
+    academic_term_id uuid NULL,
+    client_contact_id uuid NULL,
+    status engagement_status NULL DEFAULT 'ACTIVE',
+    domain domain_type NULL DEFAULT 'FULL_STACK',
+    created_at timestamptz(6) NULL DEFAULT now(),
+    updated_at timestamptz(6) NULL DEFAULT now(),
+    PRIMARY KEY (engagement_id),
+    FOREIGN KEY (project_id) REFERENCES public.projects(project_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (partner_id) REFERENCES public.partners(partner_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (academic_term_id) REFERENCES public.academic_terms(term_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (client_contact_id) REFERENCES public.constituents(constituent_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+);
 
--- Table: volunteer_history (2)
+CREATE TABLE public.officer_assignments (
+    assignment_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    volunteer_id uuid NULL,
+    role_id uuid NULL,
+    chapter_id uuid NULL,
+    start_date date NULL,
+    end_date date NULL,
+    PRIMARY KEY (assignment_id),
+    FOREIGN KEY (volunteer_id) REFERENCES public.volunteers(volunteer_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (role_id) REFERENCES public.officer_roles(role_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+CREATE TABLE public.project_staffing (
+    staffing_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    volunteer_id uuid NULL,
+    engagement_id uuid NULL,
+    role_id uuid NULL,
+    is_lead_contact boolean NULL DEFAULT false,
+    start_date date NULL,
+    end_date date NULL,
+    PRIMARY KEY (staffing_id),
+    FOREIGN KEY (volunteer_id) REFERENCES public.volunteers(volunteer_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (engagement_id) REFERENCES public.project_engagements(engagement_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (role_id) REFERENCES public.project_roles(role_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
 CREATE TABLE public.volunteer_history (
-  history_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  volunteer_id uuid NOT NULL,
-  action_type public.action_type NOT NULL DEFAULT 'JOINED'::action_type,
-  reason text NULL,
-  action_date date NOT NULL,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT membership_history_pkey PRIMARY KEY (history_id),
-  CONSTRAINT volunteer_history_history_id_key UNIQUE (history_id),
-  CONSTRAINT volunteer_history_volunteer_id_fkey FOREIGN KEY (volunteer_id) REFERENCES public.volunteers (volunteer_id)
-) TABLESPACE pg_default;
-
--- Table: volunteer_role_project (2)
-CREATE TABLE public.volunteer_role_project (
-  volunteer_role_project_id uuid NOT NULL DEFAULT gen_random_uuid(),
-  volunteer_id uuid NOT NULL,
-  role_id uuid NOT NULL,
-  project_id uuid NOT NULL,
-  start_date date NOT NULL,
-  end_date date NULL,
-  notes text NULL,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT volunteer_role_project_pkey PRIMARY KEY (volunteer_role_project_id),
-  CONSTRAINT volunteer_role_project_volunteer_role_id_key UNIQUE (volunteer_role_project_id),
-  CONSTRAINT member_role_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects (project_id),
-  CONSTRAINT member_role_role_id_fkey FOREIGN KEY (role_id) REFERENCES public.roles (role_id),
-  CONSTRAINT volunteer_role_project_volunteer_id_fkey FOREIGN KEY (volunteer_id) REFERENCES public.volunteers (volunteer_id)
-) TABLESPACE pg_default;
-
+    history_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    volunteer_id uuid NULL,
+    action_type action_type NULL,
+    related_entity_id uuid NULL,
+    previous_value_label varchar NULL,
+    new_value_label varchar NULL,
+    effective_date date NULL,
+    PRIMARY KEY (history_id),
+    FOREIGN KEY (volunteer_id) REFERENCES public.volunteers(volunteer_id) ON UPDATE NO ACTION ON DELETE CASCADE
+);
