@@ -67,8 +67,8 @@ GRAPHQL_PORT=3003
 ### 3. Database Setup
 
 ```bash
-npx prisma db pull     # Sync schema with database
-npx prisma generate    # Generate Prisma client
+pnpm exec prisma db pull     # Sync schema with database
+pnpm exec prisma generate    # Generate Prisma client
 ```
 
 ### 4. Start Development Server
@@ -142,7 +142,7 @@ Relationship/tracking entities:
 
 - **DO NOT** edit `schema.prisma` directly in production
 - Use Supabase Table Editor for schema changes in production
-- Always run `npx prisma db pull` and `npx prisma generate` after database changes
+- Always run `pnpm exec prisma db pull` and `pnpm exec prisma generate` after database changes
 - This ensures code stays synchronized with the database
 
 ### Branch Naming Convention

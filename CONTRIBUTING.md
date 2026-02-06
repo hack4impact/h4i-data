@@ -38,8 +38,8 @@ Access the important fields from Vaultwarden from this: https://vault.hack4impac
 ### 4. Database Setup
 
 ```bash
-npx prisma db pull     # Sync schema with database
-npx prisma generate    # Generate Prisma client
+pnpm exec prisma db pull     # Sync schema with database
+pnpm exec prisma generate    # Generate Prisma client
 ```
 
 ### 5. Start Development Server

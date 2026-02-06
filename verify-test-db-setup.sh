@@ -98,7 +98,7 @@ run_test "Checking db-init/seed.sql exists" '[ -f "db-init/seed.sql" ]'
 run_test "Checking .env.test exists" '[ -f ".env.test" ]'
 run_test_with_output "Checking seed.sql has 11 enums" 'grep -c "CREATE TYPE" db-init/seed.sql' "11"
 run_test_with_output "Checking seed.sql has 18 tables" 'grep -c "CREATE TABLE" db-init/seed.sql' "18"
-run_test "Checking npm script 'seed:test' exists" 'grep -q "\"seed:test\"" package.json'
+run_test "Checking script 'seed:test' exists" 'grep -q "\"seed:test\"" package.json'
 run_test "Checking server.ts loads .env.test" 'grep -q "\.env\.test" src/config/server.ts'
 
 echo ""
@@ -204,10 +204,10 @@ if [ "$MODE" == "full" ]; then
   echo ""
 
   ##############################################
-  # PHASE 7: NPM Scripts (4 tests)
+  # PHASE 7: Package Scripts (4 tests)
   ##############################################
   echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-  echo -e "${CYAN}Phase 7: NPM Scripts${NC}"
+  echo -e "${CYAN}Phase 7: Package Scripts${NC}"
   echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
   run_test "Checking seed:test script exists" 'grep -q "\"seed:test\":" package.json'

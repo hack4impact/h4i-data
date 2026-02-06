@@ -33,7 +33,7 @@ export function createRestApp() {
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      service: 'volunteer-management-backend-rest',
+      service: 'operations-api-rest',
     });
   });
 

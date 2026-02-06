@@ -21,13 +21,13 @@ Example: feature(core): add submit functionality in Button.tsx
 Run before committing:
 
 ```
-npx eslint .
+pnpm exec eslint .
 ```
 
 To fix automatic errors:
 
 ```
-npx eslint --fix .
+pnpm exec eslint --fix .
 ```
 
 ### Unused Dependencies
@@ -35,7 +35,7 @@ npx eslint --fix .
 Run to check for unused dependencies
 
 ```
-npx depcheck
+pnpm exec depcheck
 ```
 
 Uninstall unused dependencies with
@@ -53,13 +53,13 @@ Make sure to order the scripts alphabetically (A - Z)
 Run to format
 
 ```
-npx prettier . --write
+pnpm exec prettier . --write
 ```
 
 Check if all files follow Prettier format
 
 ```
-npx prettier . --check
+pnpm exec prettier . --check
 ```
 
 ## Writing Code

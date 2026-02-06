@@ -40,7 +40,7 @@ export function createGraphqlApp() {
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      service: 'volunteer-management-backend-graphql',
+      service: 'operations-api-graphql',
     });
   });
 

@@ -38,7 +38,7 @@ export const logger = winston.createLogger({
   level: env.NODE_ENV === 'development' ? 'debug' : 'info',
   format: customFormat,
   defaultMeta: {
-    service: 'volunteer-management-backend',
+    service: 'operations-api',
     environment: env.NODE_ENV,
   },
   transports: [

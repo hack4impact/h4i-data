@@ -26,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hack4impact/test-backend.git"
+    "url": "git+https://github.com/hack4impact/operations-api.git"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
@@ -45,9 +45,9 @@
   "author": "Hack4Impact",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/hack4impact/test-backend/issues"
+    "url": "https://github.com/hack4impact/operations-api/issues"
   },
-  "homepage": "https://github.com/hack4impact/test-backend#readme",
+  "homepage": "https://github.com/hack4impact/operations-api#readme",
   "dependencies": {
     "@graphql-tools/schema": "^10.0.31",
     "@prisma/adapter-pg": "^7.3.0",
