@@ -16,7 +16,7 @@ Here are all of the steps you should follow whenever contributing to this repo!
 ### 2. Install Dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 3. Environment Setup
@@ -47,12 +47,12 @@ npx prisma generate    # Generate Prisma client
 
 ```bash
 # Start integrated server (both REST & GraphQL)
-npm run dev
+pnpm run dev
 
 # Or start servers separately
-npm run dev:rest       # REST API only
-npm run dev:graphql    # GraphQL API only
-npm run dev:both       # Both servers concurrently
+pnpm run dev:rest       # REST API only
+pnpm run dev:graphql    # GraphQL API only
+pnpm run dev:both       # Both servers concurrently
 ```
 
 The servers will be available at:
@@ -77,7 +77,7 @@ Follow the pattern listed in your issue: `feature/issue-number-description`
 
 ### Making Changes
 
-1. Before you start making changes, always make sure you're on the develop branch, then `git pull` and `npm i` to make sure your code is up to date
+1. Before you start making changes, always make sure you're on the develop branch, then `git pull` and `pnpm install` to make sure your code is up to date
 2. Create a branch `git checkout -b <name-of-branch>`
 3. Make changes to the code
 4. Run ESLint to ensure code standards (see in [style guide](https://github.com/hack4impact/operations-api/blob/main/STYLE_GUIDE.md#eslint)).
@@ -103,9 +103,9 @@ When interacting with Git/GitHub, feel free to use the command line, VSCode exte
 ### Testing
 
 ```bash
-npm run test               # Run all tests (Unit &  Integration)
-npm run test:coverage      # Generate coverage report for Unit tests only
-npm run test:integration   # Integration tests only
-npm run test:unit          # Unit tests only
-npm run test:watch         # Watch mode for unit tests
+pnpm run test               # Run all tests (Unit &  Integration)
+pnpm run test:coverage      # Generate coverage report for Unit tests only
+pnpm run test:integration   # Integration tests only
+pnpm run test:unit          # Unit tests only
+pnpm run test:watch         # Watch mode for unit tests
 ```

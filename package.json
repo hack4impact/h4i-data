@@ -1,12 +1,13 @@
 {
   "name": "volunteer-management-backend",
   "version": "1.0.0",
+  "packageManager": "pnpm@10.28.2",
   "description": "Backend API for volunteer management with GraphQL and REST endpoints",
   "main": "src/app.ts",
   "scripts": {
     "build": "tsc && prisma generate",
     "dev": "ts-node src/app.ts",
-    "dev:both": "concurrently \"npm run dev:graphql\" \"npm run dev:rest\"",
+    "dev:both": "concurrently \"pnpm run dev:graphql\" \"pnpm run dev:rest\"",
     "dev:graphql": "ts-node src/api/graphql/server.ts",
     "dev:rest": "ts-node src/api/rest/server.ts",
     "format": "prettier --write src/",
@@ -14,7 +15,7 @@
     "prepare": "husky",
     "seed:test": "docker compose exec -T test-db psql -U postgres -d test_db -f /docker-entrypoint-initdb.d/seed.sql",
     "start": "node dist/app.js",
-    "test": "npm run test:unit && npm run test:integration",
+    "test": "pnpm run test:unit && pnpm run test:integration",
     "test:coverage": "jest --coverage --testPathIgnorePatterns=tests/integration",
     "test:integration": "cross-env NODE_ENV=test jest tests/integration --runInBand",
     "test:unit": "jest tests/unit",

@@ -4,8 +4,8 @@
 
 The GraphQL API provides a flexible way to query and mutate volunteer management data. The endpoint is available at `/api/graphql` with an interactive GraphQL playground for development.
 
-**Base URL**: `http://localhost:3003/api/graphql` for npm run dev:graphql
-**Base URL**: `http://localhost:3001/api/graphql` for npm run dev
+**Base URL**: `http://localhost:3003/api/graphql` for pnpm run dev:graphql
+**Base URL**: `http://localhost:3001/api/graphql` for pnpm run dev
 
 ---
 

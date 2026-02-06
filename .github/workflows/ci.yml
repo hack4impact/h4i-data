@@ -17,17 +17,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: 'npm'
-
-      - name: Clear npm cache
-        run: npm cache clean --force
+          cache: 'pnpm'
 
       - name: Install deps
-        run: npm ci --fetch-retries=5
+        run: pnpm install --frozen-lockfile
 
       - name: Prisma generate
         run: npx prisma generate
@@ -52,7 +52,7 @@ jobs:
           echo "Database is ready!"
 
       - name: Run tests
-        run: npm run test
+        run: pnpm run test
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://postgres:test_password@localhost:5433/test_db

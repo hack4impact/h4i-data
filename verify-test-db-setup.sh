@@ -373,14 +373,14 @@ if [ $FAIL -eq 0 ]; then
     echo -e "     (Runs all 80+ tests including Docker interaction)"
     echo -e "  2. Run: ${YELLOW}docker compose up -d${NC}"
     echo -e "     (Start your test database)"
-    echo -e "  3. Run: ${YELLOW}npm run test:docker${NC}"
+    echo -e "  3. Run: ${YELLOW}pnpm run test:docker${NC}"
     echo -e "     (Run your application tests against local docker db)"
   else
     echo -e "${GREEN}🎉 Comprehensive testing complete! Your test database is fully operational.${NC}"
     echo ""
     echo -e "Your test database environment is ready for:"
-    echo -e "  Running application tests (npm run test:docker)"
-    echo -e "  Manual reseeding with 'npm run seed:test'"
+    echo -e "  Running application tests (pnpm run test:docker)"
+    echo -e "  Manual reseeding with 'pnpm run seed:test'"
     echo -e "  Full teardown/restart cycles"
     echo -e "  CI/CD integration"
   fi

@@ -4,8 +4,8 @@
 
 The REST API follows RESTful conventions and provides endpoints for managing volunteer data. All endpoints return JSON responses and use standard HTTP status codes.
 
-**Base URL**: `http://localhost:3002/api/rest` for npm run dev:rest
-**Base URL**: `http://localhost:3001/api/rest` for npm run dev
+**Base URL**: `http://localhost:3002/api/rest` for pnpm run dev:rest
+**Base URL**: `http://localhost:3001/api/rest` for pnpm run dev
 
 ---
 
@@ -286,7 +286,7 @@ All responses follow a consistent JSON format:
 
 ## Request/Response Examples
 
-### cURL Examples (npm run dev)
+### cURL Examples (pnpm run dev)
 
 **Get all volunteers**:
 

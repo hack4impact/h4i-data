@@ -2,7 +2,7 @@
 
 This guide demonstrates how to create REST endpoints using Test-Driven Development (TDD) in this project.
 
-Note that the ports here are 3001, meaning you should run `npm run dev` and not `npm run dev:rest` in order for easy copy-paste of the code! Otherwise, just replace 3001 with 3002 if you prefer running REST API server specifically.
+Note that the ports here are 3001, meaning you should run `pnpm run dev` and not `pnpm run dev:rest` in order for easy copy-paste of the code! Otherwise, just replace 3001 with 3002 if you prefer running REST API server specifically.
 
 ---
 
@@ -65,7 +65,7 @@ describe('POST /volunteers', () => {
 ### Step 2: Run tests (they will fail) (RED)
 
 ```bash
-npm run test:integration
+pnpm run test:integration
 ```
 
 ### Step 3: Create Validator (GREEN)
@@ -198,7 +198,7 @@ router.use('/volunteers', volunteerRoutes);
 ### Step 8: Run All Tests (GREEN)
 
 ```bash
-npm run test
+pnpm run test
 ```
 
 ### Step 10: Refactor & Add Improvements (REFACTOR)
@@ -338,19 +338,19 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run unit tests
-        run: npm run test:unit
+        run: pnpm run test:unit
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run integration tests
-        run: npm run test:integration
+        run: pnpm run test:integration
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}

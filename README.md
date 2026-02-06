@@ -47,7 +47,7 @@ prisma/
 ### 1. Install Dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 2. Environment Setup
@@ -76,12 +76,12 @@ npx prisma generate    # Generate Prisma client
 
 ```bash
 # Start integrated server (both REST & GraphQL)
-npm run dev
+pnpm run dev
 
 # Or start servers separately
-npm run dev:rest       # REST API only
-npm run dev:graphql    # GraphQL API only
-npm run dev:both       # Both servers concurrently
+pnpm run dev:rest       # REST API only
+pnpm run dev:graphql    # GraphQL API only
+pnpm run dev:both       # Both servers concurrently
 ```
 
 The servers will be available at:
@@ -95,11 +95,11 @@ The servers will be available at:
 ## Testing
 
 ```bash
-npm run test               # Run all tests (Unit &  Integration)
-npm run test:coverage      # Generate coverage report for Unit tests only
-npm run test:integration   # Integration tests only
-npm run test:unit          # Unit tests only
-npm run test:watch         # Watch mode for unit tests
+pnpm run test               # Run all tests (Unit &  Integration)
+pnpm run test:coverage      # Generate coverage report for Unit tests only
+pnpm run test:integration   # Integration tests only
+pnpm run test:unit          # Unit tests only
+pnpm run test:watch         # Watch mode for unit tests
 ```
 
 ---
