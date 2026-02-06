@@ -7,7 +7,6 @@ import {
   updateChapter,
   updateChapterSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
 import { z } from 'zod';
 
 // Infer TypeScript types directly from your Zod schemas
@@ -17,21 +16,8 @@ type UpdateChapterInput = z.infer<typeof updateChapterSchema>;
 export const chapterResolvers = {
   Query: {
     chapters: () => getAllChapters(),
-    chapter: async (_parent: unknown, { id }: { id: string }) => {
-      const chapter = await getChapterById(id);
-      if (!chapter) {
-        // This is the version-compatible way to create the error
-        throw new GraphQLError(
-          'Chapter not found',
-          undefined, // nodes
-          undefined, // source
-          undefined, // positions
-          undefined, // path
-          undefined, // originalError
-          { code: 'NOT_FOUND' } // extensions
-        );
-      }
-      return chapter;
+    chapter: (_parent: unknown, { id }: { id: string }) => {
+      return getChapterById(id);
     },
   },
   Mutation: {

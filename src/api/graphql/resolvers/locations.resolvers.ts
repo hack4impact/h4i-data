@@ -7,7 +7,6 @@ import {
   updateLocation,
   updateLocationSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
 import { z } from 'zod';
 
 // Infer TypeScript types directly from your Zod schemas
@@ -17,20 +16,8 @@ type UpdateLocationInput = z.infer<typeof updateLocationSchema>;
 export const locationResolvers = {
   Query: {
     locations: () => getAllLocations(),
-    location: async (_parent: unknown, { id }: { id: string }) => {
-      const location = await getLocationById(id);
-      if (!location) {
-        throw new GraphQLError(
-          'Location not found',
-          undefined, // nodes
-          undefined, // source
-          undefined, // positions
-          undefined, // path
-          undefined, // originalError
-          { code: 'NOT_FOUND' } // extensions
-        );
-      }
-      return location;
+    location: (_parent: unknown, { id }: { id: string }) => {
+      return getLocationById(id);
     },
   },
   Mutation: {
