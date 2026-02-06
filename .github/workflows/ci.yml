@@ -44,13 +44,6 @@ jobs:
       - name: Run Prettier
         run: npx prettier --check "src/**/*.ts" "tests/**/*.ts"
 
-      - name: Start test database
-        run: |
-          docker compose up -d test-db
-          echo "Waiting for database to be ready..."
-          timeout 30 bash -c 'until docker compose exec -T test-db pg_isready -U postgres -d test_db; do sleep 1; done'
-          echo "Database is ready!"
-
       - name: Run tests
         run: pnpm run test
         env:
@@ -60,4 +53,4 @@ jobs:
 
       - name: Stop test database
         if: always()
-        run: docker compose down -v
+        run: pnpm run docker:down
