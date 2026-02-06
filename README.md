@@ -1,6 +1,6 @@
-# Volunteer Management Backend!
+# Operations API
 
-A comprehensive backend API for managing volunteers, chapters, nonprofits, projects, and sponsors with both REST and GraphQL endpoints.
+A comprehensive backend API for managing H4I operations data — volunteers, chapters, projects, partners, and more — with both REST and GraphQL endpoints.
 
 ---
 
@@ -8,8 +8,8 @@ A comprehensive backend API for managing volunteers, chapters, nonprofits, proje
 
 - **Language** - TypeScript
 - **Framework** - Express.js
-- **Database** - PostgreSQL (hosted on Supabase)
-- **ORM** - Prisma
+- **Database** - PostgreSQL (Supabase in production, Docker locally)
+- **ORM** - Prisma 7+ (with `@prisma/adapter-pg`)
 - **API Types** - REST & GraphQL
 - **Testing** - Jest & Supertest
 - **Code Quality** - ESLint, Prettier, Husky
@@ -57,12 +57,11 @@ Create a `.env` file in the root directory and copy fields from `.env.example`:
 ```env
 # Database Configuration
 DATABASE_URL=your_database_url_here
-DIRECT_URL=your_direct_url_here
 
 # Server Configuration
-PORT=3000
-REST_PORT=3001
-GRAPHQL_PORT=3002
+PORT=3001
+REST_PORT=3002
+GRAPHQL_PORT=3003
 ```
 
 ### 3. Database Setup
@@ -95,37 +94,45 @@ The servers will be available at:
 ## Testing
 
 ```bash
-pnpm run test               # Run all tests (Unit &  Integration)
-pnpm run test:coverage      # Generate coverage report for Unit tests only
-pnpm run test:integration   # Integration tests only
-pnpm run test:unit          # Unit tests only
+pnpm run test               # Run all tests (unit + integration, auto-starts Docker)
+pnpm run test:unit          # Unit tests only (no Docker required)
+pnpm run test:integration   # Integration tests only (auto-starts Docker)
+pnpm run test:coverage      # Generate coverage report for unit tests only
 pnpm run test:watch         # Watch mode for unit tests
 ```
+
+Integration tests automatically start a Docker PostgreSQL container via `docker compose up -d --wait` before running. Docker Desktop must be installed and running.
 
 ---
 
 ## Database Schema
 
-The database includes the following main entities:
+The database includes the following core entities:
 
+- **constituents** - People in the system (base identity table)
+- **volunteers** - Volunteer profiles (extends constituents)
 - **chapters** - Local H4I chapters
-- **companies** - Companies associated with volunteers, sponsors, & nonprofits
-- **contacts** - Contact information
+- **companies** - Employers and corporate entities
 - **locations** - Geographic locations
-- **operations_branches** - H4I Branches of the Operations Board
-- **nonprofits** - Partner nonprofit organizations
-- **roles** - All existing roles within the organization
-- **projects** - Development projects for nonprofits
-- **sponsors** - Corporate sponsors
-- **volunteers** - Student and professional volunteers
+- **partners** - Partner organizations (nonprofits, NGOs, etc.)
+- **projects** - Development projects
+- **officer_roles** - Officer/leadership roles (chapter or central scope)
+- **project_roles** - Roles within a project team
 
-The database includes the following main relationship tables:
+Supporting entities:
 
-- **nonprofit_chapter_project**
-- **sponsor_chapter**
-- **volunteer_assignment**
-- **volunteer_history**
-- **volunteer_role_project**
+- **universities** - Universities linked to chapters and volunteers
+- **academic_terms** - Semesters/quarters at universities
+- **social_links** - Social media links for constituents
+
+Relationship/tracking entities:
+
+- **project_engagements** - Links projects to partners, chapters, and terms
+- **project_staffing** - Assigns volunteers to project engagements with roles
+- **project_deliverables** - Deliverables (repos, designs, docs) for projects
+- **officer_assignments** - Assigns volunteers to officer roles at chapters
+- **mentorships** - Mentor/mentee relationships between constituents
+- **volunteer_history** - Audit trail of volunteer lifecycle events
 
 ---
 
@@ -151,24 +158,23 @@ Follow the pattern: `feature/issue-number-description`
 
 ### GraphQL API
 
-GraphQL endpoint available at `/api/graphql` with interactive playground.
+GraphQL endpoint available at:
+
+- **Integrated server** (`pnpm run dev`): `http://localhost:3001/api/graphql`
+- **Standalone** (`pnpm run dev:graphql`): `http://localhost:3003/`
 
 Example mutation:
 
 ```graphql
 mutation {
-  addVolunteer(
-    volunteer: {
-      first_name: "Jane"
-      last_name: "Doe"
-      email: "janedoe@example.com"
-      graduation_date: "2026-06-18"
-      volunteer_status: STUDENT
-      H4I_email: "jane@hack4impact.org"
-      volunteer_type: CHAPTER
-      university_id: "860b69b4-a14e-41d9-a367-2632b342e549"
-    }
-  )
+  createChapter(input: {
+    name: "UC Berkeley"
+    founded_date: "2020-09-01"
+  }) {
+    chapter_id
+    name
+    founded_date
+  }
 }
 ```
 
@@ -176,7 +182,12 @@ More examples available in [`docs/examples/graphql-examples.md`](docs/examples/g
 
 ### REST API
 
-REST endpoints available at `/api/rest` following RESTful conventions.
+REST endpoints available at:
+
+- **Integrated server** (`pnpm run dev`): `http://localhost:3001/api/rest/{entity}`
+- **Standalone** (`pnpm run dev:rest`): `http://localhost:3002/{entity}`
+
+Available REST routes: `/chapters`, `/companies`, `/constituents`, `/locations`, `/partners`, `/projects`, `/officer-roles`, `/volunteers`, `/universities`, `/academic-terms`, `/project-roles`, `/social-links`, `/volunteer-history`, `/officer-assignments`, `/mentorships`, `/project-deliverables`, `/project-engagements`, `/project-staffing`
 
 See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md`](docs/api/graphql-api.md) for complete API documentation.
 
@@ -189,7 +200,7 @@ See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md
 1. **Service Layer** (`src/core/services/`)
    - Create business logic functions
    - Use async/await pattern
-   - Implement proper error handling with try/catch
+   - Services throw custom errors (NotFoundError, DatabaseError) — handled by error middleware
    - Follow existing naming conventions
    - Use function declarations and not arrow functions
 
@@ -224,14 +235,21 @@ See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md
 - [GraphQL Best Practices](https://graphql.org/learn/best-practices/)
 - [Express.js Guide](https://expressjs.com/en/guide/routing.html)
 
-## Docker
+## Docker (Test Database)
 
-Command to enter in terminal to access tables:
+A local PostgreSQL 16 container is used for integration tests. It runs on port **5433** and is seeded from `db-init/seed.sql`.
 
-- docker compose exec -T test-db psql -U postgres -d test_db
-- \dt
-- SQL commands such as (SELECT * FROM volunteers;)
+```bash
+pnpm run docker:up          # Start the test database container
+pnpm run docker:down        # Stop and remove the container (with volumes)
+pnpm run seed:test          # Re-run seed.sql against the running container
+```
 
-To pause test, insert this: await new Promise(() => {});
+To inspect the database manually:
 
-It helps you see when data is created in the local database!
+```bash
+docker compose exec -T test-db psql -U postgres -d test_db
+# Then run: \dt (list tables), SELECT * FROM volunteers; etc.
+```
+
+**Tip:** To pause a test so you can inspect the database mid-run, insert `await new Promise(() => {});` in the test.

@@ -2,10 +2,10 @@
 
 ## Overview
 
-The GraphQL API provides a flexible way to query and mutate volunteer management data. The endpoint is available at `/api/graphql` with an interactive GraphQL playground for development.
+The GraphQL API provides a flexible way to query and mutate operations data. The endpoint uses `graphql-http` (not Apollo), so there is no built-in playground — use an external GraphQL client or cURL.
 
-**Base URL**: `http://localhost:3003/api/graphql` for pnpm run dev:graphql
-**Base URL**: `http://localhost:3001/api/graphql` for pnpm run dev
+**Integrated server** (`pnpm run dev`): `http://localhost:3001/api/graphql`
+**Standalone server** (`pnpm run dev:graphql`): `http://localhost:3003/`
 
 ---
 
@@ -262,14 +262,9 @@ GraphQL errors are returned in the standard GraphQL error format:
 
 ## Development Tools
 
-### GraphQL Playground
+### Introspection
 
-Visit `http://localhost:3000/api/graphql` in your browser for an interactive query editor with:
-
-- Schema exploration
-- Query autocompletion
-- Real-time error validation
-- Query history
+Since `graphql-http` does not include a built-in playground, use a tool like [GraphQL Playground](https://github.com/graphql/graphql-playground), Postman, or Insomnia to explore the API. You can also use introspection queries via cURL.
 
 ### Top Level Introspection Query
 

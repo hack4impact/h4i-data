@@ -96,8 +96,8 @@ echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━�
 run_test "Checking docker-compose.yml exists" '[ -f "docker-compose.yml" ]'
 run_test "Checking db-init/seed.sql exists" '[ -f "db-init/seed.sql" ]'
 run_test "Checking .env.test exists" '[ -f ".env.test" ]'
-run_test_with_output "Checking seed.sql has 6 enums" 'grep -c "CREATE TYPE" db-init/seed.sql' "6"
-run_test_with_output "Checking seed.sql has 15 tables" 'grep -c "CREATE TABLE" db-init/seed.sql' "15"
+run_test_with_output "Checking seed.sql has 11 enums" 'grep -c "CREATE TYPE" db-init/seed.sql' "11"
+run_test_with_output "Checking seed.sql has 18 tables" 'grep -c "CREATE TABLE" db-init/seed.sql' "18"
 run_test "Checking npm script 'seed:test' exists" 'grep -q "\"seed:test\"" package.json'
 run_test "Checking server.ts loads .env.test" 'grep -q "\.env\.test" src/config/server.ts'
 
@@ -125,11 +125,11 @@ if [ "$MODE" == "full" ]; then
   run_test "Checking for CASCADE in DROP" 'grep -q "CASCADE" db-init/seed.sql'
   run_test "Checking for pgcrypto extension" 'grep -q "pgcrypto" db-init/seed.sql'
   run_test "Checking for action_type enum" 'grep -q "CREATE TYPE.*action_type" db-init/seed.sql'
-  run_test "Checking for level_type enum" 'grep -q "CREATE TYPE.*level_type" db-init/seed.sql'
-  run_test "Checking for status_type enum" 'grep -q "CREATE TYPE.*status_type" db-init/seed.sql'
-  run_test "Checking for volunteer_status enum" 'grep -q "CREATE TYPE.*volunteer_status" db-init/seed.sql'
-  run_test "Checking for volunteer_type enum" 'grep -q "CREATE TYPE.*volunteer_type" db-init/seed.sql'
-  run_test "Checking for project_type enum" 'grep -q "CREATE TYPE.*project_type" db-init/seed.sql'
+  run_test "Checking for deliverable_type enum" 'grep -q "CREATE TYPE.*deliverable_type" db-init/seed.sql'
+  run_test "Checking for domain_type enum" 'grep -q "CREATE TYPE.*domain_type" db-init/seed.sql'
+  run_test "Checking for engagement_status enum" 'grep -q "CREATE TYPE.*engagement_status" db-init/seed.sql'
+  run_test "Checking for volunteer_class enum" 'grep -q "CREATE TYPE.*volunteer_class" db-init/seed.sql'
+  run_test "Checking for role_scope enum" 'grep -q "CREATE TYPE.*role_scope" db-init/seed.sql'
   run_test "Checking for NOT NULL constraints" 'grep -q "NOT NULL" db-init/seed.sql'
 
   echo ""
@@ -141,21 +141,21 @@ if [ "$MODE" == "full" ]; then
   echo -e "${CYAN}Phase 3: Table Definitions in SQL${NC}"
   echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-  run_test "Checking contacts table defined" 'grep -q "CREATE TABLE.*contacts" db-init/seed.sql'
   run_test "Checking locations table defined" 'grep -q "CREATE TABLE.*locations" db-init/seed.sql'
-  run_test "Checking operations_branches table defined" 'grep -q "CREATE TABLE.*operations_branches" db-init/seed.sql'
+  run_test "Checking constituents table defined" 'grep -q "CREATE TABLE.*constituents" db-init/seed.sql'
   run_test "Checking projects table defined" 'grep -q "CREATE TABLE.*projects" db-init/seed.sql'
-  run_test "Checking roles table defined" 'grep -q "CREATE TABLE.*roles" db-init/seed.sql'
+  run_test "Checking officer_roles table defined" 'grep -q "CREATE TABLE.*officer_roles" db-init/seed.sql'
+  run_test "Checking project_roles table defined" 'grep -q "CREATE TABLE.*project_roles" db-init/seed.sql'
+  run_test "Checking partners table defined" 'grep -q "CREATE TABLE.*partners" db-init/seed.sql'
+  run_test "Checking universities table defined" 'grep -q "CREATE TABLE.*universities" db-init/seed.sql'
   run_test "Checking companies table defined" 'grep -q "CREATE TABLE.*companies" db-init/seed.sql'
   run_test "Checking chapters table defined" 'grep -q "CREATE TABLE.*chapters" db-init/seed.sql'
-  run_test "Checking nonprofits table defined" 'grep -q "CREATE TABLE.*nonprofits" db-init/seed.sql'
-  run_test "Checking sponsors table defined" 'grep -q "CREATE TABLE.*sponsors" db-init/seed.sql'
   run_test "Checking volunteers table defined" 'grep -q "CREATE TABLE.*volunteers" db-init/seed.sql'
-  run_test "Checking nonprofit_chapter_project table defined" 'grep -q "CREATE TABLE.*nonprofit_chapter_project" db-init/seed.sql'
-  run_test "Checking sponsor_chapter table defined" 'grep -q "CREATE TABLE.*sponsor_chapter" db-init/seed.sql'
-  run_test "Checking volunteer_assignment table defined" 'grep -q "CREATE TABLE.*volunteer_assignment" db-init/seed.sql'
+  run_test "Checking mentorships table defined" 'grep -q "CREATE TABLE.*mentorships" db-init/seed.sql'
+  run_test "Checking project_engagements table defined" 'grep -q "CREATE TABLE.*project_engagements" db-init/seed.sql'
+  run_test "Checking officer_assignments table defined" 'grep -q "CREATE TABLE.*officer_assignments" db-init/seed.sql'
+  run_test "Checking project_staffing table defined" 'grep -q "CREATE TABLE.*project_staffing" db-init/seed.sql'
   run_test "Checking volunteer_history table defined" 'grep -q "CREATE TABLE.*volunteer_history" db-init/seed.sql'
-  run_test "Checking volunteer_role_project table defined" 'grep -q "CREATE TABLE.*volunteer_role_project" db-init/seed.sql'
 
   echo ""
 
@@ -246,13 +246,13 @@ if [ "$MODE" == "full" ]; then
   echo -e "${YELLOW}Waiting for database initialization...${NC}"
   sleep 5
 
-  run_test_with_output "Counting enums in database" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM pg_type WHERE typtype = '\''e'\'' AND typnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '\''public'\'');" 2>/dev/null | tr -d " "' "6"
-  run_test_with_output "Counting tables in database" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '\''public'\'' AND table_type = '\''BASE TABLE'\'';" 2>/dev/null | tr -d " "' "15"
-  run_test "Checking contacts table exists in DB" 'docker compose exec -T test-db psql -U postgres -d test_db -c "\dt contacts" 2>/dev/null | grep -q contacts'
+  run_test_with_output "Counting enums in database" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM pg_type WHERE typtype = '\''e'\'' AND typnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '\''public'\'');" 2>/dev/null | tr -d " "' "11"
+  run_test_with_output "Counting tables in database" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '\''public'\'' AND table_type = '\''BASE TABLE'\'';" 2>/dev/null | tr -d " "' "18"
+  run_test "Checking constituents table exists in DB" 'docker compose exec -T test-db psql -U postgres -d test_db -c "\dt constituents" 2>/dev/null | grep -q constituents'
   run_test "Checking volunteers table exists in DB" 'docker compose exec -T test-db psql -U postgres -d test_db -c "\dt volunteers" 2>/dev/null | grep -q volunteers'
   run_test "Checking projects table exists in DB" 'docker compose exec -T test-db psql -U postgres -d test_db -c "\dt projects" 2>/dev/null | grep -q projects'
   run_test "Checking chapters table exists in DB" 'docker compose exec -T test-db psql -U postgres -d test_db -c "\dt chapters" 2>/dev/null | grep -q chapters'
-  run_test "Checking nonprofits table exists in DB" 'docker compose exec -T test-db psql -U postgres -d test_db -c "\dt nonprofits" 2>/dev/null | grep -q nonprofits'
+  run_test "Checking partners table exists in DB" 'docker compose exec -T test-db psql -U postgres -d test_db -c "\dt partners" 2>/dev/null | grep -q partners'
   run_test "Checking pgcrypto extension enabled" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM pg_extension WHERE extname = '\''pgcrypto'\'';" 2>/dev/null | tr -d " " | grep -q "^1$"'
 
   echo ""
@@ -266,8 +266,8 @@ if [ "$MODE" == "full" ]; then
 
   echo -e "${YELLOW}Testing manual reseed...${NC}"
   run_test "Running seed:test command" 'docker compose exec -T test-db psql -U postgres -d test_db -f /docker-entrypoint-initdb.d/seed.sql &> /dev/null'
-  run_test_with_output "Verifying tables after reseed" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '\''public'\'' AND table_type = '\''BASE TABLE'\'';" 2>/dev/null | tr -d " "' "15"
-  run_test_with_output "Verifying enums after reseed" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM pg_type WHERE typtype = '\''e'\'' AND typnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '\''public'\'');" 2>/dev/null | tr -d " "' "6"
+  run_test_with_output "Verifying tables after reseed" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '\''public'\'' AND table_type = '\''BASE TABLE'\'';" 2>/dev/null | tr -d " "' "18"
+  run_test_with_output "Verifying enums after reseed" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM pg_type WHERE typtype = '\''e'\'' AND typnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '\''public'\'');" 2>/dev/null | tr -d " "' "11"
 
   echo ""
 
@@ -281,11 +281,11 @@ if [ "$MODE" == "full" ]; then
   echo -e "${YELLOW}Testing data isolation...${NC}"
   # Insert test data using a fixed UUID
   TEST_UUID="'12345678-1234-1234-1234-123456789012'"
-  docker compose exec -T test-db psql -U postgres -d test_db -c "INSERT INTO contacts (contact_id, name, email) VALUES ($TEST_UUID, 'Test User', 'test@example.com') ON CONFLICT (contact_id) DO NOTHING;" &>/dev/null
-  run_test "Inserting test data" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM contacts WHERE email = '\''test@example.com'\'';" 2>/dev/null | tr -d " " | grep -q "^1$"'
-  run_test "Data persists in session" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM contacts WHERE email = '\''test@example.com'\'';" 2>/dev/null | tr -d " " | grep -q "^1$"'
+  docker compose exec -T test-db psql -U postgres -d test_db -c "INSERT INTO constituents (constituent_id, primary_email) VALUES ($TEST_UUID, 'test@example.com') ON CONFLICT (constituent_id) DO NOTHING;" &>/dev/null
+  run_test "Inserting test data" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM constituents WHERE primary_email = '\''test@example.com'\'';" 2>/dev/null | tr -d " " | grep -q "^1$"'
+  run_test "Data persists in session" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM constituents WHERE primary_email = '\''test@example.com'\'';" 2>/dev/null | tr -d " " | grep -q "^1$"'
   docker compose exec -T test-db psql -U postgres -d test_db -f /docker-entrypoint-initdb.d/seed.sql &>/dev/null
-  run_test "Reseed clears test data" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM contacts WHERE email = '\''test@example.com'\'';" 2>/dev/null | tr -d " " | grep -q "^0$"'
+  run_test "Reseed clears test data" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM constituents WHERE primary_email = '\''test@example.com'\'';" 2>/dev/null | tr -d " " | grep -q "^0$"'
 
   echo ""
 
@@ -315,7 +315,7 @@ if [ "$MODE" == "full" ]; then
   run_test "Restarting container" 'docker compose up -d test-db &> /dev/null'
   echo -e "${YELLOW}Waiting for database initialization (15 seconds)...${NC}"
   sleep 15
-  run_test_with_output "Verifying schema recreated after restart" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '\''public'\'' AND table_type = '\''BASE TABLE'\'';" 2>/dev/null | tr -d " "' "15"
+  run_test_with_output "Verifying schema recreated after restart" 'docker compose exec -T test-db psql -U postgres -d test_db -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '\''public'\'' AND table_type = '\''BASE TABLE'\'';" 2>/dev/null | tr -d " "' "18"
 
   echo ""
 
@@ -370,16 +370,14 @@ if [ $FAIL -eq 0 ]; then
     echo ""
     echo -e "Next steps:"
     echo -e "  1. Run: ${YELLOW}bash verify-test-db-setup.sh --full${NC}"
-    echo -e "     (Runs all 80+ tests including Docker interaction)"
-    echo -e "  2. Run: ${YELLOW}docker compose up -d${NC}"
-    echo -e "     (Start your test database)"
-    echo -e "  3. Run: ${YELLOW}pnpm run test:docker${NC}"
-    echo -e "     (Run your application tests against local docker db)"
+    echo -e "     (Runs all tests including Docker interaction)"
+    echo -e "  2. Run: ${YELLOW}pnpm run test:integration${NC}"
+    echo -e "     (Run integration tests — Docker starts automatically)"
   else
-    echo -e "${GREEN}🎉 Comprehensive testing complete! Your test database is fully operational.${NC}"
+    echo -e "${GREEN}Comprehensive testing complete! Your test database is fully operational.${NC}"
     echo ""
     echo -e "Your test database environment is ready for:"
-    echo -e "  Running application tests (pnpm run test:docker)"
+    echo -e "  Running application tests (pnpm run test:integration)"
     echo -e "  Manual reseeding with 'pnpm run seed:test'"
     echo -e "  Full teardown/restart cycles"
     echo -e "  CI/CD integration"

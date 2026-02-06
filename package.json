@@ -1,8 +1,8 @@
 {
-  "name": "volunteer-management-backend",
+  "name": "operations-api",
   "version": "1.0.0",
   "packageManager": "pnpm@10.28.2",
-  "description": "Backend API for volunteer management with GraphQL and REST endpoints",
+  "description": "Backend API for H4I operations with GraphQL and REST endpoints",
   "main": "src/app.ts",
   "scripts": {
     "build": "tsc && prisma generate",
@@ -19,7 +19,7 @@
     "start": "node dist/app.js",
     "test": "pnpm run test:unit && pnpm run test:integration",
     "test:coverage": "jest --coverage --testPathIgnorePatterns=tests/integration",
-    "test:integration": "pnpm run docker:up && cross-env NODE_ENV=test jest tests/integration --runInBand",
+    "test:integration": "pnpm run docker:up && cross-env NODE_ENV=test jest tests/integration --runInBand; EXIT_CODE=$?; pnpm run docker:down; exit $EXIT_CODE",
     "test:unit": "jest tests/unit",
     "test:watch": "jest --watch tests/unit",
     "type-check": "tsc --noEmit"

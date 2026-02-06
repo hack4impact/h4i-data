@@ -93,7 +93,6 @@ export async function disconnectDB() {
   try {
     await prisma.$disconnect();
     await pool.end();
-    console.log('Database disconnected successfully');
   } catch (error) {
     console.error('Failed to disconnect from the database', error);
   }

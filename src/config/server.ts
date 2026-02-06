@@ -16,6 +16,7 @@ const envFilePath = (() => {
 dotenv.config({
   path: envFilePath,
   override: process.env.NODE_ENV === 'test',
+  quiet: true,
 });
 
 // Define a schema for your environment variables

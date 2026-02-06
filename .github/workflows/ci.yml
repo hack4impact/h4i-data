@@ -30,7 +30,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Prisma generate
-        run: npx prisma generate
+        run: pnpm exec prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
@@ -39,10 +39,10 @@ jobs:
         run: ls -la node_modules/.prisma/client
 
       - name: Run ESLint
-        run: npx eslint "src/**/*.ts" "tests/**/*.ts" --max-warnings=0
+        run: pnpm exec eslint "src/**/*.ts" "tests/**/*.ts" --max-warnings=0
 
       - name: Run Prettier
-        run: npx prettier --check "src/**/*.ts" "tests/**/*.ts"
+        run: pnpm exec prettier --check "src/**/*.ts" "tests/**/*.ts"
 
       - name: Run tests
         run: pnpm run test

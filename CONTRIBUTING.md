@@ -26,12 +26,11 @@ Create a `.env` file in the root directory and copy fields from `.env.example`:
 ```env
 # Database Configuration
 DATABASE_URL=your_database_url_here
-DIRECT_URL=your_direct_url_here
 
 # Server Configuration
-PORT=3000
-REST_PORT=3001
-GRAPHQL_PORT=3002
+PORT=3001
+REST_PORT=3002
+GRAPHQL_PORT=3003
 ```
 
 Access the important fields from Vaultwarden from this: https://vault.hack4impact.org/#/login
