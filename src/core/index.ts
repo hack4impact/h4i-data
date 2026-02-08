@@ -9,8 +9,6 @@ export * from './services/roles.service';
 export * from './services/sponsors.service';
 export * from './services/volunteer.service';
 
-<<<<<<< Updated upstream
-=======
 // Export types for GraphQL resolvers
 export type {
   StatusType,
@@ -23,7 +21,6 @@ export type {
   GetProjectsFilters,
 } from './services/projects.service';
 
->>>>>>> Stashed changes
 // Validators
 export * from './validators/chapters.validator';
 export * from './validators/companies.validator';

@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Clear npm cache
@@ -35,12 +35,6 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
-      - name: Prisma migrate
-        run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.DATABASE_URL }}
-
       - name: Verify Prisma client
         run: ls -la node_modules/.prisma/client
 
@@ -50,8 +44,20 @@ jobs:
       - name: Run Prettier
         run: npx prettier --check "src/**/*.ts" "tests/**/*.ts"
 
+      - name: Start test database
+        run: |
+          docker compose up -d test-db
+          echo "Waiting for database to be ready..."
+          timeout 30 bash -c 'until docker compose exec -T test-db pg_isready -U postgres -d test_db; do sleep 1; done'
+          echo "Database is ready!"
+
       - name: Run tests
         run: npm run test
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.DATABASE_URL }}
+          NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5433/test_db
+          DIRECT_URL: postgresql://postgres:test_password@localhost:5433/test_db
+
+      - name: Stop test database
+        if: always()
+        run: docker compose down -v

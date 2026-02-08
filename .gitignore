@@ -1,6 +1,7 @@
 node_modules
 /generated
 .env
+!.env.test
 
 # Log files
 logs/
@@ -8,3 +9,5 @@ logs/
 
 # Coverage files
 coverage/
+
+dist/
