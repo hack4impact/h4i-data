@@ -176,7 +176,9 @@ afterAll(async () => {
     await prisma.nonprofit_chapter_project.deleteMany({
       where: { nonprofit_id: nonprofitId },
     });
-    await prisma.nonprofits.deleteMany({ where: { nonprofit_id: nonprofitId } });
+    await prisma.nonprofits.deleteMany({
+      where: { nonprofit_id: nonprofitId },
+    });
   }
   if (contactId) {
     await prisma.contacts.deleteMany({ where: { contact_id: contactId } });

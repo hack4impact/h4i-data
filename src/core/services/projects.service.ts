@@ -23,9 +23,7 @@ export interface GetProjectsFilters {
 /**
  * Helper function to get the latest start_date from nonprofit_chapter_project
  */
-function getLatestStartDate(
-  ncpRecords: { start_date: Date }[]
-): Date | null {
+function getLatestStartDate(ncpRecords: { start_date: Date }[]): Date | null {
   if (ncpRecords.length === 0) return null;
   return ncpRecords.reduce(
     (latest, record) => {
@@ -39,9 +37,7 @@ function getLatestStartDate(
 /**
  * Get projects with optional filtering by chapter name and sorting by Most Recent
  */
-export async function getProjectsWithFilters(
-  filters: GetProjectsFilters = {}
-) {
+export async function getProjectsWithFilters(filters: GetProjectsFilters = {}) {
   try {
     const { chapterNames, sort } = filters;
 
