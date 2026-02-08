@@ -4,6 +4,7 @@ import {
   createProject,
   updateProject,
   deleteProject,
+  getProjectsWithFilters,
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
 
@@ -18,6 +19,9 @@ jest.mock('../../../src/config/database', () => ({
       update: jest.fn(),
       delete: jest.fn(),
     },
+    chapters: {
+      findMany: jest.fn(),
+    },
   },
 }));
 
@@ -25,6 +29,83 @@ describe('Project Service', () => {
   // Before each test, clear all previous mock calls and return values
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('getProjectsWithFilters', () => {
+    it('should return projects sorted by MOST_RECENT when sort option provided', async () => {
+      const mockProjects = [
+        {
+          project_id: '1',
+          name: 'Older',
+          description: null,
+          repo: 'https://github.com/a',
+          budget: null,
+          project_type: 'DESIGN_AND_DEVELOP' as const,
+          created_at: new Date(),
+          updated_at: new Date(),
+          nonprofit_chapter_project: [
+            { start_date: new Date('2023-01-01'), chapter_id: 'ch1' },
+          ],
+        },
+        {
+          project_id: '2',
+          name: 'Newer',
+          description: null,
+          repo: 'https://github.com/b',
+          budget: null,
+          project_type: 'DESIGN_AND_DEVELOP' as const,
+          created_at: new Date(),
+          updated_at: new Date(),
+          nonprofit_chapter_project: [
+            { start_date: new Date('2024-06-01'), chapter_id: 'ch1' },
+          ],
+        },
+      ];
+      (prisma.projects.findMany as jest.Mock).mockResolvedValue(mockProjects);
+
+      const result = await getProjectsWithFilters({ sort: ['MOST_RECENT'] });
+
+      expect(result).toHaveLength(2);
+      expect(result[0].name).toBe('Newer');
+      expect(result[1].name).toBe('Older');
+      expect(prisma.projects.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return projects with chapter filter when chapterNames provided', async () => {
+      (prisma.chapters.findMany as jest.Mock).mockResolvedValue([
+        { chapter_id: 'ch1' },
+      ]);
+      (prisma.projects.findMany as jest.Mock).mockResolvedValue([]);
+
+      await getProjectsWithFilters({
+        chapterNames: ['My Chapter'],
+      });
+
+      expect(prisma.chapters.findMany).toHaveBeenCalledWith({
+        where: { name: { in: ['My Chapter'] } },
+        select: { chapter_id: true },
+      });
+      expect(prisma.projects.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            nonprofit_chapter_project: {
+              some: { chapter_id: { in: ['ch1'] } },
+            },
+          },
+        })
+      );
+    });
+
+    it('should return empty array when chapter names match no chapters', async () => {
+      (prisma.chapters.findMany as jest.Mock).mockResolvedValue([]);
+
+      const result = await getProjectsWithFilters({
+        chapterNames: ['Non Existent'],
+      });
+
+      expect(result).toEqual([]);
+      expect(prisma.projects.findMany).not.toHaveBeenCalled();
+    });
   });
 
   describe('getAllProjects', () => {

@@ -1,4 +1,8 @@
 export const projectSchemaString = `
+  enum ProjectSortOption {
+    MOST_RECENT
+  }
+
   type Project {
     project_id: ID!
     name: String!
@@ -11,7 +15,10 @@ export const projectSchemaString = `
   }
 
   type Query {
-    projects(sortOrder: String): [Project!]!
+    projects(
+      chapters: [String!]
+      sort: [ProjectSortOption!]
+    ): [Project!]!
     project(id: ID!): Project
   }
 

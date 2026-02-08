@@ -6,10 +6,111 @@ import {
   DatabaseError,
 } from '../../middleware/error.middleware';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
 // Define types based on Zod schemas for better type safety
 type CreateProjectInput = z.infer<typeof createProjectSchema>;
 type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
+
+// Types for filtering and sorting
+export type ProjectSortOption = 'MOST_RECENT';
+
+export interface GetProjectsFilters {
+  chapterNames?: string[];
+  sort?: ProjectSortOption[];
+}
+
+/**
+ * Helper function to get the latest start_date from nonprofit_chapter_project
+ */
+function getLatestStartDate(ncpRecords: { start_date: Date }[]): Date | null {
+  if (ncpRecords.length === 0) return null;
+  return ncpRecords.reduce(
+    (latest, record) => {
+      const startDate = new Date(record.start_date);
+      return !latest || startDate > latest ? startDate : latest;
+    },
+    null as Date | null
+  );
+}
+
+/**
+ * Get projects with optional filtering by chapter name and sorting by Most Recent
+ */
+export async function getProjectsWithFilters(filters: GetProjectsFilters = {}) {
+  try {
+    const { chapterNames, sort } = filters;
+
+    logger.info('Fetching projects with filters', { filters });
+
+    // Convert chapter names to chapter IDs
+    let chapterIds: string[] | undefined;
+    if (chapterNames && chapterNames.length > 0) {
+      const chapters = await prisma.chapters.findMany({
+        where: { name: { in: chapterNames } },
+        select: { chapter_id: true },
+      });
+      chapterIds = chapters.map((c) => c.chapter_id);
+      if (chapterIds.length === 0) {
+        logger.info('No matching chapters found for names', {
+          chapterNames,
+        });
+        return [];
+      }
+    }
+
+    // Build Prisma where clause
+    const where: Prisma.projectsWhereInput = {};
+    if (chapterIds && chapterIds.length > 0) {
+      where.nonprofit_chapter_project = {
+        some: {
+          chapter_id: {
+            in: chapterIds,
+          },
+        },
+      };
+    }
+
+    // Fetch projects with related nonprofit_chapter_project records
+    const projects = await prisma.projects.findMany({
+      where,
+      include: {
+        nonprofit_chapter_project: {
+          select: {
+            start_date: true,
+            chapter_id: true,
+          },
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+
+    // Apply sorting by Most Recent (nonprofit_chapter_project.start_date descending)
+    let result = projects;
+    if (sort && sort.includes('MOST_RECENT')) {
+      result = [...projects].sort((a, b) => {
+        const aDate =
+          getLatestStartDate(a.nonprofit_chapter_project)?.getTime() ??
+          -Infinity;
+        const bDate =
+          getLatestStartDate(b.nonprofit_chapter_project)?.getTime() ??
+          -Infinity;
+        return bDate - aDate; // descending: most recent first
+      });
+    }
+
+    logger.info('Successfully retrieved and filtered projects', {
+      count: result.length,
+    });
+
+    return result;
+  } catch (error) {
+    logger.error('Failed to fetch projects with filters', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    throw new DatabaseError('Failed to retrieve projects');
+  }
+}
 
 export async function getAllProjects() {
   try {
