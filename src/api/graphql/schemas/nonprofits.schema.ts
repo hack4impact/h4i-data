@@ -7,13 +7,18 @@ export const nonprofitSchemaString = `
   }
 
   type NonprofitChapterProjectInfo {
-    chapter: Chapter!
+    nonprofit_chapter_project_id: ID!
+    nonprofit_id: ID!
+    chapter: Chapter
     project: Project!
     project_status: StatusType!
     start_date: String!
     end_date: String
+    notes: String
     project_contact: Contact
     collab_contact: Contact
+    created_at: String!
+    updated_at: String!
   }
 
   type Nonprofit {
