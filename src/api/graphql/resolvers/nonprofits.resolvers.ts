@@ -15,6 +15,7 @@ import type {
   NonprofitSortOption,
 } from '../../../core/services/nonprofits.service';
 import { prisma } from '../../../config/database';
+import { status_type } from '@prisma/client';
 
 type CreateNonprofitInput = z.infer<typeof createNonprofitSchema>;
 type UpdateNonprofitInput = z.infer<typeof updateNonprofitSchema>;
@@ -29,6 +30,45 @@ interface GetNonprofitsWithFiltersArgs {
   statuses?: StatusType[];
   sort?: NonprofitSortOption[];
   chapterIds?: string[];
+}
+
+interface NonprofitParent {
+  nonprofit_id: string;
+}
+
+interface ChapterProjectsRow {
+  nonprofit_chapter_project_id: string;
+  nonprofit_id: string;
+  project_status: status_type;
+  start_date: Date;
+  end_date: Date | null;
+  notes: string | null;
+  created_at: Date;
+  updated_at: Date;
+  chapters: { chapter_id: string; name: string } | null;
+  projects: {
+    project_id: string;
+    name: string;
+    repo: string | null;
+    project_type: string | null;
+    budget: number | null;
+  } | null;
+  contacts_nonprofit_chapter_project_project_contact_idTocontacts: {
+    contact_id: string;
+    name: string;
+    email: string;
+    phone_number: string | null;
+    created_at: Date;
+    updated_at: Date;
+  } | null;
+  contacts_nonprofit_chapter_project_collab_contact_idTocontacts: {
+    contact_id: string;
+    name: string;
+    email: string;
+    phone_number: string | null;
+    created_at: Date;
+    updated_at: Date;
+  } | null;
 }
 
 export const nonprofitResolvers = {
@@ -59,15 +99,7 @@ export const nonprofitResolvers = {
       const nonprofit = await getNonprofitById(id);
 
       if (!nonprofit) {
-        throw new GraphQLError(
-          'Nonprofit not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+        throw new GraphQLError('Nonprofit not found');
       }
 
       return nonprofit;
@@ -75,120 +107,115 @@ export const nonprofitResolvers = {
   },
 
   Nonprofit: {
-    chapter_projects: async (parent: { nonprofit_id: string }) => {
-      const joinRows = await prisma.nonprofit_chapter_project.findMany({
-        where: {
-          nonprofit_id: parent.nonprofit_id,
-          chapter_id: { not: null },
-        },
+    chapter_projects: async (parent: NonprofitParent) => {
+      const rows = (await prisma.nonprofit_chapter_project.findMany({
+        where: { nonprofit_id: parent.nonprofit_id },
         select: {
-          chapter_id: true,
-          project_id: true,
+          nonprofit_chapter_project_id: true,
+          nonprofit_id: true,
           project_status: true,
           start_date: true,
           end_date: true,
-          project_contact_id: true,
-          collab_contact_id: true,
+          notes: true,
           created_at: true,
-        },
-        orderBy: { created_at: 'desc' },
-      });
+          updated_at: true,
 
-      if (joinRows.length === 0) return [];
-
-      const seen = new Set<string>();
-      const deduped = joinRows.filter((r) => {
-        const chapterId = r.chapter_id;
-        if (!chapterId) return false;
-        const key = `${chapterId}::${r.project_id}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-
-      const chapterIds = Array.from(
-        new Set(deduped.map((r) => r.chapter_id).filter(Boolean) as string[])
-      );
-      const projectIds = Array.from(new Set(deduped.map((r) => r.project_id)));
-
-      const contactIds = Array.from(
-        new Set(
-          deduped
-            .flatMap((r) => [r.project_contact_id, r.collab_contact_id])
-            .filter(Boolean) as string[]
-        )
-      );
-      const [chapters, projects, contacts] = await Promise.all([
-        prisma.chapters.findMany({
-          where: { chapter_id: { in: chapterIds } },
-        }),
-        prisma.projects.findMany({
-          where: { project_id: { in: projectIds } },
-          select: { project_id: true, name: true, repo: true },
-        }),
-        contactIds.length
-          ? prisma.contacts.findMany({
-              where: { contact_id: { in: contactIds } },
-            })
-          : Promise.resolve([]),
-      ]);
-
-      const chapterById = new Map(chapters.map((c) => [c.chapter_id, c]));
-      const projectById = new Map(projects.map((p) => [p.project_id, p]));
-      const contactById = new Map(contacts.map((c) => [c.contact_id, c]));
-
-      return deduped.map((r) => {
-        const chapterId = r.chapter_id as string;
-
-        const chapter = chapterById.get(chapterId);
-        const project = projectById.get(r.project_id);
-
-        if (!chapter) {
-          throw new GraphQLError(
-            `Data issue: chapter_id ${chapterId} exists in nonprofit_chapter_project but no matching chapters row`
-          );
-        }
-        if (!project) {
-          throw new GraphQLError(
-            `Data issue: project_id ${r.project_id} exists in nonprofit_chapter_project but no matching projects row`
-          );
-        }
-
-        const projectContact = r.project_contact_id
-          ? (contactById.get(r.project_contact_id) ?? null)
-          : null;
-
-        const collabContact = r.collab_contact_id
-          ? (contactById.get(r.collab_contact_id) ?? null)
-          : null;
-
-        return {
-          chapter: {
-            ...chapter,
-            created_at: chapter.created_at.toISOString(),
-            updated_at: chapter.updated_at.toISOString(),
+          chapters: {
+            select: {
+              chapter_id: true,
+              name: true,
+            },
           },
 
-          project,
-          project_status: r.project_status,
+          projects: {
+            select: {
+              project_id: true,
+              name: true,
+              repo: true,
+              project_type: true,
+              budget: true,
+            },
+          },
+
+          contacts_nonprofit_chapter_project_project_contact_idTocontacts: {
+            select: {
+              contact_id: true,
+              name: true,
+              email: true,
+              phone_number: true,
+              created_at: true,
+              updated_at: true,
+            },
+          },
+
+          contacts_nonprofit_chapter_project_collab_contact_idTocontacts: {
+            select: {
+              contact_id: true,
+              name: true,
+              email: true,
+              phone_number: true,
+              created_at: true,
+              updated_at: true,
+            },
+          },
+        },
+        orderBy: { created_at: 'desc' },
+      })) as ChapterProjectsRow[];
+
+      if (!rows.length) return [];
+
+      const valid = rows.filter(
+        (
+          r
+        ): r is ChapterProjectsRow & {
+          chapters: { chapter_id: string; name: string };
+          projects: {
+            project_id: string;
+            name: string;
+            repo: string | null;
+            project_type: string | null;
+            budget: number | null;
+          };
+        } => r.chapters !== null && r.projects !== null
+      );
+
+      return valid.map((r) => {
+        const chapter = r.chapters;
+        const project = r.projects;
+
+        return {
+          nonprofit_chapter_project_id: r.nonprofit_chapter_project_id,
+          nonprofit_id: r.nonprofit_id,
+
+          chapter: {
+            chapter_id: chapter.chapter_id,
+            name: chapter.name,
+          },
+
+          project: {
+            project_id: project.project_id,
+            name: project.name,
+            repo: project.repo,
+            project_type: project.project_type,
+            budget: project.budget,
+          },
+
+          project_status:
+            r.project_status === status_type.ACTIVE ? 'ACTIVE' : 'INACTIVE',
+
           start_date: r.start_date.toISOString(),
           end_date: r.end_date ? r.end_date.toISOString() : null,
 
-          project_contact: projectContact
-            ? {
-                ...projectContact,
-                created_at: projectContact.created_at.toISOString(),
-                updated_at: projectContact.updated_at.toISOString(),
-              }
-            : null,
+          notes: r.notes,
 
-          collab_contact: collabContact
-            ? {
-                ...collabContact,
-                created_at: collabContact.created_at.toISOString(),
-                updated_at: collabContact.updated_at.toISOString(),
-              }
-            : null,
+          project_contact:
+            r.contacts_nonprofit_chapter_project_project_contact_idTocontacts,
+
+          collab_contact:
+            r.contacts_nonprofit_chapter_project_collab_contact_idTocontacts,
+
+          created_at: r.created_at.toISOString(),
+          updated_at: r.updated_at.toISOString(),
         };
       });
     },
