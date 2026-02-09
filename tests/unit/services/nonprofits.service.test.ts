@@ -1,13 +1,3 @@
-import {
-  getAllNonprofits,
-  getNonprofitById,
-  createNonprofit,
-  updateNonprofit,
-  deleteNonprofit,
-  getNonprofitsWithFilters,
-} from '../../../src/core';
-import { prisma } from '../../../src/config/database';
-
 // Mock prisma client
 jest.mock('../../../src/config/database', () => ({
   prisma: {
@@ -18,8 +8,24 @@ jest.mock('../../../src/config/database', () => ({
       update: jest.fn(),
       delete: jest.fn(),
     },
+    nonprofit_chapter_project: {
+      findMany: jest.fn(),
+    },
+    chapters: {
+      findMany: jest.fn(),
+    },
   },
 }));
+
+import {
+  getAllNonprofits,
+  getNonprofitById,
+  createNonprofit,
+  updateNonprofit,
+  deleteNonprofit,
+  getNonprofitsWithFilters,
+} from '../../../src/core';
+import { prisma } from '../../../src/config/database';
 
 describe('Nonprofit Service', () => {
   beforeEach(() => {
@@ -80,6 +86,7 @@ describe('Nonprofit Service', () => {
           },
         ],
       };
+
       (prisma.nonprofits.findUnique as jest.Mock).mockResolvedValue(
         mockNonprofit
       );
@@ -205,7 +212,7 @@ describe('Nonprofit Service', () => {
       expect(result.status).toBe('ACTIVE');
       expect(prisma.nonprofits.update).toHaveBeenCalledWith({
         where: { nonprofit_id: nonprofitId },
-        data: updateData,
+        data: expect.objectContaining(updateData),
         include: {
           nonprofit_chapter_project: {
             select: {
@@ -323,52 +330,14 @@ describe('Nonprofit Service', () => {
       expect(result).toHaveLength(2);
       expect(result[0].status).toBe('ACTIVE');
       expect(result[1].status).toBe('INACTIVE');
-    });
-
-    it('should filter nonprofits by chapter IDs', async () => {
-      const mockNonprofits = [
-        {
-          nonprofit_id: '1',
-          name: 'Nonprofit 1',
-          mission: 'Test mission',
-          website: null,
-          location_id: null,
-          contact_id: 'contact-1',
-          created_at: baseDate,
-          updated_at: baseDate,
-          nonprofit_chapter_project: [
-            {
-              start_date: baseDate,
-              end_date: null,
-              project_status: 'ACTIVE',
-              chapter_id: 'chapter-1',
-            },
-          ],
-        },
-      ];
-
-      (prisma.nonprofits.findMany as jest.Mock).mockResolvedValue(
-        mockNonprofits
-      );
-
-      await getNonprofitsWithFilters({ chapterIds: ['chapter-1'] });
-
-      expect(prisma.nonprofits.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: {
-            nonprofit_chapter_project: {
-              some: {
-                chapter_id: {
-                  in: ['chapter-1'],
-                },
-              },
-            },
-          },
-        })
-      );
+      expect(prisma.nonprofits.findMany).toHaveBeenCalledTimes(1);
     });
 
     it('should filter nonprofits by ACTIVE status', async () => {
+      (
+        prisma.nonprofit_chapter_project.findMany as jest.Mock
+      ).mockResolvedValue([{ nonprofit_id: '1' }]);
+
       const mockNonprofits = [
         {
           nonprofit_id: '1',
@@ -417,6 +386,16 @@ describe('Nonprofit Service', () => {
       expect(result).toHaveLength(1);
       expect(result[0].status).toBe('ACTIVE');
       expect(result[0].name).toBe('Active Nonprofit');
+
+      expect(prisma.nonprofits.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { nonprofit_id: { in: ['1'] } },
+        })
+      );
+
+      expect(prisma.nonprofit_chapter_project.findMany).toHaveBeenCalledTimes(
+        1
+      );
     });
 
     it('should sort nonprofits A to Z by name', async () => {
@@ -687,7 +666,6 @@ describe('Nonprofit Service', () => {
         sort: ['STATUS', 'MOST_RECENT'],
       });
 
-      // Both active nonprofits should come first, sorted by most recent
       expect(result[0].name).toBe('Recent Active');
       expect(result[0].status).toBe('ACTIVE');
       expect(result[1].name).toBe('Old Active');

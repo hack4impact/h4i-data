@@ -1,4 +1,3 @@
-// src/core/services/nonprofits.service.ts
 import { prisma } from '../../config/database';
 import { createNonprofitSchema, updateNonprofitSchema } from '../validators';
 import { logger } from '../../config/logger';
@@ -7,7 +6,7 @@ import {
   DatabaseError,
 } from '../../middleware/error.middleware';
 import { z } from 'zod';
-import { Prisma } from '@prisma/client';
+import { Prisma, status_type } from '@prisma/client';
 
 type CreateNonprofitInput = z.infer<typeof createNonprofitSchema>;
 type UpdateNonprofitInput = z.infer<typeof updateNonprofitSchema>;
@@ -21,7 +20,6 @@ export type NonprofitSortOption =
   | 'STATUS';
 
 export interface GetNonprofitsFilters {
-  chapterIds?: string[];
   statuses?: StatusType[];
   sort?: NonprofitSortOption[];
 }
@@ -44,16 +42,20 @@ export interface EnrichedNonprofit {
  */
 function deriveNonprofitStatus(
   projects: {
-    project_status: string;
+    project_status: status_type | string;
     end_date: Date | null;
   }[]
 ): StatusType {
   const now = new Date();
   const hasOngoingProject = projects.some((project) => {
-    return (
-      project.project_status === 'ACTIVE' &&
-      (project.end_date === null || new Date(project.end_date) > now)
-    );
+    const isActive =
+      project.project_status === status_type.ACTIVE ||
+      project.project_status === 'ACTIVE';
+
+    const notEnded =
+      project.end_date === null || new Date(project.end_date) > now;
+
+    return isActive && notEnded;
   });
   return hasOngoingProject ? 'ACTIVE' : 'INACTIVE';
 }
@@ -129,26 +131,54 @@ export async function getNonprofitsWithFilters(
   filters: GetNonprofitsFilters = {}
 ): Promise<EnrichedNonprofit[]> {
   try {
-    const { chapterIds, statuses, sort } = filters;
+    const { statuses, sort } = filters;
 
     logger.info('Fetching nonprofits with filters', { filters });
 
-    // Build Prisma where clause
-    const where: Prisma.nonprofitsWhereInput = {};
+    const now = new Date();
 
-    if (chapterIds && chapterIds.length > 0) {
-      where.nonprofit_chapter_project = {
-        some: {
-          chapter_id: {
-            in: chapterIds,
-          },
-        },
+    const activeProjectWhere: Prisma.nonprofit_chapter_projectWhereInput = {
+      project_status: status_type.ACTIVE,
+      OR: [{ end_date: null }, { end_date: { gt: now } }],
+    };
+
+    const hasJoinFilters = statuses && statuses.length > 0;
+
+    let nonprofitIdFilter: Prisma.nonprofitsWhereInput | undefined;
+
+    if (hasJoinFilters) {
+      const ncpWhere: Prisma.nonprofit_chapter_projectWhereInput = {};
+
+      if (statuses?.length) {
+        const wantsActive = statuses.includes('ACTIVE');
+        const wantsInactive = statuses.includes('INACTIVE');
+
+        // Only ACTIVE
+        if (wantsActive && !wantsInactive) {
+          Object.assign(ncpWhere, activeProjectWhere);
+        }
+        // Only INACTIVE
+        else if (wantsInactive && !wantsActive) {
+          ncpWhere.NOT = activeProjectWhere;
+        }
+      }
+
+      const joinRows = await prisma.nonprofit_chapter_project.findMany({
+        where: ncpWhere,
+        select: { nonprofit_id: true },
+      });
+
+      if (joinRows.length === 0) return [];
+
+      const nonprofitIds = [...new Set(joinRows.map((r) => r.nonprofit_id))];
+
+      nonprofitIdFilter = {
+        nonprofit_id: { in: nonprofitIds },
       };
     }
 
-    // Fetch nonprofits with related projects
     const nonprofits = await prisma.nonprofits.findMany({
-      where,
+      where: nonprofitIdFilter,
       include: {
         nonprofit_chapter_project: {
           select: {
@@ -159,10 +189,9 @@ export async function getNonprofitsWithFilters(
           },
         },
       },
-      orderBy: { created_at: 'desc' }, // Default ordering
+      orderBy: { created_at: 'desc' },
     });
 
-    // Enrich nonprofits with derived fields
     const enrichedNonprofits: EnrichedNonprofit[] = nonprofits.map((np) => {
       const status = deriveNonprofitStatus(np.nonprofit_chapter_project);
       const latestStartDate = getLatestStartDate(np.nonprofit_chapter_project);
@@ -181,28 +210,26 @@ export async function getNonprofitsWithFilters(
       };
     });
 
-    // Apply status filter
-    let filteredNonprofits = enrichedNonprofits;
-    if (statuses && statuses.length > 0) {
-      filteredNonprofits = enrichedNonprofits.filter((np) =>
-        statuses.includes(np.status)
-      );
+    let result = enrichedNonprofits;
+    if (statuses?.length) {
+      result = result.filter((np) => statuses.includes(np.status));
     }
 
-    // Apply sorting
-    if (sort && sort.length > 0) {
+    if (sort?.length) {
       const comparator = createNonprofitComparator(sort);
-      filteredNonprofits.sort(comparator);
+      result = [...result].sort(comparator);
     }
 
     logger.info('Successfully retrieved and filtered nonprofits', {
-      count: filteredNonprofits.length,
+      count: result.length,
     });
 
-    return filteredNonprofits;
+    return result;
   } catch (error) {
     logger.error('Failed to fetch nonprofits with filters', {
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
     });
     throw new DatabaseError('Failed to retrieve nonprofits');
   }
@@ -302,8 +329,8 @@ export async function createNonprofit(
 
     const data: Prisma.nonprofitsUncheckedCreateInput = {
       name,
-      mission, // required string
-      contact_id, // required string
+      mission,
+      contact_id,
       ...(website === undefined ? {} : { website }), // include if not undefined (can be null)
       ...(location_id === undefined ? {} : { location_id }), // include if not undefined (can be null)
     };
@@ -518,4 +545,16 @@ export async function deleteNonprofit(id: string): Promise<EnrichedNonprofit> {
 
     throw new DatabaseError('Failed to delete nonprofit');
   }
+}
+
+export async function getChapterIdsByNames(names: string[]): Promise<string[]> {
+  const cleaned = [...new Set(names.map((n) => n.trim()).filter(Boolean))];
+  if (cleaned.length === 0) return [];
+
+  const chapters = await prisma.chapters.findMany({
+    where: { name: { in: cleaned } },
+    select: { chapter_id: true },
+  });
+
+  return chapters.map((c) => c.chapter_id);
 }

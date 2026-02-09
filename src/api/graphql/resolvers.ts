@@ -32,4 +32,7 @@ export const resolvers = {
     ...nonprofitResolvers.Mutation,
     ...companyResolvers.Mutation,
   },
+  Nonprofit: {
+    ...nonprofitResolvers.Nonprofit,
+  },
 };
