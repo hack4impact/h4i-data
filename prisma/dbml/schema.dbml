@@ -28,9 +28,6 @@ Table companies {
   industries industries
   locations locations
   volunteers volunteers [not null]
-
-  Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
 Table industries {
@@ -54,8 +51,6 @@ Table locations {
   chapters chapters [not null]
   companies companies [not null]
   universities universities [not null]
-
-  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
 Table majors {
@@ -76,8 +71,6 @@ Table projects {
   updated_at DateTime [not null]
   project_deliverables project_deliverables [not null]
   project_engagements project_engagements [not null]
-
-  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
 Table volunteer_history {
@@ -92,8 +85,6 @@ Table volunteer_history {
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   volunteers volunteers [not null]
-
-  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
 Table volunteers {
@@ -119,9 +110,6 @@ Table volunteers {
   majors majors
   universities universities
   constituents constituents [not null]
-
-  Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
 }
 
 Table academic_terms {
