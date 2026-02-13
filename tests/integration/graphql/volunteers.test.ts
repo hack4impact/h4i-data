@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { createGraphqlApp } from '../../../src/api/graphql/server';
+import { prisma } from '../../../src/config/database';
 
 const app = createGraphqlApp();
 
@@ -24,6 +25,12 @@ const createTestConstituent = async (email?: string) => {
     .post('/')
     .send({ query: constituentMutation, variables: constituentVariables });
   return response.body.data.createConstituent.constituent_id;
+};
+
+// Helper function to create a major lookup record for tests
+const createTestMajor = async (name: string) => {
+  const major = await prisma.majors.create({ data: { name } });
+  return major.major_id;
 };
 
 // Helper function to create a volunteer for tests
@@ -145,19 +152,20 @@ describe('GraphQL API - Volunteers', () => {
     // Arrange
     const constituentId = await createTestConstituent();
     const volunteerId = await createTestVolunteer(constituentId);
+    const majorId = await createTestMajor(`SE-GQL-${Date.now()}`);
 
     // Act
     const updateMutation = `
       mutation UpdateVolunteer($id: ID!, $input: UpdateVolunteerInput!) {
         updateVolunteer(id: $id, input: $input) {
           volunteer_id
-          major
+          major_id
         }
       }
     `;
     const updateVariables = {
       id: volunteerId,
-      input: { major: 'Software Engineering' },
+      input: { major_id: majorId },
     };
     const response = await request(app)
       .post('/')
@@ -167,7 +175,7 @@ describe('GraphQL API - Volunteers', () => {
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const updatedVolunteer = response.body.data.updateVolunteer;
-    expect(updatedVolunteer.major).toBe('Software Engineering');
+    expect(updatedVolunteer.major_id).toBe(majorId);
   });
 
   it('should delete a volunteer', async () => {

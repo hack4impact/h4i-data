@@ -13,7 +13,7 @@ export const createVolunteerSchema = z.object({
   status: memberStatusSchema.optional().default('ACTIVE'),
   volunteer_class: volunteerClassSchema.optional().default('COLLEGIATE'),
   engagement_track: engagementTrackSchema.optional().default('PROGRAMS'),
-  major: z.string().optional(),
+  major_id: z.uuid().optional(),
   education_level: educationLevelSchema.optional(),
   graduation_term_id: z.uuid().optional(),
   university_id: z.uuid().optional(),

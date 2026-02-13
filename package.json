@@ -50,10 +50,10 @@
   "homepage": "https://github.com/hack4impact/operations-api#readme",
   "dependencies": {
     "@graphql-tools/schema": "^10.0.31",
-    "@prisma/adapter-pg": "^7.3.0",
-    "@prisma/client": "^7.3.0",
+    "@prisma/adapter-pg": "^7.4.0",
+    "@prisma/client": "^7.4.0",
     "cors": "^2.8.6",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "graphql": "^16.12.0",
@@ -77,13 +77,14 @@
     "jest": "^30.2.0",
     "lint-staged": "^16.2.7",
     "prettier": "3.8.1",
-    "prisma": "^7.3.0",
+    "prisma": "^7.4.0",
+    "prisma-dbml-generator": "^0.12.0",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.54.0",
+    "typescript-eslint": "^8.55.0",
     "zod": "^4.3.6"
   }
 }

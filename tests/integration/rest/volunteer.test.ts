@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { createRestApp } from '../../../src/api/rest/server';
+import { prisma } from '../../../src/config/database';
 
 const app = createRestApp();
 
@@ -15,6 +16,12 @@ const createTestConstituent = async () => {
     .post('/constituents')
     .send(constituentData);
   return response.body.constituent_id;
+};
+
+// Helper function to create a major lookup record for tests
+const createTestMajor = async (name: string) => {
+  const major = await prisma.majors.create({ data: { name } });
+  return major.major_id;
 };
 
 // Helper function to create a volunteer for tests
@@ -33,13 +40,14 @@ describe('REST API - /volunteers', () => {
     it('should create a new volunteer', async () => {
       // Arrange
       const constituentId = await createTestConstituent();
+      const majorId = await createTestMajor(`CS-${Date.now()}`);
       const volunteerData = {
         volunteer_id: constituentId,
         org_email: 'john@org.edu',
         status: 'ACTIVE',
         volunteer_class: 'COLLEGIATE',
         engagement_track: 'PROGRAMS',
-        major: 'Computer Science',
+        major_id: majorId,
         education_level: 'UNDERGRADUATE',
       };
 
@@ -108,7 +116,8 @@ describe('REST API - /volunteers', () => {
       // Arrange
       const constituentId = await createTestConstituent();
       const volunteerId = await createTestVolunteer(constituentId);
-      const updateData = { major: 'Software Engineering' };
+      const majorId = await createTestMajor(`SE-${Date.now()}`);
+      const updateData = { major_id: majorId };
 
       // Act
       const response = await request(app)
@@ -117,7 +126,7 @@ describe('REST API - /volunteers', () => {
 
       // Assert
       expect(response.status).toBe(200);
-      expect(response.body.major).toBe('Software Engineering');
+      expect(response.body.major_id).toBe(majorId);
     });
   });
 

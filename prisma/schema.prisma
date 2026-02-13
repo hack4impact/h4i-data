@@ -2,13 +2,17 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator dbml {
+    provider = "prisma-dbml-generator"
+  }
+
 datasource db {
   provider = "postgresql"
 }
 
 model chapters {
   chapter_id          String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                String                @db.VarChar
+  name                String
   university_id       String?               @db.Uuid
   location_id         String?               @db.Uuid
   founded_date        DateTime?             @db.Date
@@ -28,25 +32,37 @@ model chapters {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model companies {
-  company_id  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String     @db.VarChar
-  industry    String?    @db.VarChar
-  location_id String?    @db.Uuid
-  created_at  DateTime   @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime   @updatedAt @db.Timestamptz(6)
-  locations   locations? @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
+  company_id  String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  industry_id String?     @db.Uuid
+  location_id String?     @db.Uuid
+  created_at  DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime    @updatedAt @db.Timestamptz(6)
+  industries  industries? @relation(fields: [industry_id], references: [industry_id], onDelete: NoAction, onUpdate: NoAction)
+  locations   locations?  @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
   volunteers  volunteers[]
 
+  @@index([industry_id])
   @@index([location_id])
+}
+
+model industries {
+  industry_id String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String    @unique
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime  @updatedAt @db.Timestamptz(6)
+  companies   companies[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model locations {
   location_id  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String         @db.VarChar
-  address_line String?        @db.VarChar
-  state_code   String?        @db.VarChar(2)
-  country_code String?        @default("USA") @db.VarChar(3)
+  name         String
+  address_line String?
+  city         String?
+  state_code   String?
+  postal_code  String?
+  country_code String?        @default("USA")
   created_at   DateTime       @default(now()) @db.Timestamptz(6)
   updated_at   DateTime       @updatedAt @db.Timestamptz(6)
   chapters     chapters[]
@@ -54,11 +70,19 @@ model locations {
   universities universities[]
 }
 
+model majors {
+  major_id   String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String       @unique
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at DateTime     @updatedAt @db.Timestamptz(6)
+  volunteers volunteers[]
+}
+
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model projects {
   project_id           String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                 String                 @db.VarChar
-  github_url           String?                @db.VarChar
+  name                 String
+  github_url           String?
   financial            financial_type?        @default(PRO_BONO)
   status               project_status         @default(WORKING)
   created_at           DateTime               @default(now()) @db.Timestamptz(6)
@@ -74,8 +98,8 @@ model volunteer_history {
   action_type          action_type
   related_entity_id    String?      @db.Uuid
   related_entity_type  entity_type?
-  previous_value_label String?      @db.VarChar
-  new_value_label      String?      @db.VarChar
+  previous_value_label String?
+  new_value_label      String?
   effective_date       DateTime     @db.Date
   created_at           DateTime     @default(now()) @db.Timestamptz(6)
   updated_at           DateTime     @updatedAt @db.Timestamptz(6)
@@ -88,11 +112,11 @@ model volunteer_history {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model volunteers {
   volunteer_id        String                @id @db.Uuid
-  org_email           String?               @db.VarChar
+  org_email           String?
   status              member_status         @default(ACTIVE)
   volunteer_class     volunteer_class?      @default(COLLEGIATE)
   engagement_track    engagement_track?     @default(PROGRAMS)
-  major               String?               @db.VarChar
+  major_id            String?               @db.Uuid
   education_level     education_level?
   graduation_term_id  String?               @db.Uuid
   university_id       String?               @db.Uuid
@@ -106,9 +130,11 @@ model volunteers {
   companies           companies?            @relation(fields: [employer_id], references: [company_id], onDelete: NoAction, onUpdate: NoAction)
   academic_terms      academic_terms?       @relation(fields: [graduation_term_id], references: [term_id], onDelete: NoAction, onUpdate: NoAction)
   chapters            chapters?             @relation(fields: [home_chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction)
+  majors              majors?               @relation(fields: [major_id], references: [major_id], onDelete: NoAction, onUpdate: NoAction)
   universities        universities?         @relation(fields: [university_id], references: [university_id], onDelete: NoAction, onUpdate: NoAction)
   constituents        constituents          @relation(fields: [volunteer_id], references: [constituent_id], onDelete: Cascade, onUpdate: NoAction)
 
+  @@index([major_id])
   @@index([graduation_term_id])
   @@index([university_id])
   @@index([home_chapter_id])
@@ -118,8 +144,8 @@ model volunteers {
 model academic_terms {
   term_id             String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   university_id       String?               @db.Uuid
-  name                String                @db.VarChar
-  canonical_label     String?               @db.VarChar
+  name                String
+  canonical_label     String?
   type                term_type?
   start_date          DateTime?             @db.Date
   end_date            DateTime?             @db.Date
@@ -134,10 +160,10 @@ model academic_terms {
 
 model constituents {
   constituent_id      String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  first_name          String                @db.VarChar
-  last_name           String                @db.VarChar
-  primary_email       String                @unique @db.VarChar
-  phone_number        String?               @db.VarChar
+  first_name          String
+  last_name           String
+  primary_email       String                @unique
+  phone_number        String?
   created_at          DateTime              @default(now()) @db.Timestamptz(6)
   updated_at          DateTime              @updatedAt @db.Timestamptz(6)
   mentorships_mentee  mentorships[]         @relation("mentorships_mentee_idToconstituents")
@@ -150,7 +176,7 @@ model constituents {
 model mentors {
   mentor_id      String        @id @db.Uuid
   status         member_status @default(ACTIVE)
-  expertise_area String?       @db.VarChar
+  expertise_area String?
   max_mentees    Int?
   created_at     DateTime      @default(now()) @db.Timestamptz(6)
   updated_at     DateTime      @updatedAt @db.Timestamptz(6)
@@ -162,7 +188,7 @@ model mentorships {
   mentorship_id                                    String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   mentor_id                                        String             @db.Uuid
   mentee_id                                        String             @db.Uuid
-  program_type                                     String?            @db.VarChar
+  program_type                                     String?
   status                                           engagement_status? @default(ACTIVE)
   start_date                                       DateTime?          @db.Date
   end_date                                         DateTime?          @db.Date
@@ -189,6 +215,7 @@ model officer_assignments {
   officer_roles officer_roles @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
   volunteers    volunteers    @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@unique([volunteer_id, role_id, chapter_id])
   @@index([volunteer_id])
   @@index([role_id])
   @@index([chapter_id])
@@ -196,7 +223,7 @@ model officer_assignments {
 
 model officer_roles {
   role_id             String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                String                @unique @db.VarChar
+  name                String                @unique
   scope               role_scope?
   rank_level          Int?
   created_at          DateTime              @default(now()) @db.Timestamptz(6)
@@ -206,12 +233,12 @@ model officer_roles {
 
 model partners {
   partner_id            String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  legal_name            String                @db.VarChar
+  legal_name            String
   mission_statement     String?
-  website_url           String?               @db.VarChar
-  pcs_organization_type String?               @db.VarChar
-  pcs_subject           String?               @db.VarChar
-  pcs_population        String?               @db.VarChar
+  website_url           String?
+  pcs_organization_type String?
+  pcs_subject           String?
+  pcs_population        String?
   created_at            DateTime              @default(now()) @db.Timestamptz(6)
   updated_at            DateTime              @updatedAt @db.Timestamptz(6)
   project_engagements   project_engagements[]
@@ -220,8 +247,8 @@ model partners {
 model project_deliverables {
   deliverable_id String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   project_id     String            @db.Uuid
-  label          String?           @db.VarChar
-  url            String?           @db.VarChar
+  label          String?
+  url            String?
   category       deliverable_type?
   created_at     DateTime          @default(now()) @db.Timestamptz(6)
   updated_at     DateTime          @updatedAt @db.Timestamptz(6)
@@ -257,7 +284,7 @@ model project_engagements {
 
 model project_roles {
   role_id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String             @db.VarChar
+  name             String             @unique
   is_leadership    Boolean?           @default(false)
   created_at       DateTime           @default(now()) @db.Timestamptz(6)
   updated_at       DateTime           @updatedAt @db.Timestamptz(6)
@@ -278,6 +305,7 @@ model project_staffing {
   project_roles       project_roles?      @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
   volunteers          volunteers          @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@unique([volunteer_id, engagement_id])
   @@index([volunteer_id])
   @@index([engagement_id])
   @@index([role_id])
@@ -287,7 +315,7 @@ model social_links {
   link_id        String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   constituent_id String                @db.Uuid
   platform       social_platform_type?
-  url            String                @db.VarChar
+  url            String
   is_featured    Boolean?              @default(false)
   created_at     DateTime              @default(now()) @db.Timestamptz(6)
   updated_at     DateTime              @updatedAt @db.Timestamptz(6)
@@ -298,8 +326,8 @@ model social_links {
 
 model universities {
   university_id  String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String           @db.VarChar
-  email_domain   String?          @db.VarChar
+  name           String
+  email_domain   String?
   location_id    String?          @db.Uuid
   created_at     DateTime         @default(now()) @db.Timestamptz(6)
   updated_at     DateTime         @updatedAt @db.Timestamptz(6)

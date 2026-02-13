@@ -3,7 +3,9 @@ export const locationSchemaString = `
     location_id: ID!
     name: String!
     address_line: String
+    city: String
     state_code: String
+    postal_code: String
     country_code: String
     created_at: String
     updated_at: String
@@ -17,14 +19,18 @@ export const locationSchemaString = `
   input CreateLocationInput {
     name: String!
     address_line: String
+    city: String
     state_code: String
+    postal_code: String
     country_code: String
   }
 
   input UpdateLocationInput {
     name: String
     address_line: String
+    city: String
     state_code: String
+    postal_code: String
     country_code: String
   }
 

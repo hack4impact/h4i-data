@@ -1,0 +1,474 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table chapters {
+  chapter_id String [pk]
+  name String [not null]
+  university_id String
+  location_id String
+  founded_date DateTime
+  status chapter_status [not null, default: 'ACTIVE']
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  locations locations
+  universities universities
+  officer_assignments officer_assignments [not null]
+  project_engagements project_engagements [not null]
+  volunteers volunteers [not null]
+}
+
+Table companies {
+  company_id String [pk]
+  name String [not null]
+  industry_id String
+  location_id String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  industries industries
+  locations locations
+  volunteers volunteers [not null]
+
+  Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table industries {
+  industry_id String [pk]
+  name String [unique, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  companies companies [not null]
+}
+
+Table locations {
+  location_id String [pk]
+  name String [not null]
+  address_line String
+  city String
+  state_code String
+  postal_code String
+  country_code String [default: 'USA']
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  chapters chapters [not null]
+  companies companies [not null]
+  universities universities [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table majors {
+  major_id String [pk]
+  name String [unique, not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  volunteers volunteers [not null]
+}
+
+Table projects {
+  project_id String [pk]
+  name String [not null]
+  github_url String
+  financial financial_type [default: 'PRO_BONO']
+  status project_status [not null, default: 'WORKING']
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  project_deliverables project_deliverables [not null]
+  project_engagements project_engagements [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table volunteer_history {
+  history_id String [pk]
+  volunteer_id String [not null]
+  action_type action_type [not null]
+  related_entity_id String
+  related_entity_type entity_type
+  previous_value_label String
+  new_value_label String
+  effective_date DateTime [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  volunteers volunteers [not null]
+
+  Note: 'This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table volunteers {
+  volunteer_id String [pk]
+  org_email String
+  status member_status [not null, default: 'ACTIVE']
+  volunteer_class volunteer_class [default: 'COLLEGIATE']
+  engagement_track engagement_track [default: 'PROGRAMS']
+  major_id String
+  education_level education_level
+  graduation_term_id String
+  university_id String
+  home_chapter_id String
+  employer_id String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  officer_assignments officer_assignments [not null]
+  project_staffing project_staffing [not null]
+  volunteer_history volunteer_history [not null]
+  companies companies
+  academic_terms academic_terms
+  chapters chapters
+  majors majors
+  universities universities
+  constituents constituents [not null]
+
+  Note: 'This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.'
+}
+
+Table academic_terms {
+  term_id String [pk]
+  university_id String
+  name String [not null]
+  canonical_label String
+  type term_type
+  start_date DateTime
+  end_date DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  universities universities
+  project_engagements project_engagements [not null]
+  volunteers volunteers [not null]
+}
+
+Table constituents {
+  constituent_id String [pk]
+  first_name String [not null]
+  last_name String [not null]
+  primary_email String [unique, not null]
+  phone_number String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  mentorships_mentee mentorships [not null]
+  mentors mentors
+  project_engagements project_engagements [not null]
+  social_links social_links [not null]
+  volunteers volunteers
+}
+
+Table mentors {
+  mentor_id String [pk]
+  status member_status [not null, default: 'ACTIVE']
+  expertise_area String
+  max_mentees Int
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  constituents constituents [not null]
+  mentorships mentorships [not null]
+}
+
+Table mentorships {
+  mentorship_id String [pk]
+  mentor_id String [not null]
+  mentee_id String [not null]
+  program_type String
+  status engagement_status [default: 'ACTIVE']
+  start_date DateTime
+  end_date DateTime
+  notes String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  constituents_mentorships_mentee_idToconstituents constituents [not null]
+  mentors mentors [not null]
+}
+
+Table officer_assignments {
+  assignment_id String [pk]
+  volunteer_id String [not null]
+  role_id String [not null]
+  chapter_id String [not null]
+  start_date DateTime
+  end_date DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  chapters chapters [not null]
+  officer_roles officer_roles [not null]
+  volunteers volunteers [not null]
+
+  indexes {
+    (volunteer_id, role_id, chapter_id) [unique]
+  }
+}
+
+Table officer_roles {
+  role_id String [pk]
+  name String [unique, not null]
+  scope role_scope
+  rank_level Int
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  officer_assignments officer_assignments [not null]
+}
+
+Table partners {
+  partner_id String [pk]
+  legal_name String [not null]
+  mission_statement String
+  website_url String
+  pcs_organization_type String
+  pcs_subject String
+  pcs_population String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  project_engagements project_engagements [not null]
+}
+
+Table project_deliverables {
+  deliverable_id String [pk]
+  project_id String [not null]
+  label String
+  url String
+  category deliverable_type
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  projects projects [not null]
+}
+
+Table project_engagements {
+  engagement_id String [pk]
+  project_id String [not null]
+  partner_id String
+  chapter_id String
+  academic_term_id String
+  client_contact_id String
+  status engagement_status [default: 'ACTIVE']
+  domain domain_type [default: 'FULL_STACK']
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  academic_terms academic_terms
+  chapters chapters
+  constituents constituents
+  partners partners
+  projects projects [not null]
+  project_staffing project_staffing [not null]
+}
+
+Table project_roles {
+  role_id String [pk]
+  name String [unique, not null]
+  is_leadership Boolean [default: false]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  project_staffing project_staffing [not null]
+}
+
+Table project_staffing {
+  staffing_id String [pk]
+  volunteer_id String [not null]
+  engagement_id String [not null]
+  role_id String
+  is_lead_contact Boolean [default: false]
+  start_date DateTime
+  end_date DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  project_engagements project_engagements [not null]
+  project_roles project_roles
+  volunteers volunteers [not null]
+
+  indexes {
+    (volunteer_id, engagement_id) [unique]
+  }
+}
+
+Table social_links {
+  link_id String [pk]
+  constituent_id String [not null]
+  platform social_platform_type
+  url String [not null]
+  is_featured Boolean [default: false]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  constituents constituents [not null]
+}
+
+Table universities {
+  university_id String [pk]
+  name String [not null]
+  email_domain String
+  location_id String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  academic_terms academic_terms [not null]
+  chapters chapters [not null]
+  locations locations
+  volunteers volunteers [not null]
+}
+
+Enum action_type {
+  JOINED
+  LEFT
+  ON_HIATUS
+  ENROLLED
+  PROMOTED
+  DEMOTED
+  ROLE_CHANGE
+  GRADUATED
+  RESIGNED
+  HIATUS
+}
+
+Enum deliverable_type {
+  REPO
+  DESIGN_SPEC
+  LIVE_URL
+  DOCUMENTATION
+}
+
+Enum domain_type {
+  DESIGN_ONLY
+  DEVELOP_ONLY
+  FULL_STACK
+  STRATEGY_CONSULT
+  MAINTENANCE
+}
+
+Enum education_level {
+  UNDERGRADUATE
+  GRADUATE
+  BOOTCAMP
+  SELF_TAUGHT
+  OTHER
+}
+
+Enum engagement_status {
+  PROSPECT
+  ACTIVE
+  COMPLETED
+  ON_HOLD
+}
+
+Enum engagement_track {
+  PROGRAMS
+  CENTRAL
+  ADVISORY
+}
+
+Enum financial_type {
+  PRO_BONO
+  INTERNAL
+  PAID_CONSULT
+}
+
+Enum role_scope {
+  CHAPTER
+  CENTRAL
+}
+
+Enum social_platform_type {
+  GITHUB
+  LINKEDIN
+  PORTFOLIO
+  TWITTER
+  DRIBBBLE
+  OTHER
+}
+
+Enum term_type {
+  SEMESTER
+  QUARTER
+  TRIMESTER
+}
+
+Enum volunteer_class {
+  COLLEGIATE
+  ALUMNI
+  ASSOCIATE
+}
+
+Enum member_status {
+  PROSPECT
+  ACTIVE
+  INACTIVE
+  ON_HIATUS
+}
+
+Enum chapter_status {
+  PROSPECT
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+Enum project_status {
+  WORKING
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+Enum entity_type {
+  CHAPTER
+  OFFICER_ROLE
+  PROJECT
+  PROJECT_ROLE
+  ENGAGEMENT
+  UNIVERSITY
+  COMPANY
+}
+
+Ref: chapters.location_id > locations.location_id [delete: No Action]
+
+Ref: chapters.university_id > universities.university_id [delete: No Action]
+
+Ref: companies.industry_id > industries.industry_id [delete: No Action]
+
+Ref: companies.location_id > locations.location_id [delete: No Action]
+
+Ref: volunteer_history.volunteer_id > volunteers.volunteer_id [delete: Cascade]
+
+Ref: volunteers.employer_id > companies.company_id [delete: No Action]
+
+Ref: volunteers.graduation_term_id > academic_terms.term_id [delete: No Action]
+
+Ref: volunteers.home_chapter_id > chapters.chapter_id [delete: No Action]
+
+Ref: volunteers.major_id > majors.major_id [delete: No Action]
+
+Ref: volunteers.university_id > universities.university_id [delete: No Action]
+
+Ref: volunteers.volunteer_id - constituents.constituent_id [delete: Cascade]
+
+Ref: academic_terms.university_id > universities.university_id [delete: No Action]
+
+Ref: mentors.mentor_id - constituents.constituent_id [delete: Cascade]
+
+Ref: mentorships.mentee_id > constituents.constituent_id [delete: No Action]
+
+Ref: mentorships.mentor_id > mentors.mentor_id [delete: Cascade]
+
+Ref: officer_assignments.chapter_id > chapters.chapter_id [delete: No Action]
+
+Ref: officer_assignments.role_id > officer_roles.role_id [delete: No Action]
+
+Ref: officer_assignments.volunteer_id > volunteers.volunteer_id [delete: No Action]
+
+Ref: project_deliverables.project_id > projects.project_id [delete: Cascade]
+
+Ref: project_engagements.academic_term_id > academic_terms.term_id [delete: No Action]
+
+Ref: project_engagements.chapter_id > chapters.chapter_id [delete: No Action]
+
+Ref: project_engagements.client_contact_id > constituents.constituent_id [delete: No Action]
+
+Ref: project_engagements.partner_id > partners.partner_id [delete: No Action]
+
+Ref: project_engagements.project_id > projects.project_id [delete: No Action]
+
+Ref: project_staffing.engagement_id > project_engagements.engagement_id [delete: No Action]
+
+Ref: project_staffing.role_id > project_roles.role_id [delete: No Action]
+
+Ref: project_staffing.volunteer_id > volunteers.volunteer_id [delete: No Action]
+
+Ref: social_links.constituent_id > constituents.constituent_id [delete: Cascade]
+
+Ref: universities.location_id > locations.location_id [delete: No Action]

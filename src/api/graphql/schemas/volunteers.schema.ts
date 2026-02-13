@@ -32,7 +32,7 @@ export const volunteerSchemaString = `
     status: MemberStatus
     volunteer_class: VolunteerClass
     engagement_track: EngagementTrack
-    major: String
+    major_id: ID
     education_level: EducationLevel
     graduation_term_id: ID
     university_id: ID
@@ -54,7 +54,7 @@ export const volunteerSchemaString = `
     status: MemberStatus
     volunteer_class: VolunteerClass
     engagement_track: EngagementTrack
-    major: String
+    major_id: ID
     education_level: EducationLevel
     graduation_term_id: ID
     university_id: ID
@@ -67,7 +67,7 @@ export const volunteerSchemaString = `
     status: MemberStatus
     volunteer_class: VolunteerClass
     engagement_track: EngagementTrack
-    major: String
+    major_id: ID
     education_level: EducationLevel
     graduation_term_id: ID
     university_id: ID

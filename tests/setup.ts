@@ -59,6 +59,8 @@ beforeEach(async () => {
       await prisma.partners.deleteMany({});
       await prisma.constituents.deleteMany({});
       await prisma.companies.deleteMany({});
+      await prisma.majors.deleteMany({});
+      await prisma.industries.deleteMany({});
       await prisma.locations.deleteMany({});
     }
   } catch (error) {

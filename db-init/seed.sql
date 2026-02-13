@@ -27,10 +27,12 @@ CREATE TYPE public.entity_type AS ENUM ('CHAPTER', 'OFFICER_ROLE', 'PROJECT', 'P
 -- Tables with no or few dependencies
 CREATE TABLE public.locations (
     location_id uuid NOT NULL DEFAULT gen_random_uuid(),
-    name varchar NOT NULL,
-    address_line varchar NULL,
-    state_code varchar(2) NULL,
-    country_code varchar(3) NULL DEFAULT 'USA',
+    name text NOT NULL,
+    address_line text NULL,
+    city text NULL,
+    state_code text NULL,
+    postal_code text NULL,
+    country_code text NULL DEFAULT 'USA',
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
     PRIMARY KEY (location_id)
@@ -38,10 +40,10 @@ CREATE TABLE public.locations (
 
 CREATE TABLE public.constituents (
     constituent_id uuid NOT NULL DEFAULT gen_random_uuid(),
-    first_name varchar NOT NULL,
-    last_name varchar NOT NULL,
-    primary_email varchar NOT NULL,
-    phone_number varchar NULL,
+    first_name text NOT NULL,
+    last_name text NOT NULL,
+    primary_email text NOT NULL,
+    phone_number text NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
     PRIMARY KEY (constituent_id),
@@ -50,8 +52,8 @@ CREATE TABLE public.constituents (
 
 CREATE TABLE public.projects (
     project_id uuid NOT NULL DEFAULT gen_random_uuid(),
-    name varchar NOT NULL,
-    github_url varchar NULL,
+    name text NOT NULL,
+    github_url text NULL,
     financial financial_type NULL DEFAULT 'PRO_BONO',
     status project_status NOT NULL DEFAULT 'WORKING',
     created_at timestamptz(6) NOT NULL DEFAULT now(),
@@ -61,7 +63,7 @@ CREATE TABLE public.projects (
 
 CREATE TABLE public.officer_roles (
     role_id uuid NOT NULL DEFAULT gen_random_uuid(),
-    name varchar NOT NULL,
+    name text NOT NULL,
     scope role_scope NULL,
     rank_level int NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
@@ -72,31 +74,50 @@ CREATE TABLE public.officer_roles (
 
 CREATE TABLE public.project_roles (
     role_id uuid NOT NULL DEFAULT gen_random_uuid(),
-    name varchar NOT NULL,
+    name text NOT NULL,
     is_leadership boolean NULL DEFAULT false,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (role_id)
+    PRIMARY KEY (role_id),
+    UNIQUE (name)
 );
 
 CREATE TABLE public.partners (
     partner_id uuid NOT NULL DEFAULT gen_random_uuid(),
-    legal_name varchar NOT NULL,
+    legal_name text NOT NULL,
     mission_statement text NULL,
-    website_url varchar NULL,
-    pcs_organization_type varchar NULL,
-    pcs_subject varchar NULL,
-    pcs_population varchar NULL,
+    website_url text NULL,
+    pcs_organization_type text NULL,
+    pcs_subject text NULL,
+    pcs_population text NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
     PRIMARY KEY (partner_id)
 );
 
+CREATE TABLE public.industries (
+    industry_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    name text NOT NULL,
+    created_at timestamptz(6) NOT NULL DEFAULT now(),
+    updated_at timestamptz(6) NOT NULL DEFAULT now(),
+    PRIMARY KEY (industry_id),
+    UNIQUE (name)
+);
+
+CREATE TABLE public.majors (
+    major_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    name text NOT NULL,
+    created_at timestamptz(6) NOT NULL DEFAULT now(),
+    updated_at timestamptz(6) NOT NULL DEFAULT now(),
+    PRIMARY KEY (major_id),
+    UNIQUE (name)
+);
+
 -- Tables with dependencies
 CREATE TABLE public.universities (
     university_id uuid NOT NULL DEFAULT gen_random_uuid(),
-    name varchar NOT NULL,
-    email_domain varchar NULL,
+    name text NOT NULL,
+    email_domain text NULL,
     location_id uuid NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
@@ -107,21 +128,23 @@ CREATE INDEX idx_universities_location_id ON public.universities(location_id);
 
 CREATE TABLE public.companies (
     company_id uuid NOT NULL DEFAULT gen_random_uuid(),
-    name varchar NOT NULL,
-    industry varchar NULL,
+    name text NOT NULL,
+    industry_id uuid NULL,
     location_id uuid NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
     PRIMARY KEY (company_id),
+    FOREIGN KEY (industry_id) REFERENCES public.industries(industry_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (location_id) REFERENCES public.locations(location_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 );
+CREATE INDEX idx_companies_industry_id ON public.companies(industry_id);
 CREATE INDEX idx_companies_location_id ON public.companies(location_id);
 
 CREATE TABLE public.academic_terms (
     term_id uuid NOT NULL DEFAULT gen_random_uuid(),
     university_id uuid NULL,
-    name varchar NOT NULL,
-    canonical_label varchar NULL,
+    name text NOT NULL,
+    canonical_label text NULL,
     type term_type NULL,
     start_date date NULL,
     end_date date NULL,
@@ -134,7 +157,7 @@ CREATE INDEX idx_academic_terms_university_id ON public.academic_terms(universit
 
 CREATE TABLE public.chapters (
     chapter_id uuid NOT NULL DEFAULT gen_random_uuid(),
-    name varchar NOT NULL,
+    name text NOT NULL,
     university_id uuid NULL,
     location_id uuid NULL,
     founded_date date NULL,
@@ -152,7 +175,7 @@ CREATE TABLE public.social_links (
     link_id uuid NOT NULL DEFAULT gen_random_uuid(),
     constituent_id uuid NOT NULL,
     platform social_platform_type NULL,
-    url varchar NOT NULL,
+    url text NOT NULL,
     is_featured boolean NULL DEFAULT false,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
@@ -164,7 +187,7 @@ CREATE INDEX idx_social_links_constituent_id ON public.social_links(constituent_
 CREATE TABLE public.mentors (
     mentor_id uuid NOT NULL,
     status member_status NOT NULL DEFAULT 'ACTIVE',
-    expertise_area varchar NULL,
+    expertise_area text NULL,
     max_mentees int NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
@@ -174,11 +197,11 @@ CREATE TABLE public.mentors (
 
 CREATE TABLE public.volunteers (
     volunteer_id uuid NOT NULL,
-    org_email varchar NULL,
+    org_email text NULL,
     status member_status NOT NULL DEFAULT 'ACTIVE',
     volunteer_class volunteer_class NULL DEFAULT 'COLLEGIATE',
     engagement_track engagement_track NULL DEFAULT 'PROGRAMS',
-    major varchar NULL,
+    major_id uuid NULL,
     education_level education_level NULL,
     graduation_term_id uuid NULL,
     university_id uuid NULL,
@@ -191,8 +214,10 @@ CREATE TABLE public.volunteers (
     FOREIGN KEY (employer_id) REFERENCES public.companies(company_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (graduation_term_id) REFERENCES public.academic_terms(term_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (home_chapter_id) REFERENCES public.chapters(chapter_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (major_id) REFERENCES public.majors(major_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (university_id) REFERENCES public.universities(university_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 );
+CREATE INDEX idx_volunteers_major_id ON public.volunteers(major_id);
 CREATE INDEX idx_volunteers_graduation_term_id ON public.volunteers(graduation_term_id);
 CREATE INDEX idx_volunteers_university_id ON public.volunteers(university_id);
 CREATE INDEX idx_volunteers_home_chapter_id ON public.volunteers(home_chapter_id);
@@ -202,7 +227,7 @@ CREATE TABLE public.mentorships (
     mentorship_id uuid NOT NULL DEFAULT gen_random_uuid(),
     mentor_id uuid NOT NULL,
     mentee_id uuid NOT NULL,
-    program_type varchar NULL,
+    program_type text NULL,
     status engagement_status NULL DEFAULT 'ACTIVE',
     start_date date NULL,
     end_date date NULL,
@@ -219,8 +244,8 @@ CREATE INDEX idx_mentorships_mentee_id ON public.mentorships(mentee_id);
 CREATE TABLE public.project_deliverables (
     deliverable_id uuid NOT NULL DEFAULT gen_random_uuid(),
     project_id uuid NOT NULL,
-    label varchar NULL,
-    url varchar NULL,
+    label text NULL,
+    url text NULL,
     category deliverable_type NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
@@ -265,7 +290,8 @@ CREATE TABLE public.officer_assignments (
     PRIMARY KEY (assignment_id),
     FOREIGN KEY (volunteer_id) REFERENCES public.volunteers(volunteer_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (role_id) REFERENCES public.officer_roles(role_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-    FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+    FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    UNIQUE (volunteer_id, role_id, chapter_id)
 );
 CREATE INDEX idx_officer_assignments_volunteer_id ON public.officer_assignments(volunteer_id);
 CREATE INDEX idx_officer_assignments_role_id ON public.officer_assignments(role_id);
@@ -284,7 +310,8 @@ CREATE TABLE public.project_staffing (
     PRIMARY KEY (staffing_id),
     FOREIGN KEY (volunteer_id) REFERENCES public.volunteers(volunteer_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (engagement_id) REFERENCES public.project_engagements(engagement_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-    FOREIGN KEY (role_id) REFERENCES public.project_roles(role_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+    FOREIGN KEY (role_id) REFERENCES public.project_roles(role_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    UNIQUE (volunteer_id, engagement_id)
 );
 CREATE INDEX idx_project_staffing_volunteer_id ON public.project_staffing(volunteer_id);
 CREATE INDEX idx_project_staffing_engagement_id ON public.project_staffing(engagement_id);
@@ -296,8 +323,8 @@ CREATE TABLE public.volunteer_history (
     action_type action_type NOT NULL,
     related_entity_id uuid NULL,
     related_entity_type entity_type NULL,
-    previous_value_label varchar NULL,
-    new_value_label varchar NULL,
+    previous_value_label text NULL,
+    new_value_label text NULL,
     effective_date date NOT NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),

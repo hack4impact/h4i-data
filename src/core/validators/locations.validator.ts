@@ -6,10 +6,12 @@ export const createLocationSchema = z.object({
     .string()
     .min(3, 'Address line must be at least 3 characters long')
     .optional(),
+  city: z.string().optional(),
   state_code: z
     .string()
     .length(2, 'State code must be exactly 2 characters')
     .optional(),
+  postal_code: z.string().optional(),
   country_code: z
     .string()
     .length(3, 'Country code must be exactly 3 characters')
