@@ -7,6 +7,7 @@ import { partnerResolvers } from './resolvers/partners.resolvers';
 import { projectResolvers } from './resolvers/projects.resolvers';
 import { officerRoleResolvers } from './resolvers/officer-roles.resolvers';
 import { volunteerResolvers } from './resolvers/volunteers.resolvers';
+import { mentorResolvers } from './resolvers/mentors.resolvers';
 
 // Supporting Entity Resolvers
 import { universityResolvers } from './resolvers/universities.resolvers';
@@ -34,6 +35,7 @@ export const resolvers = {
     ...projectResolvers.Query,
     ...officerRoleResolvers.Query,
     ...volunteerResolvers.Query,
+    ...mentorResolvers.Query,
 
     // Supporting Entities
     ...universityResolvers.Query,
@@ -59,6 +61,7 @@ export const resolvers = {
     ...projectResolvers.Mutation,
     ...officerRoleResolvers.Mutation,
     ...volunteerResolvers.Mutation,
+    ...mentorResolvers.Mutation,
 
     // Supporting Entities
     ...universityResolvers.Mutation,
@@ -77,5 +80,8 @@ export const resolvers = {
   // Type Resolvers
   ...(volunteerResolvers.Volunteer && {
     Volunteer: volunteerResolvers.Volunteer,
+  }),
+  ...(mentorResolvers.Mentor && {
+    Mentor: mentorResolvers.Mentor,
   }),
 };

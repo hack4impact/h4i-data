@@ -9,14 +9,27 @@ export const volunteerHistorySchemaString = `
     HIATUS
   }
 
+  enum EntityType {
+    CHAPTER
+    OFFICER_ROLE
+    PROJECT
+    PROJECT_ROLE
+    ENGAGEMENT
+    UNIVERSITY
+    COMPANY
+  }
+
   type VolunteerHistory {
     history_id: ID!
-    volunteer_id: ID
-    action_type: ActionType
+    volunteer_id: ID!
+    action_type: ActionType!
     related_entity_id: ID
+    related_entity_type: EntityType
     previous_value_label: String
     new_value_label: String
-    effective_date: String
+    effective_date: String!
+    created_at: String
+    updated_at: String
   }
 
   type Query {
@@ -25,12 +38,12 @@ export const volunteerHistorySchemaString = `
   }
 
   input CreateVolunteerHistoryInput {
-    volunteer_id: ID
-    action_type: ActionType
+    volunteer_id: ID!
+    action_type: ActionType!
     related_entity_id: ID
     previous_value_label: String
     new_value_label: String
-    effective_date: String
+    effective_date: String!
   }
 
   input UpdateVolunteerHistoryInput {

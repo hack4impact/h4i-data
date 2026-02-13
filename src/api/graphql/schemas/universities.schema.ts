@@ -1,9 +1,11 @@
 export const universitySchemaString = `
   type University {
     university_id: ID!
-    name: String
+    name: String!
     email_domain: String
     location_id: ID
+    created_at: String
+    updated_at: String
   }
 
   type Query {
@@ -12,7 +14,7 @@ export const universitySchemaString = `
   }
 
   input CreateUniversityInput {
-    name: String
+    name: String!
     email_domain: String
     location_id: ID
   }

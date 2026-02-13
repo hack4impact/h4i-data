@@ -8,10 +8,12 @@ export const projectDeliverableSchemaString = `
 
   type ProjectDeliverable {
     deliverable_id: ID!
-    project_id: ID
+    project_id: ID!
     label: String
     url: String
     category: DeliverableType
+    created_at: String
+    updated_at: String
   }
 
   type Query {
@@ -20,7 +22,7 @@ export const projectDeliverableSchemaString = `
   }
 
   input CreateProjectDeliverableInput {
-    project_id: ID
+    project_id: ID!
     label: String
     url: String
     category: DeliverableType

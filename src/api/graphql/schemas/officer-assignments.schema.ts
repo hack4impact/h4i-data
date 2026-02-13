@@ -1,11 +1,13 @@
 export const officerAssignmentSchemaString = `
   type OfficerAssignment {
     assignment_id: ID!
-    volunteer_id: ID
-    role_id: ID
-    chapter_id: ID
+    volunteer_id: ID!
+    role_id: ID!
+    chapter_id: ID!
     start_date: String
     end_date: String
+    created_at: String
+    updated_at: String
   }
 
   type Query {
@@ -14,9 +16,9 @@ export const officerAssignmentSchemaString = `
   }
 
   input CreateOfficerAssignmentInput {
-    volunteer_id: ID
-    role_id: ID
-    chapter_id: ID
+    volunteer_id: ID!
+    role_id: ID!
+    chapter_id: ID!
     start_date: String
     end_date: String
   }

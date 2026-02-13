@@ -8,13 +8,15 @@ export const mentorshipSchemaString = `
 
   type Mentorship {
     mentorship_id: ID!
-    mentor_id: ID
-    mentee_id: ID
+    mentor_id: ID!
+    mentee_id: ID!
     program_type: String
     status: EngagementStatus
     start_date: String
     end_date: String
     notes: String
+    created_at: String
+    updated_at: String
   }
 
   type Query {
@@ -23,8 +25,8 @@ export const mentorshipSchemaString = `
   }
 
   input CreateMentorshipInput {
-    mentor_id: ID
-    mentee_id: ID
+    mentor_id: ID!
+    mentee_id: ID!
     program_type: String
     status: EngagementStatus
     start_date: String

@@ -35,6 +35,8 @@ describe('Project Staffing Service', () => {
           is_lead_contact: true,
           start_date: new Date('2024-01-15'),
           end_date: null,
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.project_staffing.findMany as jest.Mock).mockResolvedValue(
@@ -59,6 +61,8 @@ describe('Project Staffing Service', () => {
         is_lead_contact: true,
         start_date: new Date('2024-01-15'),
         end_date: null,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.project_staffing.findUnique as jest.Mock).mockResolvedValue(
         mockStaffing
@@ -94,6 +98,8 @@ describe('Project Staffing Service', () => {
       const createdStaffing = {
         staffing_id: 'new-id-123',
         end_date: null,
+        created_at: new Date(),
+        updated_at: new Date(),
         ...inputData,
       };
       (prisma.project_staffing.create as jest.Mock).mockResolvedValue(
@@ -121,6 +127,8 @@ describe('Project Staffing Service', () => {
         is_lead_contact: false,
         start_date: new Date('2024-01-15'),
         end_date: null,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.project_staffing.update as jest.Mock).mockResolvedValue(
         updatedStaffing
@@ -147,6 +155,8 @@ describe('Project Staffing Service', () => {
         is_lead_contact: true,
         start_date: new Date('2024-01-15'),
         end_date: null,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.project_staffing.delete as jest.Mock).mockResolvedValue(
         deletedStaffing

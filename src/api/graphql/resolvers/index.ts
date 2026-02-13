@@ -7,6 +7,7 @@ export * from './partners.resolvers';
 export * from './projects.resolvers';
 export * from './officer-roles.resolvers';
 export * from './volunteers.resolvers';
+export * from './mentors.resolvers';
 
 // Supporting Entity Resolvers
 export * from './universities.resolvers';

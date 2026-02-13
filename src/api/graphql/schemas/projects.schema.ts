@@ -5,11 +5,19 @@ export const projectSchemaString = `
     PAID_CONSULT
   }
 
+  enum ProjectStatus {
+    WORKING
+    ACTIVE
+    INACTIVE
+    ARCHIVED
+  }
+
   type Project {
     project_id: ID!
-    name: String
+    name: String!
     github_url: String
     financial: FinancialType
+    status: ProjectStatus
     created_at: String
     updated_at: String
   }
@@ -23,12 +31,14 @@ export const projectSchemaString = `
     name: String!
     github_url: String
     financial: FinancialType
+    status: ProjectStatus
   }
 
   input UpdateProjectInput {
     name: String
     github_url: String
     financial: FinancialType
+    status: ProjectStatus
   }
 
   type Mutation {

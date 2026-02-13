@@ -36,6 +36,8 @@ describe('Mentorship Service', () => {
           start_date: new Date('2024-01-15'),
           end_date: null,
           notes: 'Regular check-ins scheduled',
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.mentorships.findMany as jest.Mock).mockResolvedValue(
@@ -61,6 +63,8 @@ describe('Mentorship Service', () => {
         start_date: new Date('2024-01-15'),
         end_date: null,
         notes: 'Regular check-ins scheduled',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.mentorships.findUnique as jest.Mock).mockResolvedValue(
         mockMentorship
@@ -97,6 +101,8 @@ describe('Mentorship Service', () => {
         mentorship_id: 'new-id-123',
         end_date: null,
         notes: null,
+        created_at: new Date(),
+        updated_at: new Date(),
         ...inputData,
       };
       (prisma.mentorships.create as jest.Mock).mockResolvedValue(
@@ -125,6 +131,8 @@ describe('Mentorship Service', () => {
         start_date: new Date('2024-01-15'),
         end_date: null,
         notes: 'Regular check-ins scheduled',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.mentorships.update as jest.Mock).mockResolvedValue(
         updatedMentorship
@@ -152,6 +160,8 @@ describe('Mentorship Service', () => {
         start_date: new Date('2024-01-15'),
         end_date: null,
         notes: 'Regular check-ins scheduled',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.mentorships.delete as jest.Mock).mockResolvedValue(
         deletedMentorship

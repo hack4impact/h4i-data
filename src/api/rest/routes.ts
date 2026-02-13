@@ -12,6 +12,7 @@ router.use('/partners', featureRoutes.partnerRoutes);
 router.use('/projects', featureRoutes.projectRoutes);
 router.use('/officer-roles', featureRoutes.officerRoleRoutes);
 router.use('/volunteers', featureRoutes.volunteerRoutes);
+router.use('/mentors', featureRoutes.mentorRoutes);
 
 // Supporting Entity Routes
 router.use('/universities', featureRoutes.universityRoutes);

@@ -7,6 +7,7 @@ import { partnerSchemaString } from './schemas/partners.schema';
 import { projectSchemaString } from './schemas/projects.schema';
 import { officerRoleSchemaString } from './schemas/officer-roles.schema';
 import { volunteerSchemaString } from './schemas/volunteers.schema';
+import { mentorSchemaString } from './schemas/mentors.schema';
 
 // Supporting Entity Schemas
 import { universitySchemaString } from './schemas/universities.schema';
@@ -33,6 +34,7 @@ export const typeDefs = [
   projectSchemaString,
   officerRoleSchemaString,
   volunteerSchemaString,
+  mentorSchemaString,
 
   // Supporting Entities
   universitySchemaString,

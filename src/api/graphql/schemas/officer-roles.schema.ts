@@ -6,9 +6,11 @@ export const officerRoleSchemaString = `
 
   type OfficerRole {
     role_id: ID!
-    name: String
+    name: String!
     scope: RoleScope
     rank_level: Int
+    created_at: String
+    updated_at: String
   }
 
   type Query {

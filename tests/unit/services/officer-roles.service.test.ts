@@ -32,6 +32,8 @@ describe('Officer Role Service', () => {
           name: 'President',
           scope: 'CHAPTER',
           rank_level: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.officer_roles.findMany as jest.Mock).mockResolvedValue(mockRoles);
@@ -51,6 +53,8 @@ describe('Officer Role Service', () => {
         name: 'President',
         scope: 'CHAPTER',
         rank_level: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.officer_roles.findUnique as jest.Mock).mockResolvedValue(
         mockRole
@@ -83,6 +87,8 @@ describe('Officer Role Service', () => {
       };
       const createdRole = {
         role_id: 'new-id-123',
+        created_at: new Date(),
+        updated_at: new Date(),
         ...inputData,
       };
       (prisma.officer_roles.create as jest.Mock).mockResolvedValue(createdRole);
@@ -105,6 +111,8 @@ describe('Officer Role Service', () => {
         name: 'Updated President',
         scope: 'CHAPTER',
         rank_level: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.officer_roles.update as jest.Mock).mockResolvedValue(updatedRole);
 
@@ -126,6 +134,8 @@ describe('Officer Role Service', () => {
         name: 'President',
         scope: 'CHAPTER',
         rank_level: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.officer_roles.delete as jest.Mock).mockResolvedValue(deletedRole);
 

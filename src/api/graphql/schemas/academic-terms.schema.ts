@@ -8,11 +8,13 @@ export const academicTermSchemaString = `
   type AcademicTerm {
     term_id: ID!
     university_id: ID
-    name: String
+    name: String!
     canonical_label: String
     type: TermType
     start_date: String
     end_date: String
+    created_at: String
+    updated_at: String
   }
 
   type Query {
@@ -22,7 +24,7 @@ export const academicTermSchemaString = `
 
   input CreateAcademicTermInput {
     university_id: ID
-    name: String
+    name: String!
     canonical_label: String
     type: TermType
     start_date: String

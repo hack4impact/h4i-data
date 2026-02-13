@@ -7,6 +7,7 @@ export * from './partners.service';
 export * from './projects.service';
 export * from './officer-roles.service';
 export * from './volunteer.service';
+export * from './mentors.service';
 
 // Supporting Entity Services
 export * from './universities.service';

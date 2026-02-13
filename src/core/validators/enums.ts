@@ -2,6 +2,9 @@ import { z } from 'zod';
 
 // Action types for volunteer history
 export const actionTypeSchema = z.enum([
+  'JOINED',
+  'LEFT',
+  'ON_HIATUS',
   'ENROLLED',
   'PROMOTED',
   'DEMOTED',
@@ -92,3 +95,42 @@ export const volunteerClassSchema = z.enum([
   'ASSOCIATE',
 ]);
 export type VolunteerClass = z.infer<typeof volunteerClassSchema>;
+
+// Member status for volunteers and mentors
+export const memberStatusSchema = z.enum([
+  'PROSPECT',
+  'ACTIVE',
+  'INACTIVE',
+  'ON_HIATUS',
+]);
+export type MemberStatus = z.infer<typeof memberStatusSchema>;
+
+// Chapter status
+export const chapterStatusSchema = z.enum([
+  'PROSPECT',
+  'ACTIVE',
+  'INACTIVE',
+  'SUSPENDED',
+]);
+export type ChapterStatus = z.infer<typeof chapterStatusSchema>;
+
+// Project status
+export const projectStatusSchema = z.enum([
+  'WORKING',
+  'ACTIVE',
+  'INACTIVE',
+  'ARCHIVED',
+]);
+export type ProjectStatus = z.infer<typeof projectStatusSchema>;
+
+// Entity type discriminator for volunteer history
+export const entityTypeSchema = z.enum([
+  'CHAPTER',
+  'OFFICER_ROLE',
+  'PROJECT',
+  'PROJECT_ROLE',
+  'ENGAGEMENT',
+  'UNIVERSITY',
+  'COMPANY',
+]);
+export type EntityType = z.infer<typeof entityTypeSchema>;

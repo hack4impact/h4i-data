@@ -7,6 +7,7 @@ export * from './partners.controller';
 export * from './projects.controller';
 export * from './officer-roles.controller';
 export * from './volunteers.controller';
+export * from './mentors.controller';
 
 // Supporting Entity Controllers
 export * from './universities.controller';

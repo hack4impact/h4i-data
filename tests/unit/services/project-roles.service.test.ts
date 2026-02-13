@@ -31,6 +31,8 @@ describe('Project Role Service', () => {
           role_id: '1',
           name: 'Tech Lead',
           is_leadership: true,
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.project_roles.findMany as jest.Mock).mockResolvedValue(mockRoles);
@@ -49,6 +51,8 @@ describe('Project Role Service', () => {
         role_id: roleId,
         name: 'Tech Lead',
         is_leadership: true,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.project_roles.findUnique as jest.Mock).mockResolvedValue(
         mockRole
@@ -80,6 +84,8 @@ describe('Project Role Service', () => {
       };
       const createdRole = {
         role_id: 'new-id-123',
+        created_at: new Date(),
+        updated_at: new Date(),
         ...inputData,
       };
       (prisma.project_roles.create as jest.Mock).mockResolvedValue(createdRole);
@@ -101,6 +107,8 @@ describe('Project Role Service', () => {
         role_id: roleId,
         name: 'Senior Tech Lead',
         is_leadership: true,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.project_roles.update as jest.Mock).mockResolvedValue(updatedRole);
 
@@ -121,6 +129,8 @@ describe('Project Role Service', () => {
         role_id: roleId,
         name: 'Tech Lead',
         is_leadership: true,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.project_roles.delete as jest.Mock).mockResolvedValue(deletedRole);
 

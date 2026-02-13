@@ -9,7 +9,7 @@ export const projectEngagementSchemaString = `
 
   type ProjectEngagement {
     engagement_id: ID!
-    project_id: ID
+    project_id: ID!
     partner_id: ID
     chapter_id: ID
     academic_term_id: ID
@@ -26,7 +26,7 @@ export const projectEngagementSchemaString = `
   }
 
   input CreateProjectEngagementInput {
-    project_id: ID
+    project_id: ID!
     partner_id: ID
     chapter_id: ID
     academic_term_id: ID

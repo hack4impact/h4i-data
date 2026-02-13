@@ -33,6 +33,9 @@ describe('Chapter Service', () => {
           university_id: 'univ-1',
           location_id: null,
           founded_date: new Date('2025-01-15'),
+          status: 'ACTIVE',
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.chapters.findMany as jest.Mock).mockResolvedValue(mockChapters);
@@ -53,6 +56,9 @@ describe('Chapter Service', () => {
         university_id: 'univ-1',
         location_id: null,
         founded_date: new Date('2025-01-15'),
+        status: 'ACTIVE',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.chapters.findUnique as jest.Mock).mockResolvedValue(mockChapter);
 
@@ -87,6 +93,9 @@ describe('Chapter Service', () => {
         university_id: 'univ-1',
         location_id: null,
         founded_date: new Date('2025-08-30'),
+        status: 'ACTIVE',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.chapters.create as jest.Mock).mockResolvedValue(createdChapter);
 
@@ -107,6 +116,9 @@ describe('Chapter Service', () => {
         university_id: 'univ-1',
         location_id: null,
         founded_date: new Date('2025-01-15'),
+        status: 'ACTIVE',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.chapters.update as jest.Mock).mockResolvedValue(updatedChapter);
 
@@ -129,6 +141,9 @@ describe('Chapter Service', () => {
         university_id: 'univ-1',
         location_id: null,
         founded_date: new Date('2025-01-15'),
+        status: 'ACTIVE',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.chapters.delete as jest.Mock).mockResolvedValue(deletedChapter);
 

@@ -3,7 +3,7 @@ import { termTypeSchema } from './enums';
 
 export const createAcademicTermSchema = z.object({
   university_id: z.uuid().optional(),
-  name: z.string().optional(),
+  name: z.string().min(1, 'Name is required'),
   canonical_label: z.string().optional(),
   type: termTypeSchema.optional(),
   start_date: z.coerce.date().optional(),

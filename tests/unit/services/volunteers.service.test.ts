@@ -33,7 +33,7 @@ describe('Volunteer Service', () => {
         {
           volunteer_id: 'const-1',
           org_email: 'john@org.edu',
-          active_status: true,
+          status: 'ACTIVE',
           volunteer_class: 'COLLEGIATE',
           engagement_track: 'PROGRAMS',
           major: 'Computer Science',
@@ -75,7 +75,7 @@ describe('Volunteer Service', () => {
       const mockVolunteer = {
         volunteer_id: volunteerId,
         org_email: 'john@org.edu',
-        active_status: true,
+        status: 'ACTIVE',
         volunteer_class: 'COLLEGIATE',
         engagement_track: 'PROGRAMS',
         major: 'Computer Science',
@@ -125,7 +125,7 @@ describe('Volunteer Service', () => {
       const inputData = {
         volunteer_id: constituentId,
         org_email: 'jane@org.edu',
-        active_status: true,
+        status: 'ACTIVE' as const,
         volunteer_class: 'COLLEGIATE' as const,
         engagement_track: 'PROGRAMS' as const,
         major: 'Design',
@@ -176,7 +176,7 @@ describe('Volunteer Service', () => {
       const inputData = {
         volunteer_id: 'non-existent-const',
         org_email: 'test@org.edu',
-        active_status: true,
+        status: 'ACTIVE' as const,
         volunteer_class: 'COLLEGIATE' as const,
         engagement_track: 'PROGRAMS' as const,
       };
@@ -192,11 +192,11 @@ describe('Volunteer Service', () => {
   describe('updateVolunteer', () => {
     it('should update and return the volunteer', async () => {
       const volunteerId = 'const-1';
-      const updateData = { active_status: false };
+      const updateData = { status: 'INACTIVE' as const };
       const updatedVolunteer = {
         volunteer_id: volunteerId,
         org_email: 'john@org.edu',
-        active_status: false,
+        status: 'INACTIVE',
         volunteer_class: 'COLLEGIATE',
         engagement_track: 'PROGRAMS',
         major: 'Computer Science',
@@ -238,7 +238,7 @@ describe('Volunteer Service', () => {
       const deletedVolunteer = {
         volunteer_id: volunteerId,
         org_email: 'john@org.edu',
-        active_status: true,
+        status: 'ACTIVE',
         volunteer_class: 'COLLEGIATE',
         engagement_track: 'PROGRAMS',
         major: 'Computer Science',

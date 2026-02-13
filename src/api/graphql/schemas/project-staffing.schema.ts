@@ -1,12 +1,14 @@
 export const projectStaffingSchemaString = `
   type ProjectStaffing {
     staffing_id: ID!
-    volunteer_id: ID
-    engagement_id: ID
+    volunteer_id: ID!
+    engagement_id: ID!
     role_id: ID
     is_lead_contact: Boolean
     start_date: String
     end_date: String
+    created_at: String
+    updated_at: String
   }
 
   type Query {
@@ -15,8 +17,8 @@ export const projectStaffingSchemaString = `
   }
 
   input CreateProjectStaffingInput {
-    volunteer_id: ID
-    engagement_id: ID
+    volunteer_id: ID!
+    engagement_id: ID!
     role_id: ID
     is_lead_contact: Boolean
     start_date: String

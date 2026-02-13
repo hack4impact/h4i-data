@@ -32,6 +32,7 @@ describe('Project Service', () => {
           name: 'Test Project 1',
           github_url: 'https://github.com/org/repo',
           financial: 'PRO_BONO',
+          status: 'WORKING',
           created_at: new Date(),
           updated_at: new Date(),
         },
@@ -53,6 +54,7 @@ describe('Project Service', () => {
         name: 'Test Project 1',
         github_url: 'https://github.com/org/repo',
         financial: 'PRO_BONO',
+        status: 'WORKING',
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -88,6 +90,7 @@ describe('Project Service', () => {
         name: 'New Project',
         github_url: 'https://github.com/org/new-repo',
         financial: 'PRO_BONO',
+        status: 'WORKING',
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -109,6 +112,7 @@ describe('Project Service', () => {
         name: 'Updated Project Name',
         github_url: 'https://github.com/org/repo',
         financial: 'PRO_BONO',
+        status: 'WORKING',
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -132,6 +136,7 @@ describe('Project Service', () => {
         name: 'Deleted Project',
         github_url: 'https://github.com/org/repo',
         financial: 'PRO_BONO',
+        status: 'WORKING',
         created_at: new Date(),
         updated_at: new Date(),
       };

@@ -33,6 +33,8 @@ describe('Social Link Service', () => {
           platform: 'GITHUB',
           url: 'https://github.com/user',
           is_featured: true,
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.social_links.findMany as jest.Mock).mockResolvedValue(mockLinks);
@@ -53,6 +55,8 @@ describe('Social Link Service', () => {
         platform: 'GITHUB',
         url: 'https://github.com/user',
         is_featured: true,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.social_links.findUnique as jest.Mock).mockResolvedValue(mockLink);
 
@@ -84,6 +88,8 @@ describe('Social Link Service', () => {
       const createdLink = {
         link_id: 'new-id-123',
         constituent_id: null,
+        created_at: new Date(),
+        updated_at: new Date(),
         ...inputData,
       };
       (prisma.social_links.create as jest.Mock).mockResolvedValue(createdLink);
@@ -107,6 +113,8 @@ describe('Social Link Service', () => {
         platform: 'GITHUB',
         url: 'https://github.com/user',
         is_featured: false,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.social_links.update as jest.Mock).mockResolvedValue(updatedLink);
 
@@ -129,6 +137,8 @@ describe('Social Link Service', () => {
         platform: 'GITHUB',
         url: 'https://github.com/user',
         is_featured: true,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.social_links.delete as jest.Mock).mockResolvedValue(deletedLink);
 

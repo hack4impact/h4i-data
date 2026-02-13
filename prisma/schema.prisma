@@ -8,34 +8,47 @@ datasource db {
 
 model chapters {
   chapter_id          String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                String?               @db.VarChar
+  name                String                @db.VarChar
   university_id       String?               @db.Uuid
   location_id         String?               @db.Uuid
   founded_date        DateTime?             @db.Date
+  status              chapter_status        @default(ACTIVE)
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime              @updatedAt @db.Timestamptz(6)
   locations           locations?            @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
+  universities        universities?         @relation(fields: [university_id], references: [university_id], onDelete: NoAction, onUpdate: NoAction)
   officer_assignments officer_assignments[]
   project_engagements project_engagements[]
   volunteers          volunteers[]
+
+  @@index([university_id])
+  @@index([location_id])
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model companies {
-  company_id  String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String?      @db.VarChar
-  industry    String?      @db.VarChar
-  location_id String?      @db.Uuid
-  locations   locations?   @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
+  company_id  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String     @db.VarChar
+  industry    String?    @db.VarChar
+  location_id String?    @db.Uuid
+  created_at  DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime   @updatedAt @db.Timestamptz(6)
+  locations   locations? @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
   volunteers  volunteers[]
+
+  @@index([location_id])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model locations {
   location_id  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String?        @db.VarChar
+  name         String         @db.VarChar
   address_line String?        @db.VarChar
   state_code   String?        @db.VarChar(2)
   country_code String?        @default("USA") @db.VarChar(3)
+  created_at   DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime       @updatedAt @db.Timestamptz(6)
   chapters     chapters[]
   companies    companies[]
   universities universities[]
@@ -44,11 +57,12 @@ model locations {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model projects {
   project_id           String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                 String?                @db.VarChar
+  name                 String                 @db.VarChar
   github_url           String?                @db.VarChar
   financial            financial_type?        @default(PRO_BONO)
-  created_at           DateTime?              @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  status               project_status         @default(WORKING)
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime               @updatedAt @db.Timestamptz(6)
   project_deliverables project_deliverables[]
   project_engagements  project_engagements[]
 }
@@ -56,13 +70,18 @@ model projects {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model volunteer_history {
   history_id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  volunteer_id         String?      @db.Uuid
-  action_type          action_type?
+  volunteer_id         String       @db.Uuid
+  action_type          action_type
   related_entity_id    String?      @db.Uuid
+  related_entity_type  entity_type?
   previous_value_label String?      @db.VarChar
   new_value_label      String?      @db.VarChar
-  effective_date       DateTime?    @db.Date
-  volunteers           volunteers?  @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: Cascade, onUpdate: NoAction)
+  effective_date       DateTime     @db.Date
+  created_at           DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime     @updatedAt @db.Timestamptz(6)
+  volunteers           volunteers   @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([volunteer_id])
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -70,7 +89,7 @@ model volunteer_history {
 model volunteers {
   volunteer_id        String                @id @db.Uuid
   org_email           String?               @db.VarChar
-  active_status       Boolean?              @default(true)
+  status              member_status         @default(ACTIVE)
   volunteer_class     volunteer_class?      @default(COLLEGIATE)
   engagement_track    engagement_track?     @default(PROGRAMS)
   major               String?               @db.VarChar
@@ -79,160 +98,224 @@ model volunteers {
   university_id       String?               @db.Uuid
   home_chapter_id     String?               @db.Uuid
   employer_id         String?               @db.Uuid
-  created_at          DateTime?             @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime?             @default(now()) @db.Timestamptz(6)
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime              @updatedAt @db.Timestamptz(6)
   officer_assignments officer_assignments[]
   project_staffing    project_staffing[]
   volunteer_history   volunteer_history[]
   companies           companies?            @relation(fields: [employer_id], references: [company_id], onDelete: NoAction, onUpdate: NoAction)
   academic_terms      academic_terms?       @relation(fields: [graduation_term_id], references: [term_id], onDelete: NoAction, onUpdate: NoAction)
   chapters            chapters?             @relation(fields: [home_chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction)
-  locations           universities?         @relation(fields: [university_id], references: [university_id], onDelete: NoAction, onUpdate: NoAction)
+  universities        universities?         @relation(fields: [university_id], references: [university_id], onDelete: NoAction, onUpdate: NoAction)
   constituents        constituents          @relation(fields: [volunteer_id], references: [constituent_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([graduation_term_id])
+  @@index([university_id])
+  @@index([home_chapter_id])
+  @@index([employer_id])
 }
 
 model academic_terms {
   term_id             String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   university_id       String?               @db.Uuid
-  name                String?               @db.VarChar
+  name                String                @db.VarChar
   canonical_label     String?               @db.VarChar
   type                term_type?
   start_date          DateTime?             @db.Date
   end_date            DateTime?             @db.Date
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime              @updatedAt @db.Timestamptz(6)
   universities        universities?         @relation(fields: [university_id], references: [university_id], onDelete: NoAction, onUpdate: NoAction)
   project_engagements project_engagements[]
   volunteers          volunteers[]
+
+  @@index([university_id])
 }
 
 model constituents {
-  constituent_id                                  String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  first_name                                      String?               @db.VarChar
-  last_name                                       String?               @db.VarChar
-  primary_email                                   String                @unique @db.VarChar
-  phone_number                                    String?               @db.VarChar
-  created_at                                      DateTime?             @default(now()) @db.Timestamptz(6)
-  updated_at                                      DateTime?             @default(now()) @db.Timestamptz(6)
-  mentorships_mentorships_mentee_idToconstituents mentorships[]         @relation("mentorships_mentee_idToconstituents")
-  mentorships_mentorships_mentor_idToconstituents mentorships[]         @relation("mentorships_mentor_idToconstituents")
-  project_engagements                             project_engagements[]
-  social_links                                    social_links[]
-  volunteers                                      volunteers?
+  constituent_id      String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name          String                @db.VarChar
+  last_name           String                @db.VarChar
+  primary_email       String                @unique @db.VarChar
+  phone_number        String?               @db.VarChar
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime              @updatedAt @db.Timestamptz(6)
+  mentorships_mentee  mentorships[]         @relation("mentorships_mentee_idToconstituents")
+  mentors             mentors?
+  project_engagements project_engagements[]
+  social_links        social_links[]
+  volunteers          volunteers?
+}
+
+model mentors {
+  mentor_id      String        @id @db.Uuid
+  status         member_status @default(ACTIVE)
+  expertise_area String?       @db.VarChar
+  max_mentees    Int?
+  created_at     DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime      @updatedAt @db.Timestamptz(6)
+  constituents   constituents  @relation(fields: [mentor_id], references: [constituent_id], onDelete: Cascade, onUpdate: NoAction)
+  mentorships    mentorships[]
 }
 
 model mentorships {
   mentorship_id                                    String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  mentor_id                                        String?            @db.Uuid
-  mentee_id                                        String?            @db.Uuid
+  mentor_id                                        String             @db.Uuid
+  mentee_id                                        String             @db.Uuid
   program_type                                     String?            @db.VarChar
   status                                           engagement_status? @default(ACTIVE)
   start_date                                       DateTime?          @db.Date
   end_date                                         DateTime?          @db.Date
   notes                                            String?
-  constituents_mentorships_mentee_idToconstituents constituents?      @relation("mentorships_mentee_idToconstituents", fields: [mentee_id], references: [constituent_id], onDelete: NoAction, onUpdate: NoAction)
-  constituents_mentorships_mentor_idToconstituents constituents?      @relation("mentorships_mentor_idToconstituents", fields: [mentor_id], references: [constituent_id], onDelete: NoAction, onUpdate: NoAction)
+  created_at                                       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at                                       DateTime           @updatedAt @db.Timestamptz(6)
+  constituents_mentorships_mentee_idToconstituents constituents       @relation("mentorships_mentee_idToconstituents", fields: [mentee_id], references: [constituent_id], onDelete: NoAction, onUpdate: NoAction)
+  mentors                                          mentors            @relation(fields: [mentor_id], references: [mentor_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([mentor_id])
+  @@index([mentee_id])
 }
 
 model officer_assignments {
-  assignment_id String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  volunteer_id  String?        @db.Uuid
-  role_id       String?        @db.Uuid
-  chapter_id    String?        @db.Uuid
-  start_date    DateTime?      @db.Date
-  end_date      DateTime?      @db.Date
-  chapters      chapters?      @relation(fields: [chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction)
-  officer_roles officer_roles? @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
-  volunteers    volunteers?    @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
+  assignment_id String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  volunteer_id  String        @db.Uuid
+  role_id       String        @db.Uuid
+  chapter_id    String        @db.Uuid
+  start_date    DateTime?     @db.Date
+  end_date      DateTime?     @db.Date
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime      @updatedAt @db.Timestamptz(6)
+  chapters      chapters      @relation(fields: [chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction)
+  officer_roles officer_roles @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
+  volunteers    volunteers    @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([volunteer_id])
+  @@index([role_id])
+  @@index([chapter_id])
 }
 
 model officer_roles {
   role_id             String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                String?               @unique @db.VarChar
+  name                String                @unique @db.VarChar
   scope               role_scope?
   rank_level          Int?
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime              @updatedAt @db.Timestamptz(6)
   officer_assignments officer_assignments[]
 }
 
 model partners {
   partner_id            String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  legal_name            String?               @db.VarChar
+  legal_name            String                @db.VarChar
   mission_statement     String?
   website_url           String?               @db.VarChar
   pcs_organization_type String?               @db.VarChar
   pcs_subject           String?               @db.VarChar
   pcs_population        String?               @db.VarChar
-  created_at            DateTime?             @default(now()) @db.Timestamptz(6)
+  created_at            DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime              @updatedAt @db.Timestamptz(6)
   project_engagements   project_engagements[]
 }
 
 model project_deliverables {
   deliverable_id String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  project_id     String?           @db.Uuid
+  project_id     String            @db.Uuid
   label          String?           @db.VarChar
   url            String?           @db.VarChar
   category       deliverable_type?
-  projects       projects?         @relation(fields: [project_id], references: [project_id], onDelete: Cascade, onUpdate: NoAction)
+  created_at     DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime          @updatedAt @db.Timestamptz(6)
+  projects       projects          @relation(fields: [project_id], references: [project_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([project_id])
 }
 
 model project_engagements {
   engagement_id     String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  project_id        String?            @db.Uuid
+  project_id        String             @db.Uuid
   partner_id        String?            @db.Uuid
   chapter_id        String?            @db.Uuid
   academic_term_id  String?            @db.Uuid
   client_contact_id String?            @db.Uuid
   status            engagement_status? @default(ACTIVE)
   domain            domain_type?       @default(FULL_STACK)
-  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime?          @default(now()) @db.Timestamptz(6)
+  created_at        DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime           @updatedAt @db.Timestamptz(6)
   academic_terms    academic_terms?    @relation(fields: [academic_term_id], references: [term_id], onDelete: NoAction, onUpdate: NoAction)
   chapters          chapters?          @relation(fields: [chapter_id], references: [chapter_id], onDelete: NoAction, onUpdate: NoAction)
   constituents      constituents?      @relation(fields: [client_contact_id], references: [constituent_id], onDelete: NoAction, onUpdate: NoAction)
   partners          partners?          @relation(fields: [partner_id], references: [partner_id], onDelete: NoAction, onUpdate: NoAction)
-  projects          projects?          @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction)
+  projects          projects           @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction)
   project_staffing  project_staffing[]
+
+  @@index([project_id])
+  @@index([partner_id])
+  @@index([chapter_id])
+  @@index([academic_term_id])
+  @@index([client_contact_id])
 }
 
 model project_roles {
   role_id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String?            @db.VarChar
+  name             String             @db.VarChar
   is_leadership    Boolean?           @default(false)
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime           @updatedAt @db.Timestamptz(6)
   project_staffing project_staffing[]
 }
 
 model project_staffing {
-  staffing_id         String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  volunteer_id        String?              @db.Uuid
-  engagement_id       String?              @db.Uuid
-  role_id             String?              @db.Uuid
-  is_lead_contact     Boolean?             @default(false)
-  start_date          DateTime?            @db.Date
-  end_date            DateTime?            @db.Date
-  project_engagements project_engagements? @relation(fields: [engagement_id], references: [engagement_id], onDelete: NoAction, onUpdate: NoAction)
-  project_roles       project_roles?       @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
-  volunteers          volunteers?          @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
+  staffing_id         String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  volunteer_id        String              @db.Uuid
+  engagement_id       String              @db.Uuid
+  role_id             String?             @db.Uuid
+  is_lead_contact     Boolean?            @default(false)
+  start_date          DateTime?           @db.Date
+  end_date            DateTime?           @db.Date
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime            @updatedAt @db.Timestamptz(6)
+  project_engagements project_engagements @relation(fields: [engagement_id], references: [engagement_id], onDelete: NoAction, onUpdate: NoAction)
+  project_roles       project_roles?      @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
+  volunteers          volunteers          @relation(fields: [volunteer_id], references: [volunteer_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([volunteer_id])
+  @@index([engagement_id])
+  @@index([role_id])
 }
 
 model social_links {
   link_id        String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  constituent_id String?               @db.Uuid
+  constituent_id String                @db.Uuid
   platform       social_platform_type?
-  url            String?               @db.VarChar
+  url            String                @db.VarChar
   is_featured    Boolean?              @default(false)
-  constituents   constituents?         @relation(fields: [constituent_id], references: [constituent_id], onDelete: Cascade, onUpdate: NoAction)
+  created_at     DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime              @updatedAt @db.Timestamptz(6)
+  constituents   constituents          @relation(fields: [constituent_id], references: [constituent_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([constituent_id])
 }
 
 model universities {
   university_id  String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String?          @db.VarChar
+  name           String           @db.VarChar
   email_domain   String?          @db.VarChar
   location_id    String?          @db.Uuid
+  created_at     DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime         @updatedAt @db.Timestamptz(6)
   academic_terms academic_terms[]
+  chapters       chapters[]
   locations      locations?       @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction)
   volunteers     volunteers[]
+
+  @@index([location_id])
 }
 
 /// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 enum action_type {
+  JOINED
+  LEFT
+  ON_HIATUS @map("ON HIATUS")
   ENROLLED
   PROMOTED
   DEMOTED
@@ -308,4 +391,35 @@ enum volunteer_class {
   COLLEGIATE
   ALUMNI
   ASSOCIATE
+}
+
+enum member_status {
+  PROSPECT
+  ACTIVE
+  INACTIVE
+  ON_HIATUS
+}
+
+enum chapter_status {
+  PROSPECT
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum project_status {
+  WORKING
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum entity_type {
+  CHAPTER
+  OFFICER_ROLE
+  PROJECT
+  PROJECT_ROLE
+  ENGAGEMENT
+  UNIVERSITY
+  COMPANY
 }

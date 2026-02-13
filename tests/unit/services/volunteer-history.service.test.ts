@@ -32,9 +32,12 @@ describe('Volunteer History Service', () => {
           volunteer_id: 'vol-1',
           action_type: 'ENROLLED',
           related_entity_id: 'chapter-1',
+          related_entity_type: null,
           previous_value_label: null,
           new_value_label: 'Chapter A',
           effective_date: new Date('2024-01-15'),
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.volunteer_history.findMany as jest.Mock).mockResolvedValue(
@@ -56,9 +59,12 @@ describe('Volunteer History Service', () => {
         volunteer_id: 'vol-1',
         action_type: 'ENROLLED',
         related_entity_id: 'chapter-1',
+        related_entity_type: null,
         previous_value_label: null,
         new_value_label: 'Chapter A',
         effective_date: new Date('2024-01-15'),
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.volunteer_history.findUnique as jest.Mock).mockResolvedValue(
         mockHistory
@@ -95,7 +101,10 @@ describe('Volunteer History Service', () => {
       const createdHistory = {
         history_id: 'new-id-123',
         related_entity_id: null,
+        related_entity_type: null,
         previous_value_label: null,
+        created_at: new Date(),
+        updated_at: new Date(),
         ...inputData,
       };
       (prisma.volunteer_history.create as jest.Mock).mockResolvedValue(
@@ -120,9 +129,12 @@ describe('Volunteer History Service', () => {
         volunteer_id: 'vol-1',
         action_type: 'ENROLLED',
         related_entity_id: 'chapter-1',
+        related_entity_type: null,
         previous_value_label: null,
         new_value_label: 'Updated Label',
         effective_date: new Date('2024-01-15'),
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.volunteer_history.update as jest.Mock).mockResolvedValue(
         updatedHistory
@@ -146,9 +158,12 @@ describe('Volunteer History Service', () => {
         volunteer_id: 'vol-1',
         action_type: 'ENROLLED',
         related_entity_id: 'chapter-1',
+        related_entity_type: null,
         previous_value_label: null,
         new_value_label: 'Chapter A',
         effective_date: new Date('2024-01-15'),
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.volunteer_history.delete as jest.Mock).mockResolvedValue(
         deletedHistory

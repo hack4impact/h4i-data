@@ -33,6 +33,8 @@ describe('Project Deliverable Service', () => {
           label: 'Main Repository',
           url: 'https://github.com/org/repo',
           category: 'REPO',
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.project_deliverables.findMany as jest.Mock).mockResolvedValue(
@@ -55,6 +57,8 @@ describe('Project Deliverable Service', () => {
         label: 'Main Repository',
         url: 'https://github.com/org/repo',
         category: 'REPO',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.project_deliverables.findUnique as jest.Mock).mockResolvedValue(
         mockDeliverable
@@ -90,6 +94,8 @@ describe('Project Deliverable Service', () => {
       };
       const createdDeliverable = {
         deliverable_id: 'new-id-123',
+        created_at: new Date(),
+        updated_at: new Date(),
         ...inputData,
       };
       (prisma.project_deliverables.create as jest.Mock).mockResolvedValue(
@@ -115,6 +121,8 @@ describe('Project Deliverable Service', () => {
         label: 'Updated Repository',
         url: 'https://github.com/org/repo',
         category: 'REPO',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.project_deliverables.update as jest.Mock).mockResolvedValue(
         updatedDeliverable
@@ -139,6 +147,8 @@ describe('Project Deliverable Service', () => {
         label: 'Main Repository',
         url: 'https://github.com/org/repo',
         category: 'REPO',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.project_deliverables.delete as jest.Mock).mockResolvedValue(
         deletedDeliverable

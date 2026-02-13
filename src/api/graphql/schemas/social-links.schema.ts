@@ -10,10 +10,12 @@ export const socialLinkSchemaString = `
 
   type SocialLink {
     link_id: ID!
-    constituent_id: ID
+    constituent_id: ID!
     platform: SocialPlatformType
-    url: String
+    url: String!
     is_featured: Boolean
+    created_at: String
+    updated_at: String
   }
 
   type Query {
@@ -22,9 +24,9 @@ export const socialLinkSchemaString = `
   }
 
   input CreateSocialLinkInput {
-    constituent_id: ID
+    constituent_id: ID!
     platform: SocialPlatformType
-    url: String
+    url: String!
     is_featured: Boolean
   }
 

@@ -1,13 +1,14 @@
 export const partnerSchemaString = `
   type Partner {
     partner_id: ID!
-    legal_name: String
+    legal_name: String!
     mission_statement: String
     website_url: String
     pcs_organization_type: String
     pcs_subject: String
     pcs_population: String
     created_at: String
+    updated_at: String
   }
 
   type Query {
@@ -16,7 +17,7 @@ export const partnerSchemaString = `
   }
 
   input CreatePartnerInput {
-    legal_name: String
+    legal_name: String!
     mission_statement: String
     website_url: String
     pcs_organization_type: String

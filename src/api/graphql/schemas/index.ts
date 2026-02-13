@@ -7,6 +7,7 @@ export * from './partners.schema';
 export * from './projects.schema';
 export * from './officer-roles.schema';
 export * from './volunteers.schema';
+export * from './mentors.schema';
 
 // Supporting Entity Schemas
 export * from './universities.schema';

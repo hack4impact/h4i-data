@@ -34,6 +34,8 @@ describe('Officer Assignment Service', () => {
           chapter_id: 'chapter-1',
           start_date: new Date('2024-01-15'),
           end_date: null,
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.officer_assignments.findMany as jest.Mock).mockResolvedValue(
@@ -57,6 +59,8 @@ describe('Officer Assignment Service', () => {
         chapter_id: 'chapter-1',
         start_date: new Date('2024-01-15'),
         end_date: null,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.officer_assignments.findUnique as jest.Mock).mockResolvedValue(
         mockAssignment
@@ -93,6 +97,8 @@ describe('Officer Assignment Service', () => {
       const createdAssignment = {
         assignment_id: 'new-id-123',
         end_date: null,
+        created_at: new Date(),
+        updated_at: new Date(),
         ...inputData,
       };
       (prisma.officer_assignments.create as jest.Mock).mockResolvedValue(
@@ -119,6 +125,8 @@ describe('Officer Assignment Service', () => {
         chapter_id: 'chapter-1',
         start_date: new Date('2024-01-15'),
         end_date: new Date('2024-12-31'),
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.officer_assignments.update as jest.Mock).mockResolvedValue(
         updatedAssignment
@@ -144,6 +152,8 @@ describe('Officer Assignment Service', () => {
         chapter_id: 'chapter-1',
         start_date: new Date('2024-01-15'),
         end_date: null,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.officer_assignments.delete as jest.Mock).mockResolvedValue(
         deletedAssignment

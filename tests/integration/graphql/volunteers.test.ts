@@ -68,7 +68,7 @@ describe('GraphQL API - Volunteers', () => {
       input: {
         volunteer_id: constituentId,
         org_email: 'john@org.edu',
-        active_status: true,
+        status: 'ACTIVE',
         volunteer_class: 'COLLEGIATE',
       },
     };

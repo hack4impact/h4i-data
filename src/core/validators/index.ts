@@ -10,6 +10,7 @@ export * from './partners.validator';
 export * from './projects.validator';
 export * from './officer-roles.validator';
 export * from './volunteers.validator';
+export * from './mentors.validator';
 
 // Supporting Entity Validators
 export * from './universities.validator';

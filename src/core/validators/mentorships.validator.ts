@@ -2,8 +2,8 @@ import { z } from 'zod';
 import { engagementStatusSchema } from './enums';
 
 export const createMentorshipSchema = z.object({
-  mentor_id: z.uuid().optional(),
-  mentee_id: z.uuid().optional(),
+  mentor_id: z.uuid(),
+  mentee_id: z.uuid(),
   program_type: z.string().optional(),
   status: engagementStatusSchema.optional().default('ACTIVE'),
   start_date: z.coerce.date().optional(),

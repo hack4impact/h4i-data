@@ -7,6 +7,7 @@ export * from './partners.routes';
 export * from './projects.routes';
 export * from './officer-roles.routes';
 export * from './volunteers.routes';
+export * from './mentors.routes';
 
 // Supporting Entity Routes
 export * from './universities.routes';

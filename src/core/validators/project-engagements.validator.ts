@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { engagementStatusSchema, domainTypeSchema } from './enums';
 
 export const createProjectEngagementSchema = z.object({
-  project_id: z.uuid().optional(),
+  project_id: z.uuid(),
   partner_id: z.uuid().optional(),
   chapter_id: z.uuid().optional(),
   academic_term_id: z.uuid().optional(),

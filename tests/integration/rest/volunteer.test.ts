@@ -36,7 +36,7 @@ describe('REST API - /volunteers', () => {
       const volunteerData = {
         volunteer_id: constituentId,
         org_email: 'john@org.edu',
-        active_status: true,
+        status: 'ACTIVE',
         volunteer_class: 'COLLEGIATE',
         engagement_track: 'PROGRAMS',
         major: 'Computer Science',

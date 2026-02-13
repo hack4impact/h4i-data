@@ -36,6 +36,7 @@ describe('Partner Service', () => {
           pcs_subject: 'Education',
           pcs_population: 'Youth',
           created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.partners.findMany as jest.Mock).mockResolvedValue(mockPartners);
@@ -59,6 +60,7 @@ describe('Partner Service', () => {
         pcs_subject: 'Education',
         pcs_population: 'Youth',
         created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.partners.findUnique as jest.Mock).mockResolvedValue(mockPartner);
 
@@ -94,6 +96,7 @@ describe('Partner Service', () => {
         pcs_subject: null,
         pcs_population: null,
         created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.partners.create as jest.Mock).mockResolvedValue(createdPartner);
 
@@ -117,6 +120,7 @@ describe('Partner Service', () => {
         pcs_subject: 'Education',
         pcs_population: 'Youth',
         created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.partners.update as jest.Mock).mockResolvedValue(updatedPartner);
 
@@ -142,6 +146,7 @@ describe('Partner Service', () => {
         pcs_subject: 'Education',
         pcs_population: 'Youth',
         created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.partners.delete as jest.Mock).mockResolvedValue(deletedPartner);
 

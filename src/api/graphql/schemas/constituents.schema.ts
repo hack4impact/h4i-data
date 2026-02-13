@@ -1,8 +1,8 @@
 export const constituentSchemaString = `
   type Constituent {
     constituent_id: ID!
-    first_name: String
-    last_name: String
+    first_name: String!
+    last_name: String!
     primary_email: String!
     phone_number: String
     created_at: String
@@ -15,8 +15,8 @@ export const constituentSchemaString = `
   }
 
   input CreateConstituentInput {
-    first_name: String
-    last_name: String
+    first_name: String!
+    last_name: String!
     primary_email: String!
     phone_number: String
   }

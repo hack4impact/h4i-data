@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { deliverableTypeSchema } from './enums';
 
 export const createProjectDeliverableSchema = z.object({
-  project_id: z.uuid().optional(),
+  project_id: z.uuid(),
   label: z.string().optional(),
   url: z.string().url().optional(),
   category: deliverableTypeSchema.optional(),

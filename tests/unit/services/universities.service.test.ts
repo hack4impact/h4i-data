@@ -32,6 +32,8 @@ describe('University Service', () => {
           name: 'Test University',
           email_domain: 'test.edu',
           location_id: 'loc-1',
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.universities.findMany as jest.Mock).mockResolvedValue(
@@ -53,6 +55,8 @@ describe('University Service', () => {
         name: 'Test University',
         email_domain: 'test.edu',
         location_id: 'loc-1',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.universities.findUnique as jest.Mock).mockResolvedValue(
         mockUniversity
@@ -86,6 +90,8 @@ describe('University Service', () => {
         university_id: 'new-id-123',
         ...inputData,
         location_id: null,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.universities.create as jest.Mock).mockResolvedValue(
         createdUniversity
@@ -109,6 +115,8 @@ describe('University Service', () => {
         name: 'Updated University',
         email_domain: 'test.edu',
         location_id: 'loc-1',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.universities.update as jest.Mock).mockResolvedValue(
         updatedUniversity
@@ -132,6 +140,8 @@ describe('University Service', () => {
         name: 'Test University',
         email_domain: 'test.edu',
         location_id: 'loc-1',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.universities.delete as jest.Mock).mockResolvedValue(
         deletedUniversity

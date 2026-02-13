@@ -1,10 +1,12 @@
 export const locationSchemaString = `
   type Location {
     location_id: ID!
-    name: String
+    name: String!
     address_line: String
     state_code: String
     country_code: String
+    created_at: String
+    updated_at: String
   }
 
   type Query {

@@ -35,6 +35,8 @@ describe('Academic Term Service', () => {
           type: 'SEMESTER',
           start_date: new Date('2024-08-26'),
           end_date: new Date('2024-12-15'),
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.academic_terms.findMany as jest.Mock).mockResolvedValue(
@@ -59,6 +61,8 @@ describe('Academic Term Service', () => {
         type: 'SEMESTER',
         start_date: new Date('2024-08-26'),
         end_date: new Date('2024-12-15'),
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.academic_terms.findUnique as jest.Mock).mockResolvedValue(
         mockTerm
@@ -94,6 +98,8 @@ describe('Academic Term Service', () => {
       const createdTerm = {
         term_id: 'new-id-123',
         university_id: null,
+        created_at: new Date(),
+        updated_at: new Date(),
         ...inputData,
       };
       (prisma.academic_terms.create as jest.Mock).mockResolvedValue(
@@ -121,6 +127,8 @@ describe('Academic Term Service', () => {
         type: 'SEMESTER',
         start_date: new Date('2024-08-26'),
         end_date: new Date('2024-12-15'),
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.academic_terms.update as jest.Mock).mockResolvedValue(
         updatedTerm
@@ -147,6 +155,8 @@ describe('Academic Term Service', () => {
         type: 'SEMESTER',
         start_date: new Date('2024-08-26'),
         end_date: new Date('2024-12-15'),
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.academic_terms.delete as jest.Mock).mockResolvedValue(
         deletedTerm

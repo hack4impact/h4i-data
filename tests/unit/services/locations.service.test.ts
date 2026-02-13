@@ -33,6 +33,8 @@ describe('Location Service', () => {
           address_line: '123 Test Street',
           state_code: 'CA',
           country_code: 'USA',
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ];
       (prisma.locations.findMany as jest.Mock).mockResolvedValue(mockLocations);
@@ -53,6 +55,8 @@ describe('Location Service', () => {
         address_line: '123 Test Street',
         state_code: 'CA',
         country_code: 'USA',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
       (prisma.locations.findUnique as jest.Mock).mockResolvedValue(
         mockLocation
@@ -78,6 +82,8 @@ describe('Location Service', () => {
 
       const createdLocation = {
         location_id: '1',
+        created_at: new Date(),
+        updated_at: new Date(),
         ...inputData,
       };
 
@@ -109,6 +115,8 @@ describe('Location Service', () => {
         address_line: '123 Test Street',
         state_code: 'CA',
         country_code: 'USA',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
 
       (prisma.locations.update as jest.Mock).mockResolvedValue(updatedLocation);
@@ -132,6 +140,8 @@ describe('Location Service', () => {
         address_line: '123 Test Street',
         state_code: 'CA',
         country_code: 'USA',
+        created_at: new Date(),
+        updated_at: new Date(),
       };
 
       (prisma.locations.delete as jest.Mock).mockResolvedValue(deletedLocation);

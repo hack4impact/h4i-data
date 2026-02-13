@@ -1,8 +1,10 @@
 export const projectRoleSchemaString = `
   type ProjectRole {
     role_id: ID!
-    name: String
+    name: String!
     is_leadership: Boolean
+    created_at: String
+    updated_at: String
   }
 
   type Query {
@@ -11,7 +13,7 @@ export const projectRoleSchemaString = `
   }
 
   input CreateProjectRoleInput {
-    name: String
+    name: String!
     is_leadership: Boolean
   }
 

@@ -19,10 +19,17 @@ export const volunteerSchemaString = `
     OTHER
   }
 
+  enum MemberStatus {
+    PROSPECT
+    ACTIVE
+    INACTIVE
+    ON_HIATUS
+  }
+
   type Volunteer {
     volunteer_id: ID!
     org_email: String
-    active_status: Boolean
+    status: MemberStatus
     volunteer_class: VolunteerClass
     engagement_track: EngagementTrack
     major: String
@@ -44,7 +51,7 @@ export const volunteerSchemaString = `
   input CreateVolunteerInput {
     volunteer_id: ID!
     org_email: String
-    active_status: Boolean
+    status: MemberStatus
     volunteer_class: VolunteerClass
     engagement_track: EngagementTrack
     major: String
@@ -57,7 +64,7 @@ export const volunteerSchemaString = `
 
   input UpdateVolunteerInput {
     org_email: String
-    active_status: Boolean
+    status: MemberStatus
     volunteer_class: VolunteerClass
     engagement_track: EngagementTrack
     major: String

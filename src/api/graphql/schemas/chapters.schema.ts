@@ -1,10 +1,20 @@
 export const chapterSchemaString = `
+  enum ChapterStatus {
+    PROSPECT
+    ACTIVE
+    INACTIVE
+    SUSPENDED
+  }
+
   type Chapter {
     chapter_id: ID!
-    name: String
+    name: String!
     university_id: ID
     location_id: ID
     founded_date: String
+    status: ChapterStatus
+    created_at: String
+    updated_at: String
   }
 
   type Query {
@@ -17,6 +27,7 @@ export const chapterSchemaString = `
     university_id: ID
     location_id: ID
     founded_date: String
+    status: ChapterStatus
   }
 
   input UpdateChapterInput {
@@ -24,6 +35,7 @@ export const chapterSchemaString = `
     university_id: ID
     location_id: ID
     founded_date: String
+    status: ChapterStatus
   }
 
   type Mutation {

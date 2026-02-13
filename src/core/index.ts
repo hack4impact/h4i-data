@@ -7,6 +7,7 @@ export * from './services/partners.service';
 export * from './services/projects.service';
 export * from './services/officer-roles.service';
 export * from './services/volunteer.service';
+export * from './services/mentors.service';
 
 // Supporting Entity Services
 export * from './services/universities.service';
@@ -32,6 +33,7 @@ export * from './validators/partners.validator';
 export * from './validators/projects.validator';
 export * from './validators/officer-roles.validator';
 export * from './validators/volunteers.validator';
+export * from './validators/mentors.validator';
 
 // Supporting Entity Validators
 export * from './validators/universities.validator';
