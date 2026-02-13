@@ -29,8 +29,6 @@ model chapters {
   @@index([location_id])
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model companies {
   company_id  String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String
@@ -54,7 +52,6 @@ model industries {
   companies   companies[]
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model locations {
   location_id  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String
@@ -78,7 +75,6 @@ model majors {
   volunteers volunteers[]
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model projects {
   project_id           String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                 String
@@ -91,7 +87,6 @@ model projects {
   project_engagements  project_engagements[]
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model volunteer_history {
   history_id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   volunteer_id         String       @db.Uuid
@@ -108,8 +103,6 @@ model volunteer_history {
   @@index([volunteer_id])
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model volunteers {
   volunteer_id        String                @id @db.Uuid
   org_email           String?
@@ -339,7 +332,6 @@ model universities {
   @@index([location_id])
 }
 
-/// This enum is commented in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 enum action_type {
   JOINED
   LEFT

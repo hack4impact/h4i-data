@@ -14,31 +14,48 @@ The GraphQL API provides a flexible way to query and mutate operations data. The
 ### Volunteer Entity
 
 ```graphql
+enum VolunteerClass {
+  COLLEGIATE
+  ALUMNI
+  ASSOCIATE
+}
+
+enum EngagementTrack {
+  PROGRAMS
+  CENTRAL
+  ADVISORY
+}
+
+enum EducationLevel {
+  UNDERGRADUATE
+  GRADUATE
+  BOOTCAMP
+  SELF_TAUGHT
+  OTHER
+}
+
+enum MemberStatus {
+  PROSPECT
+  ACTIVE
+  INACTIVE
+  ON_HIATUS
+}
+
 type Volunteer {
   volunteer_id: ID!
-  first_name: String!
-  last_name: String!
-  email: String!
-  graduation_date: String!
-  university_id: ID!
-  volunteer_status: StatusType!
-  h4i_email: String
-  chapter_id: ID
-  company_id: ID
-  volunteer_type: VolunteerType!
-  created_at: String!
-  updated_at: String!
-}
-
-enum StatusType {
-  STUDENT
-  PROFESSIONAL
-}
-
-enum VolunteerType {
-  OPERATIONS
-  CHAPTER
-  BOTH
+  org_email: String
+  status: MemberStatus
+  volunteer_class: VolunteerClass
+  engagement_track: EngagementTrack
+  major_id: ID
+  education_level: EducationLevel
+  graduation_term_id: ID
+  university_id: ID
+  home_chapter_id: ID
+  employer_id: ID
+  created_at: String
+  updated_at: String
+  constituent: Constituent
 }
 
 type Query {
@@ -47,29 +64,30 @@ type Query {
 }
 
 input CreateVolunteerInput {
-  first_name: String
-  last_name: String
-  email: String
-  graduation_date: String
+  volunteer_id: ID!
+  org_email: String
+  status: MemberStatus
+  volunteer_class: VolunteerClass
+  engagement_track: EngagementTrack
+  major_id: ID
+  education_level: EducationLevel
+  graduation_term_id: ID
   university_id: ID
-  volunteer_status: StatusType
-  volunteer_type: VolunteerType
-  h4i_email: String
-  chapter_id: ID
-  company_id: ID
+  home_chapter_id: ID
+  employer_id: ID
 }
 
 input UpdateVolunteerInput {
-  first_name: String
-  last_name: String
-  email: String
-  graduation_date: String
+  org_email: String
+  status: MemberStatus
+  volunteer_class: VolunteerClass
+  engagement_track: EngagementTrack
+  major_id: ID
+  education_level: EducationLevel
+  graduation_term_id: ID
   university_id: ID
-  volunteer_status: StatusType
-  volunteer_type: VolunteerType
-  h4i_email: String
-  chapter_id: ID
-  company_id: ID
+  home_chapter_id: ID
+  employer_id: ID
 }
 
 type Mutation {
@@ -185,7 +203,7 @@ type Mutation {
 type Company {
   company_id: ID!
   name: String!
-  industry: String
+  industry_id: ID
   location_id: ID
   created_at: String
   updated_at: String
@@ -193,13 +211,13 @@ type Company {
 
 input CompanyCreateInput {
   name: String!
-  industry: String
+  industry_id: ID
   location_id: ID
 }
 
 input CompanyUpdateInput {
   name: String
-  industry: String
+  industry_id: ID
   location_id: ID
 }
 
@@ -261,7 +279,9 @@ type Location {
   location_id: ID!
   name: String!
   address_line: String
+  city: String
   state_code: String
+  postal_code: String
   country_code: String
   created_at: String
   updated_at: String
@@ -275,14 +295,18 @@ type Query {
 input CreateLocationInput {
   name: String!
   address_line: String
+  city: String
   state_code: String
+  postal_code: String
   country_code: String
 }
 
 input UpdateLocationInput {
   name: String
   address_line: String
+  city: String
   state_code: String
+  postal_code: String
   country_code: String
 }
 
