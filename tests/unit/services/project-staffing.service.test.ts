@@ -46,7 +46,24 @@ describe('Project Staffing Service', () => {
       const result = await getAllProjectStaffing();
 
       expect(result).toEqual(mockStaffing);
-      expect(prisma.project_staffing.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.project_staffing.findMany).toHaveBeenCalledWith({
+        orderBy: { start_date: 'desc' },
+      });
+    });
+
+    it('should return empty array when no project staffing records exist', async () => {
+      (prisma.project_staffing.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllProjectStaffing();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.project_staffing.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllProjectStaffing()).rejects.toThrow(
+        'Failed to retrieve project staffing'
+      );
     });
   });
 
@@ -84,6 +101,15 @@ describe('Project Staffing Service', () => {
         "ProjectStaffing with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.project_staffing.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getProjectStaffingById('1')).rejects.toThrow(
+        'Failed to retrieve project staffing'
+      );
+    });
   });
 
   describe('createProjectStaffing', () => {
@@ -112,6 +138,21 @@ describe('Project Staffing Service', () => {
       expect(prisma.project_staffing.create).toHaveBeenCalledWith({
         data: inputData,
       });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.project_staffing.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createProjectStaffing({
+          volunteer_id: 'vol-1',
+          engagement_id: 'eng-1',
+          role_id: 'role-1',
+          is_lead_contact: false,
+          start_date: new Date(),
+        })
+      ).rejects.toThrow('Failed to create project staffing');
     });
   });
 
@@ -142,6 +183,24 @@ describe('Project Staffing Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent project staffing', async () => {
+      (prisma.project_staffing.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateProjectStaffing('non-existent-id', { is_lead_contact: false })
+      ).rejects.toThrow("ProjectStaffing with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.project_staffing.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        updateProjectStaffing('1', { is_lead_contact: false })
+      ).rejects.toThrow('Failed to update project staffing');
+    });
   });
 
   describe('deleteProjectStaffing', () => {
@@ -168,6 +227,24 @@ describe('Project Staffing Service', () => {
       expect(prisma.project_staffing.delete).toHaveBeenCalledWith({
         where: { staffing_id: staffingId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent project staffing', async () => {
+      (prisma.project_staffing.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteProjectStaffing('non-existent-id')).rejects.toThrow(
+        "ProjectStaffing with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.project_staffing.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteProjectStaffing('1')).rejects.toThrow(
+        'Failed to delete project staffing'
+      );
     });
   });
 });

@@ -21,21 +21,11 @@ Table chapters {
 Table companies {
   company_id String [pk]
   name String [not null]
-  industry_id String
   location_id String
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
-  industries industries
   locations locations
   volunteers volunteers [not null]
-}
-
-Table industries {
-  industry_id String [pk]
-  name String [unique, not null]
-  created_at DateTime [default: `now()`, not null]
-  updated_at DateTime [not null]
-  companies companies [not null]
 }
 
 Table locations {
@@ -406,8 +396,6 @@ Enum entity_type {
 Ref: chapters.location_id > locations.location_id [delete: No Action]
 
 Ref: chapters.university_id > universities.university_id [delete: No Action]
-
-Ref: companies.industry_id > industries.industry_id [delete: No Action]
 
 Ref: companies.location_id > locations.location_id [delete: No Action]
 

@@ -10,6 +10,7 @@ export * from './volunteers.routes';
 export * from './mentors.routes';
 
 // Supporting Entity Routes
+export * from './majors.routes';
 export * from './universities.routes';
 export * from './academic-terms.routes';
 export * from './project-roles.routes';

@@ -44,7 +44,27 @@ describe('Constituent Service', () => {
       const result = await getAllConstituents();
 
       expect(result).toEqual(mockConstituents);
-      expect(prisma.constituents.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.constituents.findMany).toHaveBeenCalledWith({
+        orderBy: { created_at: 'desc' },
+      });
+    });
+
+    it('should return empty array when no constituents exist', async () => {
+      (prisma.constituents.findMany as jest.Mock).mockResolvedValue([]);
+
+      const result = await getAllConstituents();
+
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.constituents.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(getAllConstituents()).rejects.toThrow(
+        'Failed to retrieve constituents'
+      );
     });
   });
 
@@ -80,6 +100,16 @@ describe('Constituent Service', () => {
         "Constituent with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.constituents.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(getConstituentById('1')).rejects.toThrow(
+        'Failed to retrieve constituent'
+      );
+    });
   });
 
   describe('createConstituent', () => {
@@ -106,6 +136,20 @@ describe('Constituent Service', () => {
       expect(prisma.constituents.create).toHaveBeenCalledWith({
         data: inputData,
       });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.constituents.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(
+        createConstituent({
+          first_name: 'Jane',
+          last_name: 'Smith',
+          primary_email: 'jane@example.com',
+        })
+      ).rejects.toThrow('Failed to create constituent');
     });
   });
 
@@ -134,6 +178,26 @@ describe('Constituent Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent constituent', async () => {
+      (prisma.constituents.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+
+      await expect(
+        updateConstituent('non-existent-id', { first_name: 'Updated' })
+      ).rejects.toThrow("Constituent with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.constituents.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(
+        updateConstituent('1', { first_name: 'Updated' })
+      ).rejects.toThrow('Failed to update constituent');
+    });
   });
 
   describe('deleteConstituent', () => {
@@ -158,6 +222,26 @@ describe('Constituent Service', () => {
       expect(prisma.constituents.delete).toHaveBeenCalledWith({
         where: { constituent_id: constituentId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent constituent', async () => {
+      (prisma.constituents.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+
+      await expect(deleteConstituent('non-existent-id')).rejects.toThrow(
+        "Constituent with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.constituents.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(deleteConstituent('1')).rejects.toThrow(
+        'Failed to delete constituent'
+      );
     });
   });
 });

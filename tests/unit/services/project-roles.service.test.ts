@@ -40,7 +40,24 @@ describe('Project Role Service', () => {
       const result = await getAllProjectRoles();
 
       expect(result).toEqual(mockRoles);
-      expect(prisma.project_roles.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.project_roles.findMany).toHaveBeenCalledWith({
+        orderBy: { name: 'asc' },
+      });
+    });
+
+    it('should return empty array when no project roles exist', async () => {
+      (prisma.project_roles.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllProjectRoles();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.project_roles.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllProjectRoles()).rejects.toThrow(
+        'Failed to retrieve project roles'
+      );
     });
   });
 
@@ -74,6 +91,15 @@ describe('Project Role Service', () => {
         "ProjectRole with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.project_roles.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getProjectRoleById('1')).rejects.toThrow(
+        'Failed to retrieve project role'
+      );
+    });
   });
 
   describe('createProjectRole', () => {
@@ -96,6 +122,15 @@ describe('Project Role Service', () => {
       expect(prisma.project_roles.create).toHaveBeenCalledWith({
         data: inputData,
       });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.project_roles.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createProjectRole({ name: 'Developer', is_leadership: false })
+      ).rejects.toThrow('Failed to create project role');
     });
   });
 
@@ -120,6 +155,24 @@ describe('Project Role Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent project role', async () => {
+      (prisma.project_roles.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateProjectRole('non-existent-id', { name: 'Updated' })
+      ).rejects.toThrow("ProjectRole with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.project_roles.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(updateProjectRole('1', { name: 'Updated' })).rejects.toThrow(
+        'Failed to update project role'
+      );
+    });
   });
 
   describe('deleteProjectRole', () => {
@@ -140,6 +193,24 @@ describe('Project Role Service', () => {
       expect(prisma.project_roles.delete).toHaveBeenCalledWith({
         where: { role_id: roleId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent project role', async () => {
+      (prisma.project_roles.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteProjectRole('non-existent-id')).rejects.toThrow(
+        "ProjectRole with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.project_roles.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteProjectRole('1')).rejects.toThrow(
+        'Failed to delete project role'
+      );
     });
   });
 });

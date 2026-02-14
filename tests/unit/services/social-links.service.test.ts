@@ -42,7 +42,24 @@ describe('Social Link Service', () => {
       const result = await getAllSocialLinks();
 
       expect(result).toEqual(mockLinks);
-      expect(prisma.social_links.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.social_links.findMany).toHaveBeenCalledWith({
+        orderBy: { link_id: 'asc' },
+      });
+    });
+
+    it('should return empty array when no social links exist', async () => {
+      (prisma.social_links.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllSocialLinks();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.social_links.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllSocialLinks()).rejects.toThrow(
+        'Failed to retrieve social links'
+      );
     });
   });
 
@@ -76,6 +93,15 @@ describe('Social Link Service', () => {
         "SocialLink with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.social_links.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getSocialLinkById('1')).rejects.toThrow(
+        'Failed to retrieve social link'
+      );
+    });
   });
 
   describe('createSocialLink', () => {
@@ -100,6 +126,19 @@ describe('Social Link Service', () => {
       expect(prisma.social_links.create).toHaveBeenCalledWith({
         data: inputData,
       });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.social_links.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createSocialLink({
+          platform: 'LINKEDIN' as const,
+          url: 'https://linkedin.com/in/user',
+          is_featured: false,
+        })
+      ).rejects.toThrow('Failed to create social link');
     });
   });
 
@@ -126,6 +165,24 @@ describe('Social Link Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent social link', async () => {
+      (prisma.social_links.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateSocialLink('non-existent-id', { is_featured: false })
+      ).rejects.toThrow("SocialLink with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.social_links.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        updateSocialLink('1', { is_featured: false })
+      ).rejects.toThrow('Failed to update social link');
+    });
   });
 
   describe('deleteSocialLink', () => {
@@ -148,6 +205,24 @@ describe('Social Link Service', () => {
       expect(prisma.social_links.delete).toHaveBeenCalledWith({
         where: { link_id: linkId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent social link', async () => {
+      (prisma.social_links.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteSocialLink('non-existent-id')).rejects.toThrow(
+        "SocialLink with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.social_links.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteSocialLink('1')).rejects.toThrow(
+        'Failed to delete social link'
+      );
     });
   });
 });

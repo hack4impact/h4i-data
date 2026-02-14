@@ -45,7 +45,24 @@ describe('Officer Assignment Service', () => {
       const result = await getAllOfficerAssignments();
 
       expect(result).toEqual(mockAssignments);
-      expect(prisma.officer_assignments.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.officer_assignments.findMany).toHaveBeenCalledWith({
+        orderBy: { start_date: 'desc' },
+      });
+    });
+
+    it('should return empty array when no officer assignments exist', async () => {
+      (prisma.officer_assignments.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllOfficerAssignments();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.officer_assignments.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllOfficerAssignments()).rejects.toThrow(
+        'Failed to retrieve officer assignments'
+      );
     });
   });
 
@@ -84,6 +101,15 @@ describe('Officer Assignment Service', () => {
         "OfficerAssignment with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.officer_assignments.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getOfficerAssignmentById('1')).rejects.toThrow(
+        'Failed to retrieve officer assignment'
+      );
+    });
   });
 
   describe('createOfficerAssignment', () => {
@@ -111,6 +137,20 @@ describe('Officer Assignment Service', () => {
       expect(prisma.officer_assignments.create).toHaveBeenCalledWith({
         data: inputData,
       });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.officer_assignments.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createOfficerAssignment({
+          volunteer_id: 'vol-1',
+          role_id: 'role-1',
+          chapter_id: 'chapter-1',
+          start_date: new Date(),
+        })
+      ).rejects.toThrow('Failed to create officer assignment');
     });
   });
 
@@ -140,6 +180,26 @@ describe('Officer Assignment Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent officer assignment', async () => {
+      (prisma.officer_assignments.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateOfficerAssignment('non-existent-id', { end_date: new Date() })
+      ).rejects.toThrow(
+        "OfficerAssignment with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.officer_assignments.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        updateOfficerAssignment('1', { end_date: new Date() })
+      ).rejects.toThrow('Failed to update officer assignment');
+    });
   });
 
   describe('deleteOfficerAssignment', () => {
@@ -165,6 +225,24 @@ describe('Officer Assignment Service', () => {
       expect(prisma.officer_assignments.delete).toHaveBeenCalledWith({
         where: { assignment_id: assignmentId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent officer assignment', async () => {
+      (prisma.officer_assignments.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteOfficerAssignment('non-existent-id')).rejects.toThrow(
+        "OfficerAssignment with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.officer_assignments.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteOfficerAssignment('1')).rejects.toThrow(
+        'Failed to delete officer assignment'
+      );
     });
   });
 });

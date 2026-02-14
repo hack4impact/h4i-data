@@ -46,7 +46,24 @@ describe('Academic Term Service', () => {
       const result = await getAllAcademicTerms();
 
       expect(result).toEqual(mockTerms);
-      expect(prisma.academic_terms.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.academic_terms.findMany).toHaveBeenCalledWith({
+        orderBy: { start_date: 'desc' },
+      });
+    });
+
+    it('should return empty array when no academic terms exist', async () => {
+      (prisma.academic_terms.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllAcademicTerms();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.academic_terms.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllAcademicTerms()).rejects.toThrow(
+        'Failed to retrieve academic terms'
+      );
     });
   });
 
@@ -84,6 +101,15 @@ describe('Academic Term Service', () => {
         "AcademicTerm with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.academic_terms.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAcademicTermById('1')).rejects.toThrow(
+        'Failed to retrieve academic term'
+      );
+    });
   });
 
   describe('createAcademicTerm', () => {
@@ -112,6 +138,21 @@ describe('Academic Term Service', () => {
       expect(prisma.academic_terms.create).toHaveBeenCalledWith({
         data: inputData,
       });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.academic_terms.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createAcademicTerm({
+          name: 'Spring 2025',
+          canonical_label: 'S25',
+          type: 'SEMESTER' as const,
+          start_date: new Date(),
+          end_date: new Date(),
+        })
+      ).rejects.toThrow('Failed to create academic term');
     });
   });
 
@@ -142,6 +183,24 @@ describe('Academic Term Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent academic term', async () => {
+      (prisma.academic_terms.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateAcademicTerm('non-existent-id', { name: 'Updated' })
+      ).rejects.toThrow("AcademicTerm with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.academic_terms.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        updateAcademicTerm('1', { name: 'Updated' })
+      ).rejects.toThrow('Failed to update academic term');
+    });
   });
 
   describe('deleteAcademicTerm', () => {
@@ -168,6 +227,24 @@ describe('Academic Term Service', () => {
       expect(prisma.academic_terms.delete).toHaveBeenCalledWith({
         where: { term_id: termId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent academic term', async () => {
+      (prisma.academic_terms.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteAcademicTerm('non-existent-id')).rejects.toThrow(
+        "AcademicTerm with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.academic_terms.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteAcademicTerm('1')).rejects.toThrow(
+        'Failed to delete academic term'
+      );
     });
   });
 });

@@ -43,7 +43,27 @@ describe('Chapter Service', () => {
       const result = await getAllChapters();
 
       expect(result).toEqual(mockChapters);
-      expect(prisma.chapters.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.chapters.findMany).toHaveBeenCalledWith({
+        orderBy: { name: 'asc' },
+      });
+    });
+
+    it('should return empty array when no chapters exist', async () => {
+      (prisma.chapters.findMany as jest.Mock).mockResolvedValue([]);
+
+      const result = await getAllChapters();
+
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.chapters.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(getAllChapters()).rejects.toThrow(
+        'Failed to retrieve chapters'
+      );
     });
   });
 
@@ -78,6 +98,16 @@ describe('Chapter Service', () => {
         "Chapter with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.chapters.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(getChapterById('1')).rejects.toThrow(
+        'Failed to retrieve chapter'
+      );
+    });
   });
 
   describe('createChapter', () => {
@@ -103,6 +133,16 @@ describe('Chapter Service', () => {
 
       expect(result).toEqual(createdChapter);
       expect(prisma.chapters.create).toHaveBeenCalledWith({ data: inputData });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.chapters.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(
+        createChapter({ name: 'New Chapter', university_id: 'univ-1' })
+      ).rejects.toThrow('Failed to create chapter');
     });
   });
 
@@ -130,6 +170,26 @@ describe('Chapter Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent chapter', async () => {
+      (prisma.chapters.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+
+      await expect(
+        updateChapter('non-existent-id', { name: 'Updated' })
+      ).rejects.toThrow("Chapter with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.chapters.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(updateChapter('1', { name: 'Updated' })).rejects.toThrow(
+        'Failed to update chapter'
+      );
+    });
   });
 
   describe('deleteChapter', () => {
@@ -153,6 +213,26 @@ describe('Chapter Service', () => {
       expect(prisma.chapters.delete).toHaveBeenCalledWith({
         where: { chapter_id: chapterId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent chapter', async () => {
+      (prisma.chapters.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+
+      await expect(deleteChapter('non-existent-id')).rejects.toThrow(
+        "Chapter with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.chapters.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(deleteChapter('1')).rejects.toThrow(
+        'Failed to delete chapter'
+      );
     });
   });
 });

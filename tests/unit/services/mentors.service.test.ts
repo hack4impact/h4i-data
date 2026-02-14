@@ -58,6 +58,21 @@ describe('Mentor Service', () => {
         include: { constituents: true },
       });
     });
+
+    it('should return empty array when no mentors exist', async () => {
+      (prisma.mentors.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllMentors();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.mentors.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllMentors()).rejects.toThrow(
+        'Failed to retrieve mentors'
+      );
+    });
   });
 
   describe('getMentorById', () => {
@@ -97,6 +112,15 @@ describe('Mentor Service', () => {
 
       await expect(getMentorById(mentorId)).rejects.toThrow(
         "Mentor with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.mentors.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getMentorById('1')).rejects.toThrow(
+        'Failed to retrieve mentor'
       );
     });
   });
@@ -157,6 +181,21 @@ describe('Mentor Service', () => {
         "Constituent with id 'non-existent-const' not found"
       );
     });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.constituents.findUnique as jest.Mock).mockResolvedValue({
+        constituent_id: 'const-1',
+      });
+      (prisma.mentors.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createMentor({
+          mentor_id: 'const-1',
+          status: 'ACTIVE' as const,
+        })
+      ).rejects.toThrow('Failed to create mentor');
+    });
   });
 
   describe('updateMentor', () => {
@@ -191,6 +230,24 @@ describe('Mentor Service', () => {
         include: { constituents: true },
       });
     });
+
+    it('should throw NotFoundError when updating non-existent mentor', async () => {
+      (prisma.mentors.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateMentor('non-existent-id', { status: 'INACTIVE' as const })
+      ).rejects.toThrow("Mentor with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.mentors.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        updateMentor('1', { status: 'INACTIVE' as const })
+      ).rejects.toThrow('Failed to update mentor');
+    });
   });
 
   describe('deleteMentor', () => {
@@ -222,6 +279,24 @@ describe('Mentor Service', () => {
         where: { mentor_id: mentorId },
         include: { constituents: true },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent mentor', async () => {
+      (prisma.mentors.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteMentor('non-existent-id')).rejects.toThrow(
+        "Mentor with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.mentors.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteMentor('1')).rejects.toThrow(
+        'Failed to delete mentor'
+      );
     });
   });
 });

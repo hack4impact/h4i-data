@@ -10,6 +10,7 @@ export * from './services/volunteer.service';
 export * from './services/mentors.service';
 
 // Supporting Entity Services
+export * from './services/majors.service';
 export * from './services/universities.service';
 export * from './services/academic-terms.service';
 export * from './services/project-roles.service';
@@ -36,6 +37,7 @@ export * from './validators/volunteers.validator';
 export * from './validators/mentors.validator';
 
 // Supporting Entity Validators
+export * from './validators/majors.validator';
 export * from './validators/universities.validator';
 export * from './validators/academic-terms.validator';
 export * from './validators/project-roles.validator';

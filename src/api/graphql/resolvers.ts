@@ -10,6 +10,7 @@ import { volunteerResolvers } from './resolvers/volunteers.resolvers';
 import { mentorResolvers } from './resolvers/mentors.resolvers';
 
 // Supporting Entity Resolvers
+import { majorResolvers } from './resolvers/majors.resolvers';
 import { universityResolvers } from './resolvers/universities.resolvers';
 import { academicTermResolvers } from './resolvers/academic-terms.resolvers';
 import { projectRoleResolvers } from './resolvers/project-roles.resolvers';
@@ -38,6 +39,7 @@ export const resolvers = {
     ...mentorResolvers.Query,
 
     // Supporting Entities
+    ...majorResolvers.Query,
     ...universityResolvers.Query,
     ...academicTermResolvers.Query,
     ...projectRoleResolvers.Query,
@@ -64,6 +66,7 @@ export const resolvers = {
     ...mentorResolvers.Mutation,
 
     // Supporting Entities
+    ...majorResolvers.Mutation,
     ...universityResolvers.Mutation,
     ...academicTermResolvers.Mutation,
     ...projectRoleResolvers.Mutation,

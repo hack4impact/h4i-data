@@ -44,7 +44,27 @@ describe('Partner Service', () => {
       const result = await getAllPartners();
 
       expect(result).toEqual(mockPartners);
-      expect(prisma.partners.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.partners.findMany).toHaveBeenCalledWith({
+        orderBy: { created_at: 'desc' },
+      });
+    });
+
+    it('should return empty array when no partners exist', async () => {
+      (prisma.partners.findMany as jest.Mock).mockResolvedValue([]);
+
+      const result = await getAllPartners();
+
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.partners.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(getAllPartners()).rejects.toThrow(
+        'Failed to retrieve partners'
+      );
     });
   });
 
@@ -80,6 +100,16 @@ describe('Partner Service', () => {
         "Partner with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.partners.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(getPartnerById('1')).rejects.toThrow(
+        'Failed to retrieve partner'
+      );
+    });
   });
 
   describe('createPartner', () => {
@@ -104,6 +134,16 @@ describe('Partner Service', () => {
 
       expect(result).toEqual(createdPartner);
       expect(prisma.partners.create).toHaveBeenCalledWith({ data: inputData });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.partners.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(
+        createPartner({ legal_name: 'New Organization' })
+      ).rejects.toThrow('Failed to create partner');
     });
   });
 
@@ -132,6 +172,26 @@ describe('Partner Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent partner', async () => {
+      (prisma.partners.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+
+      await expect(
+        updatePartner('non-existent-id', { legal_name: 'Updated' })
+      ).rejects.toThrow("Partner with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.partners.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(
+        updatePartner('1', { legal_name: 'Updated' })
+      ).rejects.toThrow('Failed to update partner');
+    });
   });
 
   describe('deletePartner', () => {
@@ -156,6 +216,26 @@ describe('Partner Service', () => {
       expect(prisma.partners.delete).toHaveBeenCalledWith({
         where: { partner_id: partnerId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent partner', async () => {
+      (prisma.partners.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+
+      await expect(deletePartner('non-existent-id')).rejects.toThrow(
+        "Partner with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.partners.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(deletePartner('1')).rejects.toThrow(
+        'Failed to delete partner'
+      );
     });
   });
 });

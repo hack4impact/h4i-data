@@ -2,7 +2,6 @@ export const companySchemaString = `
   type Company {
     company_id: ID!
     name: String!
-    industry_id: ID
     location_id: ID
     created_at: String
     updated_at: String
@@ -10,13 +9,11 @@ export const companySchemaString = `
 
   input CompanyCreateInput {
     name: String!
-    industry_id: ID
     location_id: ID
   }
 
   input CompanyUpdateInput {
     name: String
-    industry_id: ID
     location_id: ID
   }
 

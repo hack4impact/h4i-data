@@ -10,6 +10,7 @@ import { volunteerSchemaString } from './schemas/volunteers.schema';
 import { mentorSchemaString } from './schemas/mentors.schema';
 
 // Supporting Entity Schemas
+import { majorSchemaString } from './schemas/majors.schema';
 import { universitySchemaString } from './schemas/universities.schema';
 import { academicTermSchemaString } from './schemas/academic-terms.schema';
 import { projectRoleSchemaString } from './schemas/project-roles.schema';
@@ -37,6 +38,7 @@ export const typeDefs = [
   mentorSchemaString,
 
   // Supporting Entities
+  majorSchemaString,
   universitySchemaString,
   academicTermSchemaString,
   projectRoleSchemaString,

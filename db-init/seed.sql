@@ -95,15 +95,6 @@ CREATE TABLE public.partners (
     PRIMARY KEY (partner_id)
 );
 
-CREATE TABLE public.industries (
-    industry_id uuid NOT NULL DEFAULT gen_random_uuid(),
-    name text NOT NULL,
-    created_at timestamptz(6) NOT NULL DEFAULT now(),
-    updated_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (industry_id),
-    UNIQUE (name)
-);
-
 CREATE TABLE public.majors (
     major_id uuid NOT NULL DEFAULT gen_random_uuid(),
     name text NOT NULL,
@@ -129,15 +120,12 @@ CREATE INDEX idx_universities_location_id ON public.universities(location_id);
 CREATE TABLE public.companies (
     company_id uuid NOT NULL DEFAULT gen_random_uuid(),
     name text NOT NULL,
-    industry_id uuid NULL,
     location_id uuid NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
     PRIMARY KEY (company_id),
-    FOREIGN KEY (industry_id) REFERENCES public.industries(industry_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (location_id) REFERENCES public.locations(location_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 );
-CREATE INDEX idx_companies_industry_id ON public.companies(industry_id);
 CREATE INDEX idx_companies_location_id ON public.companies(location_id);
 
 CREATE TABLE public.academic_terms (

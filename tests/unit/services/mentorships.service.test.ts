@@ -47,7 +47,24 @@ describe('Mentorship Service', () => {
       const result = await getAllMentorships();
 
       expect(result).toEqual(mockMentorships);
-      expect(prisma.mentorships.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.mentorships.findMany).toHaveBeenCalledWith({
+        orderBy: { start_date: 'desc' },
+      });
+    });
+
+    it('should return empty array when no mentorships exist', async () => {
+      (prisma.mentorships.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllMentorships();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.mentorships.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllMentorships()).rejects.toThrow(
+        'Failed to retrieve mentorships'
+      );
     });
   });
 
@@ -86,6 +103,15 @@ describe('Mentorship Service', () => {
         "Mentorship with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.mentorships.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getMentorshipById('1')).rejects.toThrow(
+        'Failed to retrieve mentorship'
+      );
+    });
   });
 
   describe('createMentorship', () => {
@@ -115,6 +141,21 @@ describe('Mentorship Service', () => {
       expect(prisma.mentorships.create).toHaveBeenCalledWith({
         data: inputData,
       });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.mentorships.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createMentorship({
+          mentor_id: 'mentor-1',
+          mentee_id: 'mentee-1',
+          program_type: 'Career',
+          status: 'PROSPECT' as const,
+          start_date: new Date(),
+        })
+      ).rejects.toThrow('Failed to create mentorship');
     });
   });
 
@@ -146,6 +187,24 @@ describe('Mentorship Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent mentorship', async () => {
+      (prisma.mentorships.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateMentorship('non-existent-id', { status: 'COMPLETED' as const })
+      ).rejects.toThrow("Mentorship with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.mentorships.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        updateMentorship('1', { status: 'COMPLETED' as const })
+      ).rejects.toThrow('Failed to update mentorship');
+    });
   });
 
   describe('deleteMentorship', () => {
@@ -173,6 +232,24 @@ describe('Mentorship Service', () => {
       expect(prisma.mentorships.delete).toHaveBeenCalledWith({
         where: { mentorship_id: mentorshipId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent mentorship', async () => {
+      (prisma.mentorships.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteMentorship('non-existent-id')).rejects.toThrow(
+        "Mentorship with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.mentorships.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteMentorship('1')).rejects.toThrow(
+        'Failed to delete mentorship'
+      );
     });
   });
 });

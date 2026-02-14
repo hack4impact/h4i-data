@@ -42,7 +42,24 @@ describe('Project Service', () => {
       const result = await getAllProjects();
 
       expect(result).toEqual(mockProjects);
-      expect(prisma.projects.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.projects.findMany).toHaveBeenCalledWith({
+        orderBy: { created_at: 'desc' },
+      });
+    });
+
+    it('should return empty array when no projects exist', async () => {
+      (prisma.projects.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllProjects();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.projects.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllProjects()).rejects.toThrow(
+        'Failed to retrieve projects'
+      );
     });
   });
 
@@ -76,6 +93,15 @@ describe('Project Service', () => {
         "Project with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.projects.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getProjectById('1')).rejects.toThrow(
+        'Failed to retrieve project'
+      );
+    });
   });
 
   describe('createProject', () => {
@@ -100,6 +126,15 @@ describe('Project Service', () => {
 
       expect(result).toEqual(createdProject);
       expect(prisma.projects.create).toHaveBeenCalledWith({ data: inputData });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.projects.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(createProject({ name: 'New Project' })).rejects.toThrow(
+        'Failed to create project'
+      );
     });
   });
 
@@ -126,6 +161,24 @@ describe('Project Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent project', async () => {
+      (prisma.projects.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateProject('non-existent-id', { name: 'Updated' })
+      ).rejects.toThrow("Project with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.projects.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(updateProject('1', { name: 'Updated' })).rejects.toThrow(
+        'Failed to update project'
+      );
+    });
   });
 
   describe('deleteProject', () => {
@@ -148,6 +201,24 @@ describe('Project Service', () => {
       expect(prisma.projects.delete).toHaveBeenCalledWith({
         where: { project_id: projectId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent project', async () => {
+      (prisma.projects.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteProject('non-existent-id')).rejects.toThrow(
+        "Project with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.projects.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteProject('1')).rejects.toThrow(
+        'Failed to delete project'
+      );
     });
   });
 });

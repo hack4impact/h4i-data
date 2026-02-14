@@ -47,7 +47,24 @@ describe('Volunteer History Service', () => {
       const result = await getAllVolunteerHistory();
 
       expect(result).toEqual(mockHistory);
-      expect(prisma.volunteer_history.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.volunteer_history.findMany).toHaveBeenCalledWith({
+        orderBy: { effective_date: 'desc' },
+      });
+    });
+
+    it('should return empty array when no volunteer history records exist', async () => {
+      (prisma.volunteer_history.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllVolunteerHistory();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.volunteer_history.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllVolunteerHistory()).rejects.toThrow(
+        'Failed to retrieve volunteer history'
+      );
     });
   });
 
@@ -88,6 +105,15 @@ describe('Volunteer History Service', () => {
         "VolunteerHistory with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.volunteer_history.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getVolunteerHistoryById('1')).rejects.toThrow(
+        'Failed to retrieve volunteer history'
+      );
+    });
   });
 
   describe('createVolunteerHistory', () => {
@@ -117,6 +143,20 @@ describe('Volunteer History Service', () => {
       expect(prisma.volunteer_history.create).toHaveBeenCalledWith({
         data: inputData,
       });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.volunteer_history.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createVolunteerHistory({
+          volunteer_id: 'vol-1',
+          action_type: 'PROMOTED' as const,
+          new_value_label: 'Senior',
+          effective_date: new Date(),
+        })
+      ).rejects.toThrow('Failed to create volunteer history');
     });
   });
 
@@ -148,6 +188,26 @@ describe('Volunteer History Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent volunteer history', async () => {
+      (prisma.volunteer_history.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateVolunteerHistory('non-existent-id', {
+          new_value_label: 'Updated',
+        })
+      ).rejects.toThrow("VolunteerHistory with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.volunteer_history.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        updateVolunteerHistory('1', { new_value_label: 'Updated' })
+      ).rejects.toThrow('Failed to update volunteer history');
+    });
   });
 
   describe('deleteVolunteerHistory', () => {
@@ -175,6 +235,24 @@ describe('Volunteer History Service', () => {
       expect(prisma.volunteer_history.delete).toHaveBeenCalledWith({
         where: { history_id: historyId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent volunteer history', async () => {
+      (prisma.volunteer_history.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteVolunteerHistory('non-existent-id')).rejects.toThrow(
+        "VolunteerHistory with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.volunteer_history.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteVolunteerHistory('1')).rejects.toThrow(
+        'Failed to delete volunteer history'
+      );
     });
   });
 });

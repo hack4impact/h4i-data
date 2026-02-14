@@ -10,6 +10,7 @@ export * from './volunteers.controller';
 export * from './mentors.controller';
 
 // Supporting Entity Controllers
+export * from './majors.controller';
 export * from './universities.controller';
 export * from './academic-terms.controller';
 export * from './project-roles.controller';

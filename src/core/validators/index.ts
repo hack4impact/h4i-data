@@ -13,6 +13,7 @@ export * from './volunteers.validator';
 export * from './mentors.validator';
 
 // Supporting Entity Validators
+export * from './majors.validator';
 export * from './universities.validator';
 export * from './academic-terms.validator';
 export * from './project-roles.validator';

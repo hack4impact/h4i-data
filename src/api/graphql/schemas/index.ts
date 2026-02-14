@@ -10,6 +10,7 @@ export * from './volunteers.schema';
 export * from './mentors.schema';
 
 // Supporting Entity Schemas
+export * from './majors.schema';
 export * from './universities.schema';
 export * from './academic-terms.schema';
 export * from './project-roles.schema';

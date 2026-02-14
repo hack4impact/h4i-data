@@ -15,6 +15,7 @@ router.use('/volunteers', featureRoutes.volunteerRoutes);
 router.use('/mentors', featureRoutes.mentorRoutes);
 
 // Supporting Entity Routes
+router.use('/majors', featureRoutes.majorRoutes);
 router.use('/universities', featureRoutes.universityRoutes);
 router.use('/academic-terms', featureRoutes.academicTermRoutes);
 router.use('/project-roles', featureRoutes.projectRoleRoutes);

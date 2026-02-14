@@ -44,7 +44,24 @@ describe('Project Deliverable Service', () => {
       const result = await getAllProjectDeliverables();
 
       expect(result).toEqual(mockDeliverables);
-      expect(prisma.project_deliverables.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.project_deliverables.findMany).toHaveBeenCalledWith({
+        orderBy: { deliverable_id: 'asc' },
+      });
+    });
+
+    it('should return empty array when no project deliverables exist', async () => {
+      (prisma.project_deliverables.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllProjectDeliverables();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.project_deliverables.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllProjectDeliverables()).rejects.toThrow(
+        'Failed to retrieve project deliverables'
+      );
     });
   });
 
@@ -82,6 +99,15 @@ describe('Project Deliverable Service', () => {
         "ProjectDeliverable with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.project_deliverables.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getProjectDeliverableById('1')).rejects.toThrow(
+        'Failed to retrieve project deliverable'
+      );
+    });
   });
 
   describe('createProjectDeliverable', () => {
@@ -108,6 +134,20 @@ describe('Project Deliverable Service', () => {
       expect(prisma.project_deliverables.create).toHaveBeenCalledWith({
         data: inputData,
       });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.project_deliverables.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createProjectDeliverable({
+          project_id: 'proj-1',
+          label: 'Spec',
+          url: 'https://example.com',
+          category: 'DESIGN_SPEC' as const,
+        })
+      ).rejects.toThrow('Failed to create project deliverable');
     });
   });
 
@@ -136,6 +176,26 @@ describe('Project Deliverable Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent project deliverable', async () => {
+      (prisma.project_deliverables.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateProjectDeliverable('non-existent-id', { label: 'Updated' })
+      ).rejects.toThrow(
+        "ProjectDeliverable with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.project_deliverables.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        updateProjectDeliverable('1', { label: 'Updated' })
+      ).rejects.toThrow('Failed to update project deliverable');
+    });
   });
 
   describe('deleteProjectDeliverable', () => {
@@ -160,6 +220,24 @@ describe('Project Deliverable Service', () => {
       expect(prisma.project_deliverables.delete).toHaveBeenCalledWith({
         where: { deliverable_id: deliverableId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent project deliverable', async () => {
+      (prisma.project_deliverables.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteProjectDeliverable('non-existent-id')).rejects.toThrow(
+        "ProjectDeliverable with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.project_deliverables.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteProjectDeliverable('1')).rejects.toThrow(
+        'Failed to delete project deliverable'
+      );
     });
   });
 });

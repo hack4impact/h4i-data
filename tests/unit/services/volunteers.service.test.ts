@@ -67,6 +67,21 @@ describe('Volunteer Service', () => {
         include: { constituents: true },
       });
     });
+
+    it('should return empty array when no volunteers exist', async () => {
+      (prisma.volunteers.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllVolunteers();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.volunteers.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllVolunteers()).rejects.toThrow(
+        'Failed to retrieve volunteers'
+      );
+    });
   });
 
   describe('getVolunteerById', () => {
@@ -115,6 +130,15 @@ describe('Volunteer Service', () => {
 
       await expect(getVolunteerById(volunteerId)).rejects.toThrow(
         "Volunteer with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.volunteers.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getVolunteerById('1')).rejects.toThrow(
+        'Failed to retrieve volunteer'
       );
     });
   });
@@ -187,6 +211,24 @@ describe('Volunteer Service', () => {
         "Constituent with id 'non-existent-const' not found"
       );
     });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.constituents.findUnique as jest.Mock).mockResolvedValue({
+        constituent_id: 'const-1',
+      });
+      (prisma.volunteers.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createVolunteer({
+          volunteer_id: 'const-1',
+          org_email: 'test@org.edu',
+          status: 'ACTIVE' as const,
+          volunteer_class: 'COLLEGIATE' as const,
+          engagement_track: 'PROGRAMS' as const,
+        })
+      ).rejects.toThrow('Failed to create volunteer');
+    });
   });
 
   describe('updateVolunteer', () => {
@@ -230,6 +272,24 @@ describe('Volunteer Service', () => {
         include: { constituents: true },
       });
     });
+
+    it('should throw NotFoundError when updating non-existent volunteer', async () => {
+      (prisma.volunteers.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateVolunteer('non-existent-id', { status: 'INACTIVE' as const })
+      ).rejects.toThrow("Volunteer with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.volunteers.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        updateVolunteer('1', { status: 'INACTIVE' as const })
+      ).rejects.toThrow('Failed to update volunteer');
+    });
   });
 
   describe('deleteVolunteer', () => {
@@ -270,6 +330,24 @@ describe('Volunteer Service', () => {
         where: { volunteer_id: volunteerId },
         include: { constituents: true },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent volunteer', async () => {
+      (prisma.volunteers.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteVolunteer('non-existent-id')).rejects.toThrow(
+        "Volunteer with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.volunteers.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteVolunteer('1')).rejects.toThrow(
+        'Failed to delete volunteer'
+      );
     });
   });
 });

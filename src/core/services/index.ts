@@ -10,6 +10,7 @@ export * from './volunteer.service';
 export * from './mentors.service';
 
 // Supporting Entity Services
+export * from './majors.service';
 export * from './universities.service';
 export * from './academic-terms.service';
 export * from './project-roles.service';

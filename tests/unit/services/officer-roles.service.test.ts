@@ -6,6 +6,7 @@ import {
   deleteOfficerRole,
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
+import { Prisma } from '@prisma/client';
 
 jest.mock('../../../src/config/database', () => ({
   prisma: {
@@ -41,7 +42,24 @@ describe('Officer Role Service', () => {
       const result = await getAllOfficerRoles();
 
       expect(result).toEqual(mockRoles);
-      expect(prisma.officer_roles.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.officer_roles.findMany).toHaveBeenCalledWith({
+        orderBy: { name: 'asc' },
+      });
+    });
+
+    it('should return empty array when no officer roles exist', async () => {
+      (prisma.officer_roles.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllOfficerRoles();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.officer_roles.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllOfficerRoles()).rejects.toThrow(
+        'Failed to retrieve officer roles'
+      );
     });
   });
 
@@ -76,6 +94,15 @@ describe('Officer Role Service', () => {
         "OfficerRole with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.officer_roles.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getOfficerRoleById('1')).rejects.toThrow(
+        'Failed to retrieve officer role'
+      );
+    });
   });
 
   describe('createOfficerRole', () => {
@@ -99,6 +126,19 @@ describe('Officer Role Service', () => {
       expect(prisma.officer_roles.create).toHaveBeenCalledWith({
         data: inputData,
       });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.officer_roles.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createOfficerRole({
+          name: 'Vice President',
+          scope: 'CHAPTER' as const,
+          rank_level: 2,
+        })
+      ).rejects.toThrow('Failed to create officer role');
     });
   });
 
@@ -124,6 +164,27 @@ describe('Officer Role Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent officer role', async () => {
+      (prisma.officer_roles.update as jest.Mock).mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '7.0.0',
+        })
+      );
+      await expect(
+        updateOfficerRole('non-existent-id', { name: 'Updated' })
+      ).rejects.toThrow("OfficerRole with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.officer_roles.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(updateOfficerRole('1', { name: 'Updated' })).rejects.toThrow(
+        'Failed to update officer role'
+      );
+    });
   });
 
   describe('deleteOfficerRole', () => {
@@ -145,6 +206,27 @@ describe('Officer Role Service', () => {
       expect(prisma.officer_roles.delete).toHaveBeenCalledWith({
         where: { role_id: roleId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent officer role', async () => {
+      (prisma.officer_roles.delete as jest.Mock).mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '7.0.0',
+        })
+      );
+      await expect(deleteOfficerRole('non-existent-id')).rejects.toThrow(
+        "OfficerRole with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.officer_roles.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteOfficerRole('1')).rejects.toThrow(
+        'Failed to delete officer role'
+      );
     });
   });
 });

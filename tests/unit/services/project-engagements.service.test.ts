@@ -47,7 +47,24 @@ describe('Project Engagement Service', () => {
       const result = await getAllProjectEngagements();
 
       expect(result).toEqual(mockEngagements);
-      expect(prisma.project_engagements.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.project_engagements.findMany).toHaveBeenCalledWith({
+        orderBy: { created_at: 'desc' },
+      });
+    });
+
+    it('should return empty array when no project engagements exist', async () => {
+      (prisma.project_engagements.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllProjectEngagements();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.project_engagements.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllProjectEngagements()).rejects.toThrow(
+        'Failed to retrieve project engagements'
+      );
     });
   });
 
@@ -88,6 +105,15 @@ describe('Project Engagement Service', () => {
         "ProjectEngagement with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.project_engagements.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getProjectEngagementById('1')).rejects.toThrow(
+        'Failed to retrieve project engagement'
+      );
+    });
   });
 
   describe('createProjectEngagement', () => {
@@ -117,6 +143,21 @@ describe('Project Engagement Service', () => {
       expect(prisma.project_engagements.create).toHaveBeenCalledWith({
         data: inputData,
       });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.project_engagements.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createProjectEngagement({
+          project_id: 'proj-1',
+          partner_id: 'partner-1',
+          chapter_id: 'chapter-1',
+          status: 'PROSPECT' as const,
+          domain: 'DESIGN_ONLY' as const,
+        })
+      ).rejects.toThrow('Failed to create project engagement');
     });
   });
 
@@ -148,6 +189,28 @@ describe('Project Engagement Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent project engagement', async () => {
+      (prisma.project_engagements.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateProjectEngagement('non-existent-id', {
+          status: 'COMPLETED' as const,
+        })
+      ).rejects.toThrow(
+        "ProjectEngagement with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.project_engagements.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        updateProjectEngagement('1', { status: 'COMPLETED' as const })
+      ).rejects.toThrow('Failed to update project engagement');
+    });
   });
 
   describe('deleteProjectEngagement', () => {
@@ -175,6 +238,24 @@ describe('Project Engagement Service', () => {
       expect(prisma.project_engagements.delete).toHaveBeenCalledWith({
         where: { engagement_id: engagementId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent project engagement', async () => {
+      (prisma.project_engagements.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteProjectEngagement('non-existent-id')).rejects.toThrow(
+        "ProjectEngagement with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.project_engagements.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteProjectEngagement('1')).rejects.toThrow(
+        'Failed to delete project engagement'
+      );
     });
   });
 });

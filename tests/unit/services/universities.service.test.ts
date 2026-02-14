@@ -43,7 +43,24 @@ describe('University Service', () => {
       const result = await getAllUniversities();
 
       expect(result).toEqual(mockUniversities);
-      expect(prisma.universities.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.universities.findMany).toHaveBeenCalledWith({
+        orderBy: { name: 'asc' },
+      });
+    });
+
+    it('should return empty array when no universities exist', async () => {
+      (prisma.universities.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllUniversities();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.universities.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllUniversities()).rejects.toThrow(
+        'Failed to retrieve universities'
+      );
     });
   });
 
@@ -78,6 +95,15 @@ describe('University Service', () => {
         "University with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.universities.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getUniversityById('1')).rejects.toThrow(
+        'Failed to retrieve university'
+      );
+    });
   });
 
   describe('createUniversity', () => {
@@ -103,6 +129,15 @@ describe('University Service', () => {
       expect(prisma.universities.create).toHaveBeenCalledWith({
         data: inputData,
       });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.universities.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createUniversity({ name: 'New University', email_domain: 'new.edu' })
+      ).rejects.toThrow('Failed to create university');
     });
   });
 
@@ -130,6 +165,24 @@ describe('University Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent university', async () => {
+      (prisma.universities.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+      await expect(
+        updateUniversity('non-existent-id', { name: 'Updated' })
+      ).rejects.toThrow("University with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.universities.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(updateUniversity('1', { name: 'Updated' })).rejects.toThrow(
+        'Failed to update university'
+      );
+    });
   });
 
   describe('deleteUniversity', () => {
@@ -153,6 +206,24 @@ describe('University Service', () => {
       expect(prisma.universities.delete).toHaveBeenCalledWith({
         where: { university_id: universityId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent university', async () => {
+      (prisma.universities.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+      await expect(deleteUniversity('non-existent-id')).rejects.toThrow(
+        "University with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.universities.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteUniversity('1')).rejects.toThrow(
+        'Failed to delete university'
+      );
     });
   });
 });

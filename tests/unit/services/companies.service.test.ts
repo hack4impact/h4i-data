@@ -41,7 +41,25 @@ describe('Company Service', () => {
       const result = await getAllCompanies();
 
       expect(result).toEqual(mockCompanies);
-      expect(prisma.companies.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.companies.findMany).toHaveBeenCalledWith();
+    });
+
+    it('should return empty array when no companies exist', async () => {
+      (prisma.companies.findMany as jest.Mock).mockResolvedValue([]);
+
+      const result = await getAllCompanies();
+
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.companies.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(getAllCompanies()).rejects.toThrow(
+        'Failed to retrieve companies'
+      );
     });
   });
 
@@ -73,6 +91,16 @@ describe('Company Service', () => {
         "Company with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.companies.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(getCompanyById('1')).rejects.toThrow(
+        'Failed to retrieve company'
+      );
+    });
   });
 
   describe('createCompany', () => {
@@ -94,6 +122,16 @@ describe('Company Service', () => {
 
       expect(result).toEqual(createdCompany);
       expect(prisma.companies.create).toHaveBeenCalledWith({ data: inputData });
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.companies.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(createCompany({ name: 'New Company' })).rejects.toThrow(
+        'Failed to create company'
+      );
     });
   });
 
@@ -118,6 +156,26 @@ describe('Company Service', () => {
         data: updateData,
       });
     });
+
+    it('should throw NotFoundError when updating non-existent company', async () => {
+      (prisma.companies.update as jest.Mock).mockRejectedValue(
+        new Error('Record to update not found')
+      );
+
+      await expect(
+        updateCompany('non-existent-id', { name: 'Updated' })
+      ).rejects.toThrow("Company with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.companies.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(updateCompany('1', { name: 'Updated' })).rejects.toThrow(
+        'Failed to update company'
+      );
+    });
   });
 
   describe('deleteCompany', () => {
@@ -138,6 +196,26 @@ describe('Company Service', () => {
       expect(prisma.companies.delete).toHaveBeenCalledWith({
         where: { company_id: companyId },
       });
+    });
+
+    it('should throw NotFoundError when deleting non-existent company', async () => {
+      (prisma.companies.delete as jest.Mock).mockRejectedValue(
+        new Error('Record to delete does not exist')
+      );
+
+      await expect(deleteCompany('non-existent-id')).rejects.toThrow(
+        "Company with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.companies.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(deleteCompany('1')).rejects.toThrow(
+        'Failed to delete company'
+      );
     });
   });
 });
