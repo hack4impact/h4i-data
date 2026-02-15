@@ -3,6 +3,7 @@ import express from 'express';
 import { Server } from 'http';
 import { createGraphqlApp } from '../../../src/api/graphql/server';
 import { env } from '../../../src/config/server';
+// import { query } from 'winston';
 
 let server: Server;
 let app: express.Application;
@@ -17,6 +18,7 @@ afterAll(() => {
 });
 
 describe('GraphQL API - Chapters', () => {
+  let chapterId: string;
   it('should create a new chapter via mutation', async () => {
     const mutation = `
       mutation CreateChapter($input: CreateChapterInput!) {
@@ -72,7 +74,7 @@ describe('GraphQL API - Chapters', () => {
 
     expect(createResponse.status).toBe(200);
     expect(createResponse.body.errors).toBeUndefined();
-    const chapterId = createResponse.body.data.createChapter.chapter_id;
+    chapterId = createResponse.body.data.createChapter.chapter_id;
 
     // Now fetch it
     const query = `
@@ -93,5 +95,45 @@ describe('GraphQL API - Chapters', () => {
     const chapter = response.body.data.chapter;
     expect(chapter.chapter_id).toBe(chapterId);
     expect(chapter.name).toBe('Test Chapter for Query');
+  });
+  //updateChapter
+  it('updates a chapter name', async () => {
+    const mutation = {
+      query: `
+      mutation Update($id: ID!, $input: UpdateChapterInput!) {
+          updateChapter(id: $id, input: $input) { company_id name }
+        }`,
+      variables: {
+        id: chapterId,
+        input: {
+          name: 'Test Chapter for Query Updated',
+        },
+      },
+    };
+
+    const res = await request(server).post('/').send(mutation);
+    expect(res.status).toBe(200);
+    expect(res.body.data.updateChapter.name).toBe(
+      'Test Chapter for Query Updated'
+    );
+  });
+  //deletes a chapter
+  it('Deletes a chapter', async () => {
+    const deleteMutation = {
+      query: `mutation Delete($id: ID!) {deleteChapter(chapter_id: $id)}`,
+      variables: { id: chapterId },
+    };
+    const res = await request(server).post('/').send(deleteMutation);
+    expect(res.status).toBe(200);
+    expect(res.body.data.deleteChapter).toBe(true);
+
+    const verify = await request(server)
+      .post('/')
+      .send({
+        query: `query($id: ID!) { chapter(chapter_id: $id) { chapter_id } }`,
+        variables: { id: chapterId },
+      });
+    expect(verify.status).toBe(200);
+    expect(verify.body.data.company).toBeNull();
   });
 });
