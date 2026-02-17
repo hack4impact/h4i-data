@@ -311,7 +311,9 @@ describe('Project Service', () => {
     it('should sort projects by longest to shortest', async () => {
       // Mock Date.now() to return a fixed date for ongoing project calculation
       const mockNow = new Date('2024-12-31');
-      jest.spyOn(global, 'Date').mockImplementation(() => mockNow as any);
+      jest
+        .spyOn(global, 'Date')
+        .mockImplementation(() => mockNow as unknown as Date);
 
       // Act
       const result = await getProjectsWithFilters({
@@ -330,7 +332,9 @@ describe('Project Service', () => {
     it('should sort projects by shortest to longest', async () => {
       // Mock Date.now() to return a fixed date for ongoing project calculation
       const mockNow = new Date('2024-12-31');
-      jest.spyOn(global, 'Date').mockImplementation(() => mockNow as any);
+      jest
+        .spyOn(global, 'Date')
+        .mockImplementation(() => mockNow as unknown as Date);
 
       // Act
       const result = await getProjectsWithFilters({
@@ -349,7 +353,9 @@ describe('Project Service', () => {
     it('should filter by status and sort by length', async () => {
       // Mock Date.now() to return a fixed date for ongoing project calculation
       const mockNow = new Date('2024-12-31');
-      jest.spyOn(global, 'Date').mockImplementation(() => mockNow as any);
+      jest
+        .spyOn(global, 'Date')
+        .mockImplementation(() => mockNow as unknown as Date);
 
       // Act
       const result = await getProjectsWithFilters({
@@ -396,7 +402,9 @@ describe('Project Service', () => {
     it('should handle projects with null end_date (ongoing projects)', async () => {
       // Mock Date.now() to return a fixed date
       const mockNow = new Date('2024-12-31');
-      jest.spyOn(global, 'Date').mockImplementation(() => mockNow as any);
+      jest
+        .spyOn(global, 'Date')
+        .mockImplementation(() => mockNow as unknown as Date);
 
       // Act
       const result = await getProjectsWithFilters({

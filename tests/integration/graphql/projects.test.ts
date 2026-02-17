@@ -4,6 +4,7 @@ import { Server } from 'http';
 import { createGraphqlApp } from '../../../src/api/graphql/server';
 import { env } from '../../../src/config/server';
 import { prisma } from '../../../src/config/database';
+// import { clear } from 'console';
 
 let server: Server;
 let app: express.Application;
@@ -380,12 +381,12 @@ describe('GraphQL API - Projects', () => {
       expect(projects.length).toBeGreaterThanOrEqual(3);
 
       // Find our test projects in the results
-      const projectMap = new Map(
-        projects.map((p: { project_id: string; name: string }) => [
-          p.project_id,
-          p.name,
-        ])
-      );
+      // const projectMap = new Map(
+      //   projects.map((p: { project_id: string; name: string }) => [
+      //     p.project_id,
+      //     p.name,
+      //   ])
+      // );
 
       const longProjectIndex = projects.findIndex(
         (p: { project_id: string }) => p.project_id === testProject2Id
