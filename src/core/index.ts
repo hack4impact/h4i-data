@@ -17,6 +17,11 @@ export type {
   EnrichedNonprofit,
 } from './services/nonprofits.service';
 
+export type {
+  ProjectLengthSortOption,
+  GetProjectsFilters,
+} from './services/projects.service';
+
 // Validators
 export * from './validators/chapters.validator';
 export * from './validators/companies.validator';
