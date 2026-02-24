@@ -180,6 +180,15 @@ afterAll(async () => {
 });
 
 describe('GraphQL API - Nonprofits Sorting and Filtering', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-01'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   const nonprofitsQuery = `query Nonprofits($chapterIds: [ID!], $statuses: [StatusType!], $sort: [NonprofitSortOption!]) { nonprofits(chapterIds: $chapterIds, statuses: $statuses, sort: $sort) { nonprofit_id name status } }`;
 
   it('should sort nonprofits A to Z by name', async () => {

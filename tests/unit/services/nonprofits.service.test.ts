@@ -22,6 +22,15 @@ jest.mock('../../../src/config/database', () => ({
 }));
 
 describe('Nonprofit Service', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-01'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
