@@ -1,3 +1,6 @@
+// Shared Enums
+export * from './enums.schema';
+
 // Core Entity Schemas
 export * from './chapters.schema';
 export * from './companies.schema';

@@ -1,3 +1,6 @@
+// Shared Enums (must come first — referenced by other schemas)
+import { enumsSchemaString } from './schemas/enums.schema';
+
 // Core Entity Schemas
 import { chapterSchemaString } from './schemas/chapters.schema';
 import { companySchemaString } from './schemas/companies.schema';
@@ -26,6 +29,9 @@ import { projectStaffingSchemaString } from './schemas/project-staffing.schema';
 
 // Combine all schema strings into a single array
 export const typeDefs = [
+  // Shared Enums
+  enumsSchemaString,
+
   // Core Entities
   chapterSchemaString,
   companySchemaString,

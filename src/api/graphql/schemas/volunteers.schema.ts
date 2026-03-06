@@ -1,31 +1,4 @@
 export const volunteerSchemaString = `
-  enum VolunteerClass {
-    COLLEGIATE
-    ALUMNI
-    ASSOCIATE
-  }
-
-  enum EngagementTrack {
-    PROGRAMS
-    CENTRAL
-    ADVISORY
-  }
-
-  enum EducationLevel {
-    UNDERGRADUATE
-    GRADUATE
-    BOOTCAMP
-    SELF_TAUGHT
-    OTHER
-  }
-
-  enum MemberStatus {
-    PROSPECT
-    ACTIVE
-    INACTIVE
-    ON_HIATUS
-  }
-
   type Volunteer {
     volunteer_id: ID!
     org_email: String

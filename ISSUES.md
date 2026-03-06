@@ -91,7 +91,7 @@ being merged first. This is an implicit ordering dependency with no enforcement.
 Fix: Extract shared GraphQL enums (`MemberStatus`, `VolunteerClass`, `EngagementTrack`,
 `EducationLevel`) into a dedicated `enums.schema.ts` and include it first in `schemas.ts`.
 
-### 16. `src/core/index.ts` manually re-exports every validator instead of delegating to `validators/index.ts`
+### 16. `src/core/index.ts` manually re-exports every validator instead of delegating to `validators/index.ts` [DONE]
 `src/core/validators/index.ts` already exports every validator file.
 `src/core/index.ts` duplicates all of those re-exports line by line instead of using
 `export * from './validators'`.
