@@ -21,19 +21,24 @@ pnpm install
 
 ### 3. Environment Setup
 
-Create a `.env` file in the root directory and copy fields from `.env.example`:
+Copy `.env.example` to `.env` and fill in the values (credentials available in Vaultwarden):
+
+```bash
+cp .env.example .env
+```
 
 ```env
-# Database Configuration
-DATABASE_URL=your_database_url_here
+# Connect to Supabase via connection pooling
+DATABASE_URL="postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true"
+
+# Direct connection to the database. Used for migrations
+DIRECT_URL="postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres"
 
 # Server Configuration
 PORT=3001
 REST_PORT=3002
 GRAPHQL_PORT=3003
 ```
-
-Access the important fields from Vaultwarden from this: https://vault.hack4impact.org/#/login
 
 ### 4. Database Setup
 

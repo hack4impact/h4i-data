@@ -4,7 +4,8 @@ import { prisma, connectDB, disconnectDB } from '../src/config/database';
 beforeAll(async () => {
   // Only connect for integration tests, not unit tests
   const testFilePath = expect.getState().testPath;
-  const isIntegrationTest = testFilePath?.includes('/integration/') ?? false;
+  const isIntegrationTest =
+    testFilePath?.match(/[/\\]integration[/\\]/) != null;
 
   if (isIntegrationTest) {
     try {
@@ -20,7 +21,8 @@ beforeAll(async () => {
 afterAll(async () => {
   // Only disconnect for integration tests
   const testFilePath = expect.getState().testPath;
-  const isIntegrationTest = testFilePath?.includes('/integration/') ?? false;
+  const isIntegrationTest =
+    testFilePath?.match(/[/\\]integration[/\\]/) != null;
 
   if (isIntegrationTest) {
     try {
@@ -36,7 +38,7 @@ beforeEach(async () => {
   try {
     // Only clean for tests that actually use the database (not mocked unit tests)
     const testFilePath = expect.getState().testPath;
-    const isUnitTest = testFilePath?.includes('/unit/') ?? false;
+    const isUnitTest = testFilePath?.match(/[/\\]unit[/\\]/) != null;
 
     // Skip cleanup for unit tests since they mock the database
     if (!isUnitTest) {
