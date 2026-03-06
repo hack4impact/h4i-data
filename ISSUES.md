@@ -61,3 +61,38 @@ Fix: Remove the casts.
 Used to avoid a supposed circular dependency that does not actually exist.
 Both `database.ts` and `logger.ts` import from `server.ts` but do not import each other.
 Fix: Replace with a static `import { logger } from './logger'`.
+
+---
+
+## New Issues (Structural / Consistency)
+
+### 12. `console.error` in `database.ts` instead of `logger`
+`connectDB` (line 79) and `disconnectDB` (line 90) catch blocks use `console.error` while the
+rest of the file already uses `logger`. These were missed when fixing issue #6.
+Fix: Replace both `console.error` calls with `logger.error`.
+
+### 13. `companies.resolvers.ts` is inconsistent with every other resolver [DONE]
+Multiple deviations from the pattern used by all 18 other resolvers:
+- Imports directly from `'../../../core/services/companies.service'` instead of `'../../../core'`
+- Uses `company_id` as argument name instead of `id`
+- No Zod validation via `.parse()` — all other resolvers validate input before passing to services
+- `deleteCompany` returns `Boolean!` instead of the deleted entity (schema and resolver both differ)
+- Uses inline TypeScript types instead of Zod-inferred types
+Fix: Rewrite to match the pattern used by all other resolvers.
+
+### 14. `companies.schema.ts` uses `extend type Query/Mutation` instead of `type` [DONE]
+All 19 other schema files use `type Query { ... }` and `type Mutation { ... }`.
+`companies.schema.ts` is the only file using `extend type Query` and `extend type Mutation`.
+Fix: Change `extend type` to `type` to match every other schema file.
+
+### 15. `MemberStatus` enum used in `mentors.schema.ts` but defined only in `volunteers.schema.ts`
+`mentors.schema.ts` references `MemberStatus` without defining it, relying on `volunteers.schema.ts`
+being merged first. This is an implicit ordering dependency with no enforcement.
+Fix: Extract shared GraphQL enums (`MemberStatus`, `VolunteerClass`, `EngagementTrack`,
+`EducationLevel`) into a dedicated `enums.schema.ts` and include it first in `schemas.ts`.
+
+### 16. `src/core/index.ts` manually re-exports every validator instead of delegating to `validators/index.ts`
+`src/core/validators/index.ts` already exports every validator file.
+`src/core/index.ts` duplicates all of those re-exports line by line instead of using
+`export * from './validators'`.
+Fix: Replace the 16 individual validator `export *` lines with a single `export * from './validators'`.

@@ -7,11 +7,11 @@ const app = createGraphqlApp();
 const createTestCompany = async (name = 'Test Co') => {
   const mutation = {
     query: `
-      mutation Create($input: CompanyCreateInput!) {
+      mutation Create($input: CreateCompanyInput!) {
         createCompany(input: $input) { company_id name }
       }
     `,
-    variables: { input: { name, location_id: null } },
+    variables: { input: { name } },
   };
   const res = await request(app).post('/').send(mutation);
   return res.body.data.createCompany;
@@ -32,7 +32,7 @@ describe('GraphQL Companies CRUD', () => {
     const company = await createTestCompany();
     const query = {
       query: `
-        query One($id: ID!) { company(company_id: $id) { company_id name } }
+        query One($id: ID!) { company(id: $id) { company_id name } }
       `,
       variables: { id: company.company_id },
     };
@@ -50,8 +50,8 @@ describe('GraphQL Companies CRUD', () => {
     const company = await createTestCompany();
     const mutation = {
       query: `
-        mutation Update($id: ID!, $input: CompanyUpdateInput!) {
-          updateCompany(company_id: $id, input: $input) { company_id name }
+        mutation Update($id: ID!, $input: UpdateCompanyInput!) {
+          updateCompany(id: $id, input: $input) { company_id name }
         }
       `,
       variables: {
@@ -88,7 +88,7 @@ describe('GraphQL Companies CRUD', () => {
     const company = await createTestCompany();
     const mutation = {
       query: `
-        mutation Delete($id: ID!) { deleteCompany(company_id: $id) }
+        mutation Delete($id: ID!) { deleteCompany(id: $id) { company_id } }
       `,
       variables: { id: company.company_id },
     };
@@ -96,13 +96,13 @@ describe('GraphQL Companies CRUD', () => {
     // Act
     const res = await request(app).post('/').send(mutation);
     expect(res.status).toBe(200);
-    expect(res.body.data.deleteCompany).toBe(true);
+    expect(res.body.data.deleteCompany.company_id).toBe(company.company_id);
 
     // Assert: Verify it's gone
     const verifyRes = await request(app)
       .post('/')
       .send({
-        query: `query($id: ID!) { company(company_id: $id) { company_id } }`,
+        query: `query($id: ID!) { company(id: $id) { company_id } }`,
         variables: { id: company.company_id },
       });
     expect(verifyRes.status).toBe(200);

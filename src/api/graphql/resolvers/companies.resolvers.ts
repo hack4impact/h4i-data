@@ -1,47 +1,41 @@
 import {
   createCompany,
+  createCompanySchema,
   deleteCompany,
-  getCompanyById,
   getAllCompanies,
+  getCompanyById,
   updateCompany,
-} from '../../../core/services/companies.service';
+  updateCompanySchema,
+} from '../../../core';
+import { z } from 'zod';
+
+type CreateCompanyInput = z.infer<typeof createCompanySchema>;
+type UpdateCompanyInput = z.infer<typeof updateCompanySchema>;
 
 export const companyResolvers = {
   Query: {
-    company: (_: unknown, args: { company_id: string }) => {
-      return getCompanyById(args.company_id);
-    },
-    companies: () => {
-      return getAllCompanies();
+    companies: () => getAllCompanies(),
+    company: (_parent: unknown, { id }: { id: string }) => {
+      return getCompanyById(id);
     },
   },
   Mutation: {
     createCompany: (
-      _: unknown,
-      args: { input: { name: string; location_id?: string | null } }
+      _parent: unknown,
+      { input }: { input: CreateCompanyInput }
     ) => {
-      const input = {
-        name: args.input.name,
-        location_id: args.input.location_id || undefined,
-      };
-      return createCompany(input);
+      const validatedInput = createCompanySchema.parse(input);
+      return createCompany(validatedInput);
     },
     updateCompany: (
-      _: unknown,
-      args: {
-        company_id: string;
-        input: { name?: string | null; location_id?: string | null };
-      }
+      _parent: unknown,
+      { id, input }: { id: string; input: UpdateCompanyInput }
     ) => {
-      const input = {
-        name: args.input.name || undefined,
-        location_id: args.input.location_id || undefined,
-      };
-      return updateCompany(args.company_id, input);
+      const validatedInput = updateCompanySchema.parse(input);
+      return updateCompany(id, validatedInput);
     },
-    deleteCompany: async (_: unknown, args: { company_id: string }) => {
-      await deleteCompany(args.company_id);
-      return true;
+    deleteCompany: (_parent: unknown, { id }: { id: string }) => {
+      return deleteCompany(id);
     },
   },
 };
