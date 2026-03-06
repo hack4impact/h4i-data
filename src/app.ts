@@ -3,6 +3,7 @@ import { createRestApp } from './api/rest/server';
 import { createGraphqlApp } from './api/graphql/server';
 import { env } from './config/server';
 import { connectDB, disconnectDB } from './config/database';
+import { logger } from './config/logger';
 
 async function startServer() {
   await connectDB();
@@ -19,20 +20,20 @@ async function startServer() {
 
   const port = process.env.PORT || env.PORT || 3001;
   const server = app.listen(port, () => {
-    console.log(`Integrated server ready at http://localhost:${env.PORT}`);
-    console.log(`REST API available at http://localhost:${env.PORT}/api/rest`);
-    console.log(
-      `GraphQL API available at http://localhost:${env.PORT}/api/graphql`
-    );
+    logger.info('Integrated server started', {
+      port: env.PORT,
+      rest: `http://localhost:${env.PORT}/api/rest`,
+      graphql: `http://localhost:${env.PORT}/api/graphql`,
+    });
   });
 
   // --- Graceful shutdown logic ---
   async function shutdown(signal: string) {
-    console.log(`\nReceived ${signal}, shutting down gracefully...`);
+    logger.info('Shutting down gracefully', { signal });
 
     // 1. Stop the server from accepting new connections
     server.close(async () => {
-      console.log('HTTP server closed.');
+      logger.info('HTTP server closed');
 
       // 2. Disconnect from the database
       await disconnectDB();

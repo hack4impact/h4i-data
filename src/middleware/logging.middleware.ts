@@ -1,11 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { logger } from '../config/logger';
 import { randomUUID } from 'crypto';
-
-// Add request ID to Express Request type
-interface RequestWithId extends Request {
-  requestId?: string;
-}
+import { RequestWithId } from './error.middleware';
 
 // Generate unique request ID
 const generateRequestId = (): string => randomUUID();

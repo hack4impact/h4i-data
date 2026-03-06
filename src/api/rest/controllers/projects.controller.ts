@@ -1,9 +1,4 @@
-import { Request, Response } from 'express';
-
-// Add request ID to Express Request type
-interface RequestWithId extends Request {
-  requestId?: string;
-}
+import { Response } from 'express';
 import {
   getAllProjects,
   getProjectById,
@@ -13,7 +8,7 @@ import {
   createProjectSchema,
   updateProjectSchema,
 } from '../../../core';
-import { asyncHandler } from '../../../middleware';
+import { asyncHandler, RequestWithId } from '../../../middleware';
 import { logger } from '../../../config/logger';
 
 export const projectController = {

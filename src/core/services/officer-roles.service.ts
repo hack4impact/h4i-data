@@ -70,8 +70,7 @@ export async function createOfficerRole(data: CreateOfficerRoleInput) {
       roleData: data,
     });
 
-    const validated = createOfficerRoleSchema.parse(data);
-    const role = await prisma.officer_roles.create({ data: validated });
+    const role = await prisma.officer_roles.create({ data });
 
     logger.info('Successfully created officer role', {
       roleId: role.role_id,
@@ -95,10 +94,9 @@ export async function updateOfficerRole(
   try {
     logger.info('Updating officer role', { roleId: id, updateData: data });
 
-    const validated = updateOfficerRoleSchema.parse(data);
     const role = await prisma.officer_roles.update({
       where: { role_id: id },
-      data: validated,
+      data,
     });
 
     logger.info('Successfully updated officer role', {

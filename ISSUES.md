@@ -22,16 +22,16 @@ Fix: Replace with `req.socket.remoteAddress` in:
 
 ## Medium (DRY / consistency)
 
-### 4. `RequestWithId` duplicated in 21 files [OPEN]
+### 4. `RequestWithId` duplicated in 21 files [DONE]
 Defined locally in every controller, `logging.middleware.ts`, and `error.middleware.ts`.
 Fix: Export it from `error.middleware.ts` and import it everywhere else.
 
-### 5. Double validation in `officer-roles.service.ts` [OPEN]
+### 5. Double validation in `officer-roles.service.ts` [DONE]
 `createOfficerRole` and `updateOfficerRole` call `.parse()` on already-typed input.
 No other service does this.
 Fix: Remove the redundant `.parse()` calls and pass `data` directly.
 
-### 6. `app.ts` uses `console.log` instead of `logger` [OPEN]
+### 6. `app.ts` uses `console.log` instead of `logger` [DONE]
 Startup and shutdown messages use raw `console.log` while the rest of the codebase uses winston.
 Fix: Import and use `logger` from `src/config/logger.ts`.
 

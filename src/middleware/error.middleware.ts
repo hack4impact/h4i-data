@@ -4,7 +4,7 @@ import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
 
 // Add request ID to Express Request type
-interface RequestWithId extends Request {
+export interface RequestWithId extends Request {
   requestId?: string;
 }
 

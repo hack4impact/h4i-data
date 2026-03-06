@@ -1,9 +1,4 @@
-import { Request, Response } from 'express';
-
-interface RequestWithId extends Request {
-  requestId?: string;
-}
-
+import { Response } from 'express';
 import {
   getAllUniversities,
   getUniversityById,
@@ -13,7 +8,7 @@ import {
   createUniversitySchema,
   updateUniversitySchema,
 } from '../../../core';
-import { asyncHandler } from '../../../middleware';
+import { asyncHandler, RequestWithId } from '../../../middleware';
 import { logger } from '../../../config/logger';
 
 export const universityController = {

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import {
   getAllLocations,
   getLocationById,
@@ -8,12 +8,8 @@ import {
   createLocationSchema,
   updateLocationSchema,
 } from '../../../core';
-import { asyncHandler } from '../../../middleware';
+import { asyncHandler, RequestWithId } from '../../../middleware';
 import { logger } from '../../../config/logger';
-
-interface RequestWithId extends Request {
-  requestId?: string;
-}
 
 export const locationController = {
   getAllLocations: asyncHandler(async (_req: RequestWithId, res: Response) => {
