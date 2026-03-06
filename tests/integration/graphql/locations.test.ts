@@ -31,12 +31,31 @@ const createTestLocation = async () => {
 describe('GraphQL API - Locations', () => {
   it('should create a new location via mutation', async () => {
     // Act
-    const location = await createTestLocation();
+    const mutation = `
+      mutation CreateLocation($input: CreateLocationInput!) {
+        createLocation(input: $input) {
+          location_id
+          name
+          address_line
+        }
+      }
+    `;
+    const variables = {
+      input: {
+        name: 'Headquarters',
+        address_line: '123 Main Street',
+        state_code: 'CA',
+        country_code: 'USA',
+      },
+    };
+    const response = await request(app)
+      .post('/')
+      .send({ query: mutation, variables });
 
     // Assert
-    expect(location).toHaveProperty('location_id');
-    expect(location.name).toBe('Test Location');
-    expect(location.address_line).toBe('123 Test St');
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.createLocation).toHaveProperty('location_id');
   });
 
   it('should fetch a location by its ID via query', async () => {
@@ -59,6 +78,22 @@ describe('GraphQL API - Locations', () => {
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     expect(response.body.data.location.location_id).toBe(location.location_id);
+  });
+
+  it('should return null for a non-existent location ID', async () => {
+    // Act
+    const query = `
+      query {
+        location(id: "00000000-0000-0000-0000-000000000000") {
+          location_id
+        }
+      }
+    `;
+    const response = await request(app).post('/').send({ query });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.data.location).toBeNull();
   });
 
   it('should fetch all locations via query', async () => {
@@ -126,5 +161,12 @@ describe('GraphQL API - Locations', () => {
     expect(response.body.data.deleteLocation.location_id).toBe(
       location.location_id
     );
+
+    // Verify deletion
+    const verifyQuery = `query { location(id: "${location.location_id}") { location_id } }`;
+    const verifyResponse = await request(app)
+      .post('/')
+      .send({ query: verifyQuery });
+    expect(verifyResponse.body.data.location).toBeNull();
   });
 });

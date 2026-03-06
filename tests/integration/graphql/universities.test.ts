@@ -47,7 +47,9 @@ describe('GraphQL API - Universities', () => {
 
   it('should fetch a university by ID via query', async () => {
     // Arrange
-    const created = await createTestUniversity(`University ${Date.now()}`);
+    const created = await createTestUniversity(
+      `University ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const query = `
@@ -88,7 +90,7 @@ describe('GraphQL API - Universities', () => {
 
   it('should fetch all universities via query', async () => {
     // Arrange
-    await createTestUniversity(`University ${Date.now()}`);
+    await createTestUniversity(`University ${Date.now()}.${Math.random()}`);
 
     // Act
     const query = `query { universities { university_id name } }`;
@@ -103,7 +105,9 @@ describe('GraphQL API - Universities', () => {
 
   it('should update a university via mutation', async () => {
     // Arrange
-    const created = await createTestUniversity(`University ${Date.now()}`);
+    const created = await createTestUniversity(
+      `University ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const mutation = `
@@ -134,7 +138,9 @@ describe('GraphQL API - Universities', () => {
 
   it('should delete a university via mutation', async () => {
     // Arrange
-    const created = await createTestUniversity(`University ${Date.now()}`);
+    const created = await createTestUniversity(
+      `University ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const mutation = `

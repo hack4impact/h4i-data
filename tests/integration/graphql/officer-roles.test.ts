@@ -48,7 +48,9 @@ describe('GraphQL API - Officer Roles', () => {
 
   it('should fetch an officer role by ID via query', async () => {
     // Arrange
-    const created = await createTestOfficerRole(`Role ${Date.now()}`);
+    const created = await createTestOfficerRole(
+      `Role ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const query = `
@@ -87,7 +89,7 @@ describe('GraphQL API - Officer Roles', () => {
 
   it('should fetch all officer roles via query', async () => {
     // Arrange
-    await createTestOfficerRole(`Role ${Date.now()}`);
+    await createTestOfficerRole(`Role ${Date.now()}.${Math.random()}`);
 
     // Act
     const query = `query { officerRoles { role_id name } }`;
@@ -102,7 +104,9 @@ describe('GraphQL API - Officer Roles', () => {
 
   it('should update an officer role via mutation', async () => {
     // Arrange
-    const created = await createTestOfficerRole(`Role ${Date.now()}`);
+    const created = await createTestOfficerRole(
+      `Role ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const mutation = `
@@ -131,7 +135,9 @@ describe('GraphQL API - Officer Roles', () => {
 
   it('should delete an officer role via mutation', async () => {
     // Arrange
-    const created = await createTestOfficerRole(`Role ${Date.now()}`);
+    const created = await createTestOfficerRole(
+      `Role ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const mutation = `

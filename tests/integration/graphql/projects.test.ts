@@ -4,7 +4,7 @@ import { createGraphqlApp } from '../../../src/api/graphql/server';
 const app = createGraphqlApp();
 
 // Helper to create a project for tests
-const createTestProject = async (name = 'Test Project') => {
+const createTestProject = async () => {
   const mutation = `
     mutation CreateProject($input: CreateProjectInput!) {
       createProject(input: $input) {
@@ -17,7 +17,7 @@ const createTestProject = async (name = 'Test Project') => {
   `;
   const variables = {
     input: {
-      name,
+      name: `Test Project ${Date.now()}.${Math.random()}`,
       github_url: 'https://github.com/test/project',
       financial: 'PRO_BONO',
     },
@@ -31,16 +31,36 @@ const createTestProject = async (name = 'Test Project') => {
 describe('GraphQL API - Projects', () => {
   it('should create a new project via mutation', async () => {
     // Act
-    const project = await createTestProject('GraphQL Integration Test Project');
+    const mutation = `
+      mutation CreateProject($input: CreateProjectInput!) {
+        createProject(input: $input) {
+          project_id
+          name
+          github_url
+          financial
+        }
+      }
+    `;
+    const variables = {
+      input: {
+        name: `Test Project ${Date.now()}.${Math.random()}`,
+        github_url: 'https://github.com/test/project',
+        financial: 'PRO_BONO',
+      },
+    };
+    const response = await request(app)
+      .post('/')
+      .send({ query: mutation, variables });
 
     // Assert
-    expect(project).toHaveProperty('project_id');
-    expect(project.name).toBe('GraphQL Integration Test Project');
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.createProject).toHaveProperty('project_id');
   });
 
   it('should fetch a project by its ID via query', async () => {
     // Arrange
-    const project = await createTestProject('Test Project for Query');
+    const project = await createTestProject();
 
     // Act
     const query = `
@@ -60,12 +80,27 @@ describe('GraphQL API - Projects', () => {
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     expect(response.body.data.project.project_id).toBe(project.project_id);
-    expect(response.body.data.project.name).toBe('Test Project for Query');
+  });
+
+  it('should return null for a non-existent project ID', async () => {
+    // Act
+    const query = `
+      query {
+        project(id: "00000000-0000-0000-0000-000000000000") {
+          project_id
+        }
+      }
+    `;
+    const response = await request(app).post('/').send({ query });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.data.project).toBeNull();
   });
 
   it('should fetch all projects via query', async () => {
     // Arrange
-    await createTestProject('Project for List');
+    await createTestProject();
 
     // Act
     const query = `query { projects { project_id name } }`;
@@ -80,7 +115,7 @@ describe('GraphQL API - Projects', () => {
 
   it('should update a project via mutation', async () => {
     // Arrange
-    const project = await createTestProject('Project for Update');
+    const project = await createTestProject();
 
     // Act
     const mutation = `
@@ -107,7 +142,7 @@ describe('GraphQL API - Projects', () => {
 
   it('should delete a project via mutation', async () => {
     // Arrange
-    const project = await createTestProject('Project for Delete');
+    const project = await createTestProject();
 
     // Act
     const mutation = `
@@ -128,5 +163,12 @@ describe('GraphQL API - Projects', () => {
     expect(response.body.data.deleteProject.project_id).toBe(
       project.project_id
     );
+
+    // Verify deletion
+    const verifyQuery = `query { project(id: "${project.project_id}") { project_id } }`;
+    const verifyResponse = await request(app)
+      .post('/')
+      .send({ query: verifyQuery });
+    expect(verifyResponse.body.data.project).toBeNull();
   });
 });

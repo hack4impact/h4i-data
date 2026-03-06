@@ -44,7 +44,9 @@ describe('GraphQL API - Majors', () => {
 
   it('should fetch a major by ID via query', async () => {
     // Arrange
-    const created = await createTestMajor(`Major ${Date.now()}`);
+    const created = await createTestMajor(
+      `Major ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const query = `
@@ -83,7 +85,7 @@ describe('GraphQL API - Majors', () => {
 
   it('should fetch all majors via query', async () => {
     // Arrange
-    await createTestMajor(`Major ${Date.now()}`);
+    await createTestMajor(`Major ${Date.now()}.${Math.random()}`);
 
     // Act
     const query = `query { majors { major_id name } }`;
@@ -98,7 +100,9 @@ describe('GraphQL API - Majors', () => {
 
   it('should update a major via mutation', async () => {
     // Arrange
-    const created = await createTestMajor(`Major ${Date.now()}`);
+    const created = await createTestMajor(
+      `Major ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const mutation = `
@@ -125,7 +129,9 @@ describe('GraphQL API - Majors', () => {
 
   it('should delete a major via mutation', async () => {
     // Arrange
-    const created = await createTestMajor(`Major ${Date.now()}`);
+    const created = await createTestMajor(
+      `Major ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const mutation = `

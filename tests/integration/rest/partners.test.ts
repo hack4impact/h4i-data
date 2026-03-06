@@ -6,7 +6,7 @@ const app = createRestApp();
 // Helper function to create a partner for tests
 const createTestPartner = async () => {
   const partnerData = {
-    legal_name: `Test Partner ${Date.now()}`,
+    legal_name: `Test Partner ${Date.now()}.${Math.random()}`,
     mission_statement: 'Helping communities through technology',
     website_url: 'https://example.org',
   };

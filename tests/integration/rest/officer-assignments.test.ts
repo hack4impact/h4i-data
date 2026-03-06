@@ -21,14 +21,14 @@ const createTestVolunteer = async () => {
 const createTestOfficerRole = async () => {
   const res = await request(app)
     .post('/officer-roles')
-    .send({ name: `Role ${Date.now()}` });
+    .send({ name: `Role ${Date.now()}.${Math.random()}` });
   return res.body.role_id;
 };
 
 const createTestChapter = async () => {
   const res = await request(app)
     .post('/chapters')
-    .send({ name: `Chapter ${Date.now()}` });
+    .send({ name: `Chapter ${Date.now()}.${Math.random()}` });
   return res.body.chapter_id;
 };
 

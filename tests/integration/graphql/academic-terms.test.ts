@@ -89,7 +89,7 @@ describe('GraphQL API - Academic Terms', () => {
 
   it('should fetch all academic terms via query', async () => {
     // Arrange
-    await createTestAcademicTerm(`Term ${Date.now()}`);
+    await createTestAcademicTerm(`Term ${Date.now()}.${Math.random()}`);
 
     // Act
     const query = `query { academicTerms { term_id name } }`;
@@ -104,7 +104,9 @@ describe('GraphQL API - Academic Terms', () => {
 
   it('should update an academic term via mutation', async () => {
     // Arrange
-    const created = await createTestAcademicTerm(`Term ${Date.now()}`);
+    const created = await createTestAcademicTerm(
+      `Term ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const mutation = `
@@ -133,7 +135,9 @@ describe('GraphQL API - Academic Terms', () => {
 
   it('should delete an academic term via mutation', async () => {
     // Arrange
-    const created = await createTestAcademicTerm(`Term ${Date.now()}`);
+    const created = await createTestAcademicTerm(
+      `Term ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const mutation = `

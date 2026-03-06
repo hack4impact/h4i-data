@@ -21,7 +21,7 @@ const createTestVolunteer = async () => {
 const createTestEngagement = async () => {
   const projectRes = await request(app)
     .post('/projects')
-    .send({ name: `Project ${Date.now()}` });
+    .send({ name: `Project ${Date.now()}.${Math.random()}` });
   const projectId = projectRes.body.project_id;
 
   const engagementRes = await request(app)

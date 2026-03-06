@@ -47,7 +47,9 @@ describe('GraphQL API - Project Roles', () => {
 
   it('should fetch a project role by ID via query', async () => {
     // Arrange
-    const created = await createTestProjectRole(`Role ${Date.now()}`);
+    const created = await createTestProjectRole(
+      `Role ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const query = `
@@ -86,7 +88,7 @@ describe('GraphQL API - Project Roles', () => {
 
   it('should fetch all project roles via query', async () => {
     // Arrange
-    await createTestProjectRole(`Role ${Date.now()}`);
+    await createTestProjectRole(`Role ${Date.now()}.${Math.random()}`);
 
     // Act
     const query = `query { projectRoles { role_id name } }`;
@@ -101,7 +103,9 @@ describe('GraphQL API - Project Roles', () => {
 
   it('should update a project role via mutation', async () => {
     // Arrange
-    const created = await createTestProjectRole(`Role ${Date.now()}`);
+    const created = await createTestProjectRole(
+      `Role ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const mutation = `

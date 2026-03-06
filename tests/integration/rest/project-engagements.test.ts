@@ -6,7 +6,7 @@ const app = createRestApp();
 const createTestProject = async () => {
   const res = await request(app)
     .post('/projects')
-    .send({ name: `Project ${Date.now()}` });
+    .send({ name: `Project ${Date.now()}.${Math.random()}` });
   return res.body.project_id;
 };
 

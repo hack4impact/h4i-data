@@ -15,7 +15,7 @@ const createTestPartner = async () => {
   `;
   const variables = {
     input: {
-      legal_name: `Test Partner ${Date.now()}`,
+      legal_name: `Test Partner ${Date.now()}.${Math.random()}`,
       mission_statement: 'Helping communities through technology',
     },
   };
