@@ -5,7 +5,7 @@ const app = createRestApp();
 
 // Helper function to create a constituent for tests
 const createTestConstituent = async () => {
-  const uniqueEmail = `test.mentor.rest.${Date.now()}@example.com`;
+  const uniqueEmail = `test.mentor.rest.${Date.now()}.${Math.random()}@example.com`;
   const constituentData = {
     first_name: 'Jane',
     last_name: 'Smith',

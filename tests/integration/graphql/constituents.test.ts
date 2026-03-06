@@ -33,7 +33,7 @@ const createTestConstituent = async (email?: string) => {
 describe('GraphQL API - Constituents', () => {
   it('should create a new constituent via mutation', async () => {
     // Arrange
-    const uniqueEmail = `test.create.gql.${Date.now()}@example.com`;
+    const uniqueEmail = `test.create.gql.${Date.now()}.${Math.random()}@example.com`;
 
     // Act
     const mutation = `

@@ -9,7 +9,7 @@ const createTestVolunteer = async () => {
     .send({
       first_name: 'Test',
       last_name: 'Volunteer',
-      primary_email: `vh.${Date.now()}@example.com`,
+      primary_email: `vh.${Date.now()}.${Math.random()}@example.com`,
     });
   const constituentId = constituentRes.body.constituent_id;
 

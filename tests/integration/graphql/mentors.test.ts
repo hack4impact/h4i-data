@@ -12,7 +12,8 @@ const createTestConstituent = async (email?: string) => {
       }
     }
   `;
-  const uniqueEmail = email || `test.mentor.gql.${Date.now()}@example.com`;
+  const uniqueEmail =
+    email || `test.mentor.gql.${Date.now()}.${Math.random()}@example.com`;
   const variables = {
     input: {
       first_name: 'Test',

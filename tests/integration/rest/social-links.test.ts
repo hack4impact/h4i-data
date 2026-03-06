@@ -9,7 +9,7 @@ const createTestConstituent = async () => {
     .send({
       first_name: 'Test',
       last_name: 'User',
-      primary_email: `social.${Date.now()}@example.com`,
+      primary_email: `social.${Date.now()}.${Math.random()}@example.com`,
     });
   return res.body.constituent_id;
 };
@@ -17,14 +17,17 @@ const createTestConstituent = async () => {
 describe('REST API - /social-links', () => {
   describe('POST /social-links', () => {
     it('should create a new social link', async () => {
+      // Arrange
       const constituentId = await createTestConstituent();
 
+      // Act
       const response = await request(app).post('/social-links').send({
         constituent_id: constituentId,
         platform: 'GITHUB',
         url: 'https://github.com/testuser',
       });
 
+      // Assert
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('link_id');
       expect(response.body.constituent_id).toBe(constituentId);
@@ -42,14 +45,17 @@ describe('REST API - /social-links', () => {
 
   describe('GET /social-links', () => {
     it('should fetch all social links', async () => {
+      // Arrange
       const constituentId = await createTestConstituent();
       await request(app).post('/social-links').send({
         constituent_id: constituentId,
         url: 'https://github.com/testuser2',
       });
 
+      // Act
       const response = await request(app).get('/social-links');
 
+      // Assert
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThan(0);

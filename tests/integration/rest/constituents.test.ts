@@ -21,7 +21,7 @@ describe('REST API - /constituents', () => {
   describe('POST /constituents', () => {
     it('should create a new constituent', async () => {
       // Arrange
-      const uniqueEmail = `test.create.${Date.now()}@example.com`;
+      const uniqueEmail = `test.create.${Date.now()}.${Math.random()}@example.com`;
       const constituentData = {
         first_name: 'Jane',
         last_name: 'Smith',

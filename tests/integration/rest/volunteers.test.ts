@@ -5,7 +5,7 @@ const app = createRestApp();
 
 // Helper function to create a constituent for tests
 const createTestConstituent = async () => {
-  const uniqueEmail = `test.constituent.rest.${Date.now()}@example.com`;
+  const uniqueEmail = `test.constituent.rest.${Date.now()}.${Math.random()}@example.com`;
   const constituentData = {
     first_name: 'John',
     last_name: 'Doe',
@@ -19,8 +19,8 @@ const createTestConstituent = async () => {
 
 // Helper function to create a major lookup record for tests
 const createTestMajor = async (name: string) => {
-  const major = await prisma.majors.create({ data: { name } });
-  return major.major_id;
+  const response = await request(app).post('/majors').send({ name });
+  return response.body.major_id;
 };
 
 // Helper function to create a volunteer for tests
@@ -39,7 +39,9 @@ describe('REST API - /volunteers', () => {
     it('should create a new volunteer', async () => {
       // Arrange
       const constituentId = await createTestConstituent();
-      const majorId = await createTestMajor(`CS-${Date.now()}`);
+      const majorId = await createTestMajor(
+        `CS-${Date.now()}.${Math.random()}`
+      );
       const volunteerData = {
         volunteer_id: constituentId,
         org_email: 'john@org.edu',
@@ -115,7 +117,9 @@ describe('REST API - /volunteers', () => {
       // Arrange
       const constituentId = await createTestConstituent();
       const volunteerId = await createTestVolunteer(constituentId);
-      const majorId = await createTestMajor(`SE-${Date.now()}`);
+      const majorId = await createTestMajor(
+        `SE-${Date.now()}.${Math.random()}`
+      );
       const updateData = { major_id: majorId };
 
       // Act

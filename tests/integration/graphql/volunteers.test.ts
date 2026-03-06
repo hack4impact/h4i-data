@@ -1,6 +1,5 @@
 import request from 'supertest';
 import { createGraphqlApp } from '../../../src/api/graphql/server';
-import { prisma } from '../../../src/config/database';
 
 const app = createGraphqlApp();
 
@@ -13,7 +12,8 @@ const createTestConstituent = async (email?: string) => {
       }
     }
   `;
-  const uniqueEmail = email || `test.constituent.${Date.now()}@example.com`;
+  const uniqueEmail =
+    email || `test.constituent.${Date.now()}.${Math.random()}@example.com`;
   const constituentVariables = {
     input: {
       first_name: 'Test',
@@ -29,8 +29,17 @@ const createTestConstituent = async (email?: string) => {
 
 // Helper function to create a major lookup record for tests
 const createTestMajor = async (name: string) => {
-  const major = await prisma.majors.create({ data: { name } });
-  return major.major_id;
+  const mutation = `
+    mutation CreateMajor($input: CreateMajorInput!) {
+      createMajor(input: $input) {
+        major_id
+      }
+    }
+  `;
+  const response = await request(app)
+    .post('/')
+    .send({ query: mutation, variables: { input: { name } } });
+  return response.body.data.createMajor.major_id;
 };
 
 // Helper function to create a volunteer for tests
@@ -59,7 +68,6 @@ describe('GraphQL API - Volunteers', () => {
   it('should create a new volunteer via mutation', async () => {
     // Arrange: Create a constituent to associate the volunteer with
     const constituentId = await createTestConstituent();
-    expect(constituentId).toBeDefined();
 
     // Act
     const mutation = `
@@ -152,7 +160,9 @@ describe('GraphQL API - Volunteers', () => {
     // Arrange
     const constituentId = await createTestConstituent();
     const volunteerId = await createTestVolunteer(constituentId);
-    const majorId = await createTestMajor(`SE-GQL-${Date.now()}`);
+    const majorId = await createTestMajor(
+      `SE-GQL-${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const updateMutation = `
@@ -200,5 +210,18 @@ describe('GraphQL API - Volunteers', () => {
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     expect(response.body.data.deleteVolunteer.volunteer_id).toBe(volunteerId);
+
+    // Verify deletion
+    const verifyQuery = `
+      query {
+        volunteer(id: "${volunteerId}") {
+          volunteer_id
+        }
+      }
+    `;
+    const verifyResponse = await request(app)
+      .post('/')
+      .send({ query: verifyQuery });
+    expect(verifyResponse.body.data.volunteer).toBeNull();
   });
 });
