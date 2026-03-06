@@ -19,10 +19,22 @@ export const prisma = new PrismaClient({
   adapter,
   log: [
     { level: 'query', emit: 'event' },
-    { level: 'info', emit: 'stdout' },
-    { level: 'warn', emit: 'stdout' },
-    { level: 'error', emit: 'stdout' },
+    { level: 'info', emit: 'event' },
+    { level: 'warn', emit: 'event' },
+    { level: 'error', emit: 'event' },
   ],
+});
+
+prisma.$on('info', (e) => {
+  logger.info(e.message, { target: e.target });
+});
+
+prisma.$on('warn', (e) => {
+  logger.warn(e.message, { target: e.target });
+});
+
+prisma.$on('error', (e) => {
+  logger.error(e.message, { target: e.target });
 });
 
 // Query performance monitoring (only in development)
