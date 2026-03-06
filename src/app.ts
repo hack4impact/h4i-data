@@ -2,16 +2,12 @@ import express from 'express';
 import { createRestApp } from './api/rest/server';
 import { createGraphqlApp } from './api/graphql/server';
 import { env } from './config/server';
-import { connectDB, disconnectDB } from './config/database'; // Import disconnectDB
-import cors from 'cors';
-import { corsConfig } from './config/cors';
+import { connectDB, disconnectDB } from './config/database';
 
 async function startServer() {
   await connectDB();
 
   const app = express();
-  // allows access to the api
-  app.use(cors(corsConfig));
 
   // Mount the REST API
   const restApp = createRestApp();

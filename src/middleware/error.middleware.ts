@@ -108,7 +108,7 @@ export function errorHandler(
       statusCode,
     },
     timestamp: new Date().toISOString(),
-    ip: req.ip || req.connection.remoteAddress,
+    ip: req.ip || req.socket.remoteAddress,
   };
 
   // Log based on severity

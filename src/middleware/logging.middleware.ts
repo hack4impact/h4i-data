@@ -31,7 +31,7 @@ export function requestLogger(
     method: req.method,
     url: req.originalUrl || req.url,
     userAgent: req.get('User-Agent'),
-    ip: req.ip || req.connection.remoteAddress,
+    ip: req.ip || req.socket.remoteAddress,
     contentLength: req.get('Content-Length'),
     contentType: req.get('Content-Type'),
     timestamp: new Date().toISOString(),

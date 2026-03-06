@@ -2,7 +2,7 @@ import { CorsOptions } from 'cors';
 import { env } from './server';
 import { logger } from './logger';
 
-function getAllowedOrigins() {
+function buildAllowedOrigins(): string[] {
   const origins: string[] = [];
 
   // Always allow localhost in development
@@ -34,20 +34,18 @@ function getAllowedOrigins() {
   return origins;
 }
 
+const allowedOrigins = buildAllowedOrigins();
+
 export const corsConfig: CorsOptions = {
   origin: (origin, callback) => {
-    const allowedOrigins = getAllowedOrigins();
-
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
 
-    // Check if origin is allowed
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       logger.warn('CORS blocked request from unauthorized origin', {
         blockedOrigin: origin,
-        allowedOrigins,
       });
       callback(new Error('Not allowed by CORS'));
     }
