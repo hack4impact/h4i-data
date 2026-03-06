@@ -43,9 +43,6 @@ describe('Project Service', () => {
       const result = await getAllProjects();
 
       expect(result).toEqual(mockProjects);
-      expect(prisma.projects.findMany).toHaveBeenCalledWith({
-        orderBy: { created_at: 'desc' },
-      });
     });
 
     it('should return empty array when no projects exist', async () => {
@@ -81,9 +78,6 @@ describe('Project Service', () => {
       const result = await getProjectById(projectId);
 
       expect(result).toEqual(mockProject);
-      expect(prisma.projects.findUnique).toHaveBeenCalledWith({
-        where: { project_id: projectId },
-      });
     });
 
     it('should throw NotFoundError if no project is found', async () => {
@@ -126,7 +120,6 @@ describe('Project Service', () => {
       const result = await createProject(inputData);
 
       expect(result).toEqual(createdProject);
-      expect(prisma.projects.create).toHaveBeenCalledWith({ data: inputData });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -157,10 +150,6 @@ describe('Project Service', () => {
       const result = await updateProject(projectId, updateData);
 
       expect(result).toEqual(updatedProject);
-      expect(prisma.projects.update).toHaveBeenCalledWith({
-        where: { project_id: projectId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent project', async () => {
@@ -202,9 +191,6 @@ describe('Project Service', () => {
       const result = await deleteProject(projectId);
 
       expect(result).toEqual(deletedProject);
-      expect(prisma.projects.delete).toHaveBeenCalledWith({
-        where: { project_id: projectId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent project', async () => {

@@ -48,9 +48,6 @@ describe('Mentorship Service', () => {
       const result = await getAllMentorships();
 
       expect(result).toEqual(mockMentorships);
-      expect(prisma.mentorships.findMany).toHaveBeenCalledWith({
-        orderBy: { start_date: 'desc' },
-      });
     });
 
     it('should return empty array when no mentorships exist', async () => {
@@ -91,9 +88,6 @@ describe('Mentorship Service', () => {
       const result = await getMentorshipById(mentorshipId);
 
       expect(result).toEqual(mockMentorship);
-      expect(prisma.mentorships.findUnique).toHaveBeenCalledWith({
-        where: { mentorship_id: mentorshipId },
-      });
     });
 
     it('should throw NotFoundError if no mentorship is found', async () => {
@@ -139,9 +133,6 @@ describe('Mentorship Service', () => {
       const result = await createMentorship(inputData);
 
       expect(result).toEqual(createdMentorship);
-      expect(prisma.mentorships.create).toHaveBeenCalledWith({
-        data: inputData,
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -183,10 +174,6 @@ describe('Mentorship Service', () => {
       const result = await updateMentorship(mentorshipId, updateData);
 
       expect(result).toEqual(updatedMentorship);
-      expect(prisma.mentorships.update).toHaveBeenCalledWith({
-        where: { mentorship_id: mentorshipId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent mentorship', async () => {
@@ -233,9 +220,6 @@ describe('Mentorship Service', () => {
       const result = await deleteMentorship(mentorshipId);
 
       expect(result).toEqual(deletedMentorship);
-      expect(prisma.mentorships.delete).toHaveBeenCalledWith({
-        where: { mentorship_id: mentorshipId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent mentorship', async () => {

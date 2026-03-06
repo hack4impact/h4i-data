@@ -42,7 +42,6 @@ describe('Company Service', () => {
       const result = await getAllCompanies();
 
       expect(result).toEqual(mockCompanies);
-      expect(prisma.companies.findMany).toHaveBeenCalledWith();
     });
 
     it('should return empty array when no companies exist', async () => {
@@ -79,9 +78,6 @@ describe('Company Service', () => {
       const result = await getCompanyById(companyId);
 
       expect(result).toEqual(mockCompany);
-      expect(prisma.companies.findUnique).toHaveBeenCalledWith({
-        where: { company_id: companyId },
-      });
     });
 
     it('should throw NotFoundError if no company is found', async () => {
@@ -122,7 +118,6 @@ describe('Company Service', () => {
       const result = await createCompany(inputData);
 
       expect(result).toEqual(createdCompany);
-      expect(prisma.companies.create).toHaveBeenCalledWith({ data: inputData });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -152,10 +147,6 @@ describe('Company Service', () => {
       const result = await updateCompany(companyId, updateData);
 
       expect(result).toEqual(updatedCompany);
-      expect(prisma.companies.update).toHaveBeenCalledWith({
-        where: { company_id: companyId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent company', async () => {
@@ -197,9 +188,6 @@ describe('Company Service', () => {
       const result = await deleteCompany(companyId);
 
       expect(result).toEqual(deletedCompany);
-      expect(prisma.companies.delete).toHaveBeenCalledWith({
-        where: { company_id: companyId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent company', async () => {

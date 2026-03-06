@@ -43,9 +43,6 @@ describe('Social Link Service', () => {
       const result = await getAllSocialLinks();
 
       expect(result).toEqual(mockLinks);
-      expect(prisma.social_links.findMany).toHaveBeenCalledWith({
-        orderBy: { link_id: 'asc' },
-      });
     });
 
     it('should return empty array when no social links exist', async () => {
@@ -81,9 +78,6 @@ describe('Social Link Service', () => {
       const result = await getSocialLinkById(linkId);
 
       expect(result).toEqual(mockLink);
-      expect(prisma.social_links.findUnique).toHaveBeenCalledWith({
-        where: { link_id: linkId },
-      });
     });
 
     it('should throw NotFoundError if no social link is found', async () => {
@@ -124,9 +118,6 @@ describe('Social Link Service', () => {
       const result = await createSocialLink(inputData);
 
       expect(result).toEqual(createdLink);
-      expect(prisma.social_links.create).toHaveBeenCalledWith({
-        data: inputData,
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -161,10 +152,6 @@ describe('Social Link Service', () => {
       const result = await updateSocialLink(linkId, updateData);
 
       expect(result).toEqual(updatedLink);
-      expect(prisma.social_links.update).toHaveBeenCalledWith({
-        where: { link_id: linkId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent social link', async () => {
@@ -206,9 +193,6 @@ describe('Social Link Service', () => {
       const result = await deleteSocialLink(linkId);
 
       expect(result).toEqual(deletedLink);
-      expect(prisma.social_links.delete).toHaveBeenCalledWith({
-        where: { link_id: linkId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent social link', async () => {

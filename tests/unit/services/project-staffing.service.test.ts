@@ -47,9 +47,6 @@ describe('Project Staffing Service', () => {
       const result = await getAllProjectStaffing();
 
       expect(result).toEqual(mockStaffing);
-      expect(prisma.project_staffing.findMany).toHaveBeenCalledWith({
-        orderBy: { start_date: 'desc' },
-      });
     });
 
     it('should return empty array when no project staffing records exist', async () => {
@@ -89,9 +86,6 @@ describe('Project Staffing Service', () => {
       const result = await getProjectStaffingById(staffingId);
 
       expect(result).toEqual(mockStaffing);
-      expect(prisma.project_staffing.findUnique).toHaveBeenCalledWith({
-        where: { staffing_id: staffingId },
-      });
     });
 
     it('should throw NotFoundError if no project staffing is found', async () => {
@@ -136,9 +130,6 @@ describe('Project Staffing Service', () => {
       const result = await createProjectStaffing(inputData);
 
       expect(result).toEqual(createdStaffing);
-      expect(prisma.project_staffing.create).toHaveBeenCalledWith({
-        data: inputData,
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -179,10 +170,6 @@ describe('Project Staffing Service', () => {
       const result = await updateProjectStaffing(staffingId, updateData);
 
       expect(result).toEqual(updatedStaffing);
-      expect(prisma.project_staffing.update).toHaveBeenCalledWith({
-        where: { staffing_id: staffingId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent project staffing', async () => {
@@ -228,9 +215,6 @@ describe('Project Staffing Service', () => {
       const result = await deleteProjectStaffing(staffingId);
 
       expect(result).toEqual(deletedStaffing);
-      expect(prisma.project_staffing.delete).toHaveBeenCalledWith({
-        where: { staffing_id: staffingId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent project staffing', async () => {

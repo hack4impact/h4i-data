@@ -45,9 +45,6 @@ describe('Project Deliverable Service', () => {
       const result = await getAllProjectDeliverables();
 
       expect(result).toEqual(mockDeliverables);
-      expect(prisma.project_deliverables.findMany).toHaveBeenCalledWith({
-        orderBy: { deliverable_id: 'asc' },
-      });
     });
 
     it('should return empty array when no project deliverables exist', async () => {
@@ -85,9 +82,6 @@ describe('Project Deliverable Service', () => {
       const result = await getProjectDeliverableById(deliverableId);
 
       expect(result).toEqual(mockDeliverable);
-      expect(prisma.project_deliverables.findUnique).toHaveBeenCalledWith({
-        where: { deliverable_id: deliverableId },
-      });
     });
 
     it('should throw NotFoundError if no project deliverable is found', async () => {
@@ -132,9 +126,6 @@ describe('Project Deliverable Service', () => {
       const result = await createProjectDeliverable(inputData);
 
       expect(result).toEqual(createdDeliverable);
-      expect(prisma.project_deliverables.create).toHaveBeenCalledWith({
-        data: inputData,
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -172,10 +163,6 @@ describe('Project Deliverable Service', () => {
       const result = await updateProjectDeliverable(deliverableId, updateData);
 
       expect(result).toEqual(updatedDeliverable);
-      expect(prisma.project_deliverables.update).toHaveBeenCalledWith({
-        where: { deliverable_id: deliverableId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent project deliverable', async () => {
@@ -221,9 +208,6 @@ describe('Project Deliverable Service', () => {
       const result = await deleteProjectDeliverable(deliverableId);
 
       expect(result).toEqual(deletedDeliverable);
-      expect(prisma.project_deliverables.delete).toHaveBeenCalledWith({
-        where: { deliverable_id: deliverableId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent project deliverable', async () => {

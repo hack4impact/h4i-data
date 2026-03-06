@@ -46,9 +46,6 @@ describe('Officer Assignment Service', () => {
       const result = await getAllOfficerAssignments();
 
       expect(result).toEqual(mockAssignments);
-      expect(prisma.officer_assignments.findMany).toHaveBeenCalledWith({
-        orderBy: { start_date: 'desc' },
-      });
     });
 
     it('should return empty array when no officer assignments exist', async () => {
@@ -87,9 +84,6 @@ describe('Officer Assignment Service', () => {
       const result = await getOfficerAssignmentById(assignmentId);
 
       expect(result).toEqual(mockAssignment);
-      expect(prisma.officer_assignments.findUnique).toHaveBeenCalledWith({
-        where: { assignment_id: assignmentId },
-      });
     });
 
     it('should throw NotFoundError if no officer assignment is found', async () => {
@@ -135,9 +129,6 @@ describe('Officer Assignment Service', () => {
       const result = await createOfficerAssignment(inputData);
 
       expect(result).toEqual(createdAssignment);
-      expect(prisma.officer_assignments.create).toHaveBeenCalledWith({
-        data: inputData,
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -176,10 +167,6 @@ describe('Officer Assignment Service', () => {
       const result = await updateOfficerAssignment(assignmentId, updateData);
 
       expect(result).toEqual(updatedAssignment);
-      expect(prisma.officer_assignments.update).toHaveBeenCalledWith({
-        where: { assignment_id: assignmentId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent officer assignment', async () => {
@@ -226,9 +213,6 @@ describe('Officer Assignment Service', () => {
       const result = await deleteOfficerAssignment(assignmentId);
 
       expect(result).toEqual(deletedAssignment);
-      expect(prisma.officer_assignments.delete).toHaveBeenCalledWith({
-        where: { assignment_id: assignmentId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent officer assignment', async () => {

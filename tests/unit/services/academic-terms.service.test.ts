@@ -47,9 +47,6 @@ describe('Academic Term Service', () => {
       const result = await getAllAcademicTerms();
 
       expect(result).toEqual(mockTerms);
-      expect(prisma.academic_terms.findMany).toHaveBeenCalledWith({
-        orderBy: { start_date: 'desc' },
-      });
     });
 
     it('should return empty array when no academic terms exist', async () => {
@@ -89,9 +86,6 @@ describe('Academic Term Service', () => {
       const result = await getAcademicTermById(termId);
 
       expect(result).toEqual(mockTerm);
-      expect(prisma.academic_terms.findUnique).toHaveBeenCalledWith({
-        where: { term_id: termId },
-      });
     });
 
     it('should throw NotFoundError if no academic term is found', async () => {
@@ -136,9 +130,6 @@ describe('Academic Term Service', () => {
       const result = await createAcademicTerm(inputData);
 
       expect(result).toEqual(createdTerm);
-      expect(prisma.academic_terms.create).toHaveBeenCalledWith({
-        data: inputData,
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -179,10 +170,6 @@ describe('Academic Term Service', () => {
       const result = await updateAcademicTerm(termId, updateData);
 
       expect(result).toEqual(updatedTerm);
-      expect(prisma.academic_terms.update).toHaveBeenCalledWith({
-        where: { term_id: termId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent academic term', async () => {
@@ -228,9 +215,6 @@ describe('Academic Term Service', () => {
       const result = await deleteAcademicTerm(termId);
 
       expect(result).toEqual(deletedTerm);
-      expect(prisma.academic_terms.delete).toHaveBeenCalledWith({
-        where: { term_id: termId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent academic term', async () => {

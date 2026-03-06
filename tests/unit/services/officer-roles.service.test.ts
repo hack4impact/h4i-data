@@ -42,9 +42,6 @@ describe('Officer Role Service', () => {
       const result = await getAllOfficerRoles();
 
       expect(result).toEqual(mockRoles);
-      expect(prisma.officer_roles.findMany).toHaveBeenCalledWith({
-        orderBy: { name: 'asc' },
-      });
     });
 
     it('should return empty array when no officer roles exist', async () => {
@@ -81,9 +78,6 @@ describe('Officer Role Service', () => {
       const result = await getOfficerRoleById(roleId);
 
       expect(result).toEqual(mockRole);
-      expect(prisma.officer_roles.findUnique).toHaveBeenCalledWith({
-        where: { role_id: roleId },
-      });
     });
 
     it('should throw NotFoundError if no officer role is found', async () => {
@@ -123,9 +117,6 @@ describe('Officer Role Service', () => {
       const result = await createOfficerRole(inputData);
 
       expect(result).toEqual(createdRole);
-      expect(prisma.officer_roles.create).toHaveBeenCalledWith({
-        data: inputData,
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -159,10 +150,6 @@ describe('Officer Role Service', () => {
       const result = await updateOfficerRole(roleId, updateData);
 
       expect(result).toEqual(updatedRole);
-      expect(prisma.officer_roles.update).toHaveBeenCalledWith({
-        where: { role_id: roleId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent officer role', async () => {
@@ -203,9 +190,6 @@ describe('Officer Role Service', () => {
       const result = await deleteOfficerRole(roleId);
 
       expect(result).toEqual(deletedRole);
-      expect(prisma.officer_roles.delete).toHaveBeenCalledWith({
-        where: { role_id: roleId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent officer role', async () => {

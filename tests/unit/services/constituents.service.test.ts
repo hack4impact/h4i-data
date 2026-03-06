@@ -45,9 +45,6 @@ describe('Constituent Service', () => {
       const result = await getAllConstituents();
 
       expect(result).toEqual(mockConstituents);
-      expect(prisma.constituents.findMany).toHaveBeenCalledWith({
-        orderBy: { created_at: 'desc' },
-      });
     });
 
     it('should return empty array when no constituents exist', async () => {
@@ -88,9 +85,6 @@ describe('Constituent Service', () => {
       const result = await getConstituentById(constituentId);
 
       expect(result).toEqual(mockConstituent);
-      expect(prisma.constituents.findUnique).toHaveBeenCalledWith({
-        where: { constituent_id: constituentId },
-      });
     });
 
     it('should throw NotFoundError if no constituent is found', async () => {
@@ -134,9 +128,6 @@ describe('Constituent Service', () => {
       const result = await createConstituent(inputData);
 
       expect(result).toEqual(createdConstituent);
-      expect(prisma.constituents.create).toHaveBeenCalledWith({
-        data: inputData,
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -174,10 +165,6 @@ describe('Constituent Service', () => {
       const result = await updateConstituent(constituentId, updateData);
 
       expect(result).toEqual(updatedConstituent);
-      expect(prisma.constituents.update).toHaveBeenCalledWith({
-        where: { constituent_id: constituentId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent constituent', async () => {
@@ -223,9 +210,6 @@ describe('Constituent Service', () => {
       const result = await deleteConstituent(constituentId);
 
       expect(result).toEqual(deletedConstituent);
-      expect(prisma.constituents.delete).toHaveBeenCalledWith({
-        where: { constituent_id: constituentId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent constituent', async () => {

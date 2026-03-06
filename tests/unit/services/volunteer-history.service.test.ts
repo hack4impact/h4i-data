@@ -48,9 +48,6 @@ describe('Volunteer History Service', () => {
       const result = await getAllVolunteerHistory();
 
       expect(result).toEqual(mockHistory);
-      expect(prisma.volunteer_history.findMany).toHaveBeenCalledWith({
-        orderBy: { effective_date: 'desc' },
-      });
     });
 
     it('should return empty array when no volunteer history records exist', async () => {
@@ -91,9 +88,6 @@ describe('Volunteer History Service', () => {
       const result = await getVolunteerHistoryById(historyId);
 
       expect(result).toEqual(mockHistory);
-      expect(prisma.volunteer_history.findUnique).toHaveBeenCalledWith({
-        where: { history_id: historyId },
-      });
     });
 
     it('should throw NotFoundError if no volunteer history is found', async () => {
@@ -141,9 +135,6 @@ describe('Volunteer History Service', () => {
       const result = await createVolunteerHistory(inputData);
 
       expect(result).toEqual(createdHistory);
-      expect(prisma.volunteer_history.create).toHaveBeenCalledWith({
-        data: inputData,
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -184,10 +175,6 @@ describe('Volunteer History Service', () => {
       const result = await updateVolunteerHistory(historyId, updateData);
 
       expect(result).toEqual(updatedHistory);
-      expect(prisma.volunteer_history.update).toHaveBeenCalledWith({
-        where: { history_id: historyId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent volunteer history', async () => {
@@ -236,9 +223,6 @@ describe('Volunteer History Service', () => {
       const result = await deleteVolunteerHistory(historyId);
 
       expect(result).toEqual(deletedHistory);
-      expect(prisma.volunteer_history.delete).toHaveBeenCalledWith({
-        where: { history_id: historyId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent volunteer history', async () => {

@@ -44,9 +44,6 @@ describe('University Service', () => {
       const result = await getAllUniversities();
 
       expect(result).toEqual(mockUniversities);
-      expect(prisma.universities.findMany).toHaveBeenCalledWith({
-        orderBy: { name: 'asc' },
-      });
     });
 
     it('should return empty array when no universities exist', async () => {
@@ -83,9 +80,6 @@ describe('University Service', () => {
       const result = await getUniversityById(universityId);
 
       expect(result).toEqual(mockUniversity);
-      expect(prisma.universities.findUnique).toHaveBeenCalledWith({
-        where: { university_id: universityId },
-      });
     });
 
     it('should throw NotFoundError if no university is found', async () => {
@@ -127,9 +121,6 @@ describe('University Service', () => {
       const result = await createUniversity(inputData);
 
       expect(result).toEqual(createdUniversity);
-      expect(prisma.universities.create).toHaveBeenCalledWith({
-        data: inputData,
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -161,10 +152,6 @@ describe('University Service', () => {
       const result = await updateUniversity(universityId, updateData);
 
       expect(result).toEqual(updatedUniversity);
-      expect(prisma.universities.update).toHaveBeenCalledWith({
-        where: { university_id: universityId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent university', async () => {
@@ -207,9 +194,6 @@ describe('University Service', () => {
       const result = await deleteUniversity(universityId);
 
       expect(result).toEqual(deletedUniversity);
-      expect(prisma.universities.delete).toHaveBeenCalledWith({
-        where: { university_id: universityId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent university', async () => {

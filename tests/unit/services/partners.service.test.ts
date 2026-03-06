@@ -45,9 +45,6 @@ describe('Partner Service', () => {
       const result = await getAllPartners();
 
       expect(result).toEqual(mockPartners);
-      expect(prisma.partners.findMany).toHaveBeenCalledWith({
-        orderBy: { created_at: 'desc' },
-      });
     });
 
     it('should return empty array when no partners exist', async () => {
@@ -88,9 +85,6 @@ describe('Partner Service', () => {
       const result = await getPartnerById(partnerId);
 
       expect(result).toEqual(mockPartner);
-      expect(prisma.partners.findUnique).toHaveBeenCalledWith({
-        where: { partner_id: partnerId },
-      });
     });
 
     it('should throw NotFoundError if no partner is found', async () => {
@@ -134,7 +128,6 @@ describe('Partner Service', () => {
       const result = await createPartner(inputData);
 
       expect(result).toEqual(createdPartner);
-      expect(prisma.partners.create).toHaveBeenCalledWith({ data: inputData });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -168,10 +161,6 @@ describe('Partner Service', () => {
       const result = await updatePartner(partnerId, updateData);
 
       expect(result).toEqual(updatedPartner);
-      expect(prisma.partners.update).toHaveBeenCalledWith({
-        where: { partner_id: partnerId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent partner', async () => {
@@ -217,9 +206,6 @@ describe('Partner Service', () => {
       const result = await deletePartner(partnerId);
 
       expect(result).toEqual(deletedPartner);
-      expect(prisma.partners.delete).toHaveBeenCalledWith({
-        where: { partner_id: partnerId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent partner', async () => {

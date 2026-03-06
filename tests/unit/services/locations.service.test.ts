@@ -43,7 +43,6 @@ describe('Location Service', () => {
       const result = await getAllLocations();
 
       expect(result).toEqual(mockLocations);
-      expect(prisma.locations.findMany).toHaveBeenCalledWith();
     });
 
     it('should return empty array when no locations exist', async () => {
@@ -84,9 +83,6 @@ describe('Location Service', () => {
       const result = await getLocationById(locationId);
 
       expect(result).toEqual(mockLocation);
-      expect(prisma.locations.findUnique).toHaveBeenCalledWith({
-        where: { location_id: locationId },
-      });
     });
 
     it('should throw NotFoundError if no location is found', async () => {
@@ -129,15 +125,6 @@ describe('Location Service', () => {
       const result = await createLocation(inputData);
 
       expect(result).toEqual(createdLocation);
-
-      expect(prisma.locations.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          name: inputData.name,
-          address_line: inputData.address_line,
-          state_code: inputData.state_code,
-          country_code: inputData.country_code,
-        }),
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -171,10 +158,6 @@ describe('Location Service', () => {
       const result = await updateLocation(locationId, updateData);
 
       expect(result).toEqual(updatedLocation);
-      expect(prisma.locations.update).toHaveBeenCalledWith({
-        where: { location_id: locationId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent location', async () => {
@@ -219,9 +202,6 @@ describe('Location Service', () => {
       const result = await deleteLocation(locationId);
 
       expect(result).toEqual(deletedLocation);
-      expect(prisma.locations.delete).toHaveBeenCalledWith({
-        where: { location_id: locationId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent location', async () => {

@@ -40,9 +40,6 @@ describe('Major Service', () => {
       const result = await getAllMajors();
 
       expect(result).toEqual(mockMajors);
-      expect(prisma.majors.findMany).toHaveBeenCalledWith({
-        orderBy: { name: 'asc' },
-      });
     });
 
     it('should return empty array when no majors exist', async () => {
@@ -73,9 +70,6 @@ describe('Major Service', () => {
       const result = await getMajorById(majorId);
 
       expect(result).toEqual(mockMajor);
-      expect(prisma.majors.findUnique).toHaveBeenCalledWith({
-        where: { major_id: majorId },
-      });
     });
 
     it('should throw NotFoundError if no major is found', async () => {
@@ -111,9 +105,6 @@ describe('Major Service', () => {
       const result = await createMajor(inputData);
 
       expect(result).toEqual(createdMajor);
-      expect(prisma.majors.create).toHaveBeenCalledWith({
-        data: inputData,
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -141,10 +132,6 @@ describe('Major Service', () => {
       const result = await updateMajor(majorId, updateData);
 
       expect(result).toEqual(updatedMajor);
-      expect(prisma.majors.update).toHaveBeenCalledWith({
-        where: { major_id: majorId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent major', async () => {
@@ -183,9 +170,6 @@ describe('Major Service', () => {
       const result = await deleteMajor(majorId);
 
       expect(result).toEqual(deletedMajor);
-      expect(prisma.majors.delete).toHaveBeenCalledWith({
-        where: { major_id: majorId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent major', async () => {

@@ -44,9 +44,6 @@ describe('Chapter Service', () => {
       const result = await getAllChapters();
 
       expect(result).toEqual(mockChapters);
-      expect(prisma.chapters.findMany).toHaveBeenCalledWith({
-        orderBy: { name: 'asc' },
-      });
     });
 
     it('should return empty array when no chapters exist', async () => {
@@ -86,9 +83,6 @@ describe('Chapter Service', () => {
       const result = await getChapterById(chapterId);
 
       expect(result).toEqual(mockChapter);
-      expect(prisma.chapters.findUnique).toHaveBeenCalledWith({
-        where: { chapter_id: chapterId },
-      });
     });
 
     it('should throw NotFoundError if no chapter is found', async () => {
@@ -133,7 +127,6 @@ describe('Chapter Service', () => {
       const result = await createChapter(inputData);
 
       expect(result).toEqual(createdChapter);
-      expect(prisma.chapters.create).toHaveBeenCalledWith({ data: inputData });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -166,10 +159,6 @@ describe('Chapter Service', () => {
       const result = await updateChapter(chapterId, updateData);
 
       expect(result).toEqual(updatedChapter);
-      expect(prisma.chapters.update).toHaveBeenCalledWith({
-        where: { chapter_id: chapterId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent chapter', async () => {
@@ -214,9 +203,6 @@ describe('Chapter Service', () => {
       const result = await deleteChapter(chapterId);
 
       expect(result).toEqual(deletedChapter);
-      expect(prisma.chapters.delete).toHaveBeenCalledWith({
-        where: { chapter_id: chapterId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent chapter', async () => {

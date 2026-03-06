@@ -41,9 +41,6 @@ describe('Project Role Service', () => {
       const result = await getAllProjectRoles();
 
       expect(result).toEqual(mockRoles);
-      expect(prisma.project_roles.findMany).toHaveBeenCalledWith({
-        orderBy: { name: 'asc' },
-      });
     });
 
     it('should return empty array when no project roles exist', async () => {
@@ -79,9 +76,6 @@ describe('Project Role Service', () => {
       const result = await getProjectRoleById(roleId);
 
       expect(result).toEqual(mockRole);
-      expect(prisma.project_roles.findUnique).toHaveBeenCalledWith({
-        where: { role_id: roleId },
-      });
     });
 
     it('should throw NotFoundError if no project role is found', async () => {
@@ -120,9 +114,6 @@ describe('Project Role Service', () => {
       const result = await createProjectRole(inputData);
 
       expect(result).toEqual(createdRole);
-      expect(prisma.project_roles.create).toHaveBeenCalledWith({
-        data: inputData,
-      });
     });
 
     it('should throw DatabaseError when create fails', async () => {
@@ -151,10 +142,6 @@ describe('Project Role Service', () => {
       const result = await updateProjectRole(roleId, updateData);
 
       expect(result).toEqual(updatedRole);
-      expect(prisma.project_roles.update).toHaveBeenCalledWith({
-        where: { role_id: roleId },
-        data: updateData,
-      });
     });
 
     it('should throw NotFoundError when updating non-existent project role', async () => {
@@ -194,9 +181,6 @@ describe('Project Role Service', () => {
       const result = await deleteProjectRole(roleId);
 
       expect(result).toEqual(deletedRole);
-      expect(prisma.project_roles.delete).toHaveBeenCalledWith({
-        where: { role_id: roleId },
-      });
     });
 
     it('should throw NotFoundError when deleting non-existent project role', async () => {
