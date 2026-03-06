@@ -6,6 +6,7 @@ import {
   deleteSocialLink,
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
+import { Prisma } from '@prisma/client';
 
 jest.mock('../../../src/config/database', () => ({
   prisma: {
@@ -168,7 +169,10 @@ describe('Social Link Service', () => {
 
     it('should throw NotFoundError when updating non-existent social link', async () => {
       (prisma.social_links.update as jest.Mock).mockRejectedValue(
-        new Error('Record to update not found')
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
       );
       await expect(
         updateSocialLink('non-existent-id', { is_featured: false })
@@ -209,7 +213,10 @@ describe('Social Link Service', () => {
 
     it('should throw NotFoundError when deleting non-existent social link', async () => {
       (prisma.social_links.delete as jest.Mock).mockRejectedValue(
-        new Error('Record to delete does not exist')
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
       );
       await expect(deleteSocialLink('non-existent-id')).rejects.toThrow(
         "SocialLink with id 'non-existent-id' not found"

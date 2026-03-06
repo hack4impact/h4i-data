@@ -6,6 +6,7 @@ import {
   deletePartner,
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
+import { Prisma } from '@prisma/client';
 
 jest.mock('../../../src/config/database', () => ({
   prisma: {
@@ -175,7 +176,10 @@ describe('Partner Service', () => {
 
     it('should throw NotFoundError when updating non-existent partner', async () => {
       (prisma.partners.update as jest.Mock).mockRejectedValue(
-        new Error('Record to update not found')
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
       );
 
       await expect(
@@ -220,7 +224,10 @@ describe('Partner Service', () => {
 
     it('should throw NotFoundError when deleting non-existent partner', async () => {
       (prisma.partners.delete as jest.Mock).mockRejectedValue(
-        new Error('Record to delete does not exist')
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
       );
 
       await expect(deletePartner('non-existent-id')).rejects.toThrow(

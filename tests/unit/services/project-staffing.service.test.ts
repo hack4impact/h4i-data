@@ -6,6 +6,7 @@ import {
   deleteProjectStaffing,
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
+import { Prisma } from '@prisma/client';
 
 jest.mock('../../../src/config/database', () => ({
   prisma: {
@@ -186,7 +187,10 @@ describe('Project Staffing Service', () => {
 
     it('should throw NotFoundError when updating non-existent project staffing', async () => {
       (prisma.project_staffing.update as jest.Mock).mockRejectedValue(
-        new Error('Record to update not found')
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
       );
       await expect(
         updateProjectStaffing('non-existent-id', { is_lead_contact: false })
@@ -231,7 +235,10 @@ describe('Project Staffing Service', () => {
 
     it('should throw NotFoundError when deleting non-existent project staffing', async () => {
       (prisma.project_staffing.delete as jest.Mock).mockRejectedValue(
-        new Error('Record to delete does not exist')
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
       );
       await expect(deleteProjectStaffing('non-existent-id')).rejects.toThrow(
         "ProjectStaffing with id 'non-existent-id' not found"

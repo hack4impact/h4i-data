@@ -6,6 +6,7 @@ import {
   deleteLocation,
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
+import { Prisma } from '@prisma/client';
 
 jest.mock('../../../src/config/database', () => ({
   prisma: {
@@ -178,7 +179,10 @@ describe('Location Service', () => {
 
     it('should throw NotFoundError when updating non-existent location', async () => {
       (prisma.locations.update as jest.Mock).mockRejectedValue(
-        new Error('Record to update not found')
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
       );
 
       await expect(
@@ -222,7 +226,10 @@ describe('Location Service', () => {
 
     it('should throw NotFoundError when deleting non-existent location', async () => {
       (prisma.locations.delete as jest.Mock).mockRejectedValue(
-        new Error('Record to delete does not exist')
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
       );
 
       await expect(deleteLocation('non-existent-id')).rejects.toThrow(

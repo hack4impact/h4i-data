@@ -6,6 +6,7 @@ import {
   deleteProjectRole,
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
+import { Prisma } from '@prisma/client';
 
 jest.mock('../../../src/config/database', () => ({
   prisma: {
@@ -158,7 +159,10 @@ describe('Project Role Service', () => {
 
     it('should throw NotFoundError when updating non-existent project role', async () => {
       (prisma.project_roles.update as jest.Mock).mockRejectedValue(
-        new Error('Record to update not found')
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
       );
       await expect(
         updateProjectRole('non-existent-id', { name: 'Updated' })
@@ -197,7 +201,10 @@ describe('Project Role Service', () => {
 
     it('should throw NotFoundError when deleting non-existent project role', async () => {
       (prisma.project_roles.delete as jest.Mock).mockRejectedValue(
-        new Error('Record to delete does not exist')
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
       );
       await expect(deleteProjectRole('non-existent-id')).rejects.toThrow(
         "ProjectRole with id 'non-existent-id' not found"

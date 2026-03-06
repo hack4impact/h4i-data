@@ -6,6 +6,7 @@ import {
   deleteAcademicTerm,
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
+import { Prisma } from '@prisma/client';
 
 jest.mock('../../../src/config/database', () => ({
   prisma: {
@@ -186,7 +187,10 @@ describe('Academic Term Service', () => {
 
     it('should throw NotFoundError when updating non-existent academic term', async () => {
       (prisma.academic_terms.update as jest.Mock).mockRejectedValue(
-        new Error('Record to update not found')
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
       );
       await expect(
         updateAcademicTerm('non-existent-id', { name: 'Updated' })
@@ -231,7 +235,10 @@ describe('Academic Term Service', () => {
 
     it('should throw NotFoundError when deleting non-existent academic term', async () => {
       (prisma.academic_terms.delete as jest.Mock).mockRejectedValue(
-        new Error('Record to delete does not exist')
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
       );
       await expect(deleteAcademicTerm('non-existent-id')).rejects.toThrow(
         "AcademicTerm with id 'non-existent-id' not found"
