@@ -1,6 +1,5 @@
 import request from 'supertest';
 import { createRestApp } from '../../../src/api/rest/server';
-import { prisma } from '../../../src/config/database';
 
 const app = createRestApp();
 
