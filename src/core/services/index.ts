@@ -6,7 +6,7 @@ export * from './locations.service';
 export * from './partners.service';
 export * from './projects.service';
 export * from './officer-roles.service';
-export * from './volunteer.service';
+export * from './volunteers.service';
 export * from './mentors.service';
 
 // Supporting Entity Services
