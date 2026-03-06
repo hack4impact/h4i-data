@@ -76,7 +76,7 @@ export async function connectDB() {
       environment: env.NODE_ENV,
     });
   } catch (error) {
-    console.error('Failed to connect to the database', error);
+    logger.error('Failed to connect to the database', error);
     process.exit(1);
   }
 }
@@ -87,6 +87,6 @@ export async function disconnectDB() {
     await prisma.$disconnect();
     await pool.end();
   } catch (error) {
-    console.error('Failed to disconnect from the database', error);
+    logger.error('Failed to disconnect from the database', error);
   }
 }

@@ -66,7 +66,7 @@ Fix: Replace with a static `import { logger } from './logger'`.
 
 ## New Issues (Structural / Consistency)
 
-### 12. `console.error` in `database.ts` instead of `logger`
+### 12. `console.error` in `database.ts` instead of `logger` [DONE]
 `connectDB` (line 79) and `disconnectDB` (line 90) catch blocks use `console.error` while the
 rest of the file already uses `logger`. These were missed when fixing issue #6.
 Fix: Replace both `console.error` calls with `logger.error`.
