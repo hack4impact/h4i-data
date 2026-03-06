@@ -18,8 +18,7 @@ async function startServer() {
   const graphqlApp = createGraphqlApp();
   app.use('/api/graphql', graphqlApp);
 
-  const port = process.env.PORT || env.PORT || 3001;
-  const server = app.listen(port, () => {
+  const server = app.listen(env.PORT, () => {
     logger.info('Integrated server started', {
       port: env.PORT,
       rest: `http://localhost:${env.PORT}/api/rest`,

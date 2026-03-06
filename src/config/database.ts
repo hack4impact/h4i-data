@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 import { env } from './server';
+import { logger } from './logger';
 
 // Create connection pool for Prisma adapter
 const pool = new pg.Pool({
@@ -26,10 +27,6 @@ export const prisma = new PrismaClient({
 
 // Query performance monitoring (only in development)
 if (process.env.NODE_ENV === 'development') {
-  // Import logger dynamically to avoid circular dependency
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { logger } = require('./logger');
-
   prisma.$on('query', (e) => {
     if (e.duration > 1000) {
       logger.warn('Slow database query detected', {
@@ -69,10 +66,6 @@ export async function connectDB() {
 
     // Test the connection
     const health = await checkDatabaseHealth();
-
-    // Import logger dynamically to avoid circular dependency
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { logger } = require('./logger');
 
     logger.info('Database connected successfully', {
       responseTime: `${health.responseTime}ms`,

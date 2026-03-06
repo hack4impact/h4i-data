@@ -81,10 +81,6 @@ export const resolvers = {
     ...projectStaffingResolvers.Mutation,
   },
   // Type Resolvers
-  ...(volunteerResolvers.Volunteer && {
-    Volunteer: volunteerResolvers.Volunteer,
-  }),
-  ...(mentorResolvers.Mentor && {
-    Mentor: mentorResolvers.Mentor,
-  }),
+  Volunteer: volunteerResolvers.Volunteer,
+  Mentor: mentorResolvers.Mentor,
 };

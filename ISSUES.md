@@ -35,7 +35,7 @@ Fix: Remove the redundant `.parse()` calls and pass `data` directly.
 Startup and shutdown messages use raw `console.log` while the rest of the codebase uses winston.
 Fix: Import and use `logger` from `src/config/logger.ts`.
 
-### 7. Redundant port resolution in `app.ts` [OPEN]
+### 7. Redundant port resolution in `app.ts` [DONE]
 `const port = process.env.PORT || env.PORT || 3001` — `env.PORT` already reads from
 `process.env.PORT` with a default of 3001 via Zod. The full expression is triple-redundant.
 Fix: Use `env.PORT` directly.
@@ -44,20 +44,20 @@ Fix: Use `env.PORT` directly.
 
 ## Minor (style / cleanup)
 
-### 8. `import fs` at the bottom of `logger.ts` [OPEN]
+### 8. `import fs` at the bottom of `logger.ts` [DONE]
 The `import fs from 'fs'` statement is on line 107, after executable code.
 Fix: Move it to the top of the file with the other imports.
 
-### 9. Unnecessary conditional spread in `resolvers.ts` [OPEN]
+### 9. Unnecessary conditional spread in `resolvers.ts` [DONE]
 `...(volunteerResolvers.Volunteer && { Volunteer: ... })` — the property is always defined.
 Fix: Replace with direct assignment for both `Volunteer` and `Mentor` type resolvers.
 
-### 10. Unnecessary `as string` casts in controllers [OPEN]
+### 10. Unnecessary `as string` casts in controllers [N/A — cast is required by Express types in this project]
 `req.params.id as string` — Express types `req.params` as `Record<string, string>`, so the
 cast is redundant. Affects all 19 controllers.
 Fix: Remove the casts.
 
-### 11. Dynamic `require('./logger')` in `database.ts` [OPEN]
+### 11. Dynamic `require('./logger')` in `database.ts` [DONE]
 Used to avoid a supposed circular dependency that does not actually exist.
 Both `database.ts` and `logger.ts` import from `server.ts` but do not import each other.
 Fix: Replace with a static `import { logger } from './logger'`.

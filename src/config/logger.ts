@@ -1,6 +1,7 @@
 import winston from 'winston';
 import path from 'path';
 import { env } from './server';
+import fs from 'fs';
 
 // Ensure logs directory exists
 const logsDir = 'logs';
@@ -104,7 +105,6 @@ winston.addColors({
 });
 
 // Create logs directory if it doesn't exist
-import fs from 'fs';
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
