@@ -19,25 +19,24 @@ A comprehensive backend API for managing H4I operations data — volunteers, cha
 
 ## Project Structure
 
-```markdown
+```
 src/
 ├── api/
-│ ├── rest/ # REST API endpoints
-│ └── graphql/ # GraphQL schema and resolvers
+│   ├── rest/       # REST API endpoints
+│   └── graphql/    # GraphQL schema and resolvers
 ├── core/
-│ ├── services/ # Business logic
-│ └── validators/ # Input validation
-├── config/ # Database and server configuration
-├── middleware/ # Logging, security, and errors
-└── app.ts # Main application entry point
+│   ├── services/   # Business logic
+│   └── validators/ # Input validation
+├── config/         # Database and server configuration
+├── middleware/      # Logging, security, and errors
+└── app.ts          # Main application entry point
 
 tests/
-├── unit/ # Unit tests
-└── integration/ # Integration tests
+├── unit/           # Unit tests (no database required)
+└── integration/    # Integration tests (requires Docker)
 
 prisma/
-├── schema.prisma # Database schema
-└── migrations/ # Database migrations
+└── schema.prisma   # Database schema
 ```
 
 ---
@@ -98,20 +97,6 @@ The servers will be available at:
 
 ---
 
-## Testing
-
-```bash
-pnpm run test               # Run all tests (unit + integration, auto-starts Docker)
-pnpm run test:unit          # Unit tests only (no Docker required)
-pnpm run test:integration   # Integration tests only (auto-starts Docker)
-pnpm run test:coverage      # Generate coverage report for unit tests only
-pnpm run test:watch         # Watch mode for unit tests
-```
-
-Integration tests automatically start a Docker PostgreSQL container via `docker compose up -d --wait` before running. Docker Desktop must be installed and running.
-
----
-
 ## Database Schema
 
 The database includes the following core entities:
@@ -140,24 +125,6 @@ Relationship/tracking entities:
 - **officer_assignments** - Assigns volunteers to officer roles at chapters
 - **mentorships** - Mentor/mentee relationships between constituents
 - **volunteer_history** - Audit trail of volunteer lifecycle events
-
----
-
-## Development Guidelines
-
-### Database Management
-
-- **DO NOT** edit `schema.prisma` directly in production
-- Use Supabase Table Editor for schema changes in production
-- Always run `pnpm exec prisma db pull` and `pnpm exec prisma generate` after database changes
-- This ensures code stays synchronized with the database
-
-### Branch Naming Convention
-
-Follow the pattern: `feature/issue-number-description`
-
-- Example: `feature/1-add-volunteer-endpoints`
-- This automatically links branches to GitHub issues
 
 ---
 
@@ -200,38 +167,9 @@ See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md
 
 ---
 
-## Architecture
+## Contributing
 
-### Adding New Endpoints
-
-1. **Service Layer** (`src/core/services/`)
-   - Create business logic functions
-   - Use async/await pattern
-   - Services throw custom errors (NotFoundError, DatabaseError) — handled by error middleware
-   - Follow existing naming conventions
-   - Use function declarations and not arrow functions
-
-2. **GraphQL** (`src/api/graphql/`)
-   - Add schema definitions in `schemas/`
-   - Implement resolvers in `resolvers/`
-   - Export from respective index files
-   - Update `graphql/resolvers.ts` and `graphql/schemas.ts` after schema and resolver implementations
-
-3. **REST** (`src/api/rest/`)
-   - Add controllers in `controllers/`
-   - Define routes in `routes/`
-   - Export from respective index files
-   - Apply validation using Zod validators from `core/validators`
-   - Add route in `rest/routes.ts`
-
-### Testing Best Practices
-
-- Mock services before importing in tests
-- Use `describe()` blocks for organizing related tests
-- Write async test functions
-- Follow AAA pattern: Arrange, Act, Assert
-- **Integration tests should be completely self-contained** - each test creates its own data and doesn't depend on other tests
-- Examples available in `tests/` directory
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing, and contribution guidelines.
 
 ---
 
@@ -241,22 +179,3 @@ See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md
 - [Jest Documentation](https://jestjs.io/docs/getting-started)
 - [GraphQL Best Practices](https://graphql.org/learn/best-practices/)
 - [Express.js Guide](https://expressjs.com/en/guide/routing.html)
-
-## Docker (Test Database)
-
-A local PostgreSQL 16 container is used for integration tests. It runs on port **5433** and is seeded from `db-init/seed.sql`.
-
-```bash
-pnpm run docker:up          # Start the test database container
-pnpm run docker:down        # Stop and remove the container (with volumes)
-pnpm run seed:test          # Re-run seed.sql against the running container
-```
-
-To inspect the database manually:
-
-```bash
-docker compose exec -T test-db psql -U postgres -d test_db
-# Then run: \dt (list tables), SELECT * FROM volunteers; etc.
-```
-
-**Tip:** To pause a test so you can inspect the database mid-run, insert `await new Promise(() => {});` in the test.

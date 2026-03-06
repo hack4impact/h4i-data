@@ -67,9 +67,83 @@ The servers will be available at:
 
 ---
 
+## Testing
+
+### Unit Tests
+
+Unit tests mock the database and run without any external dependencies.
+
+```bash
+pnpm run test:unit          # Run unit tests
+pnpm run test:watch         # Watch mode
+pnpm run test:coverage      # Generate coverage report
+```
+
+### Integration Tests
+
+Integration tests run against a real local PostgreSQL database in Docker. **Docker Desktop must be installed and running** before running integration tests.
+
+#### Docker Setup
+
+A PostgreSQL 16 container runs on port **5433**, separate from any local Postgres you may have on 5432. It is seeded automatically from `db-init/seed.sql` on startup.
+
+```bash
+pnpm run docker:up          # Start the test database container
+pnpm run docker:down        # Stop and remove the container (with volumes)
+pnpm run seed:test          # Re-run seed.sql against the running container
+```
+
+#### Running Integration Tests
+
+```bash
+pnpm run test:integration   # Starts Docker, runs tests, stops Docker
+```
+
+The test script handles starting and stopping the container automatically. If you want to keep the container running between runs (faster for development), start it manually first:
+
+```bash
+pnpm run docker:up
+cross-env NODE_ENV=test jest tests/integration --runInBand
+```
+
+#### Inspecting the Test Database
+
+To inspect the database manually while tests are running or after a failure:
+
+```bash
+docker compose exec -T test-db psql -U postgres -d test_db
+# Useful psql commands:
+# \dt              — list tables
+# SELECT * FROM volunteers;
+```
+
+**Tip:** To pause a test mid-run so you can inspect the database state, insert `await new Promise(() => {});` at the point you want to pause.
+
+### Run All Tests
+
+```bash
+pnpm run test               # Unit tests, then integration tests (requires Docker)
+```
+
+### Testing Best Practices
+
+- Mock the database before importing modules in unit tests
+- Use `describe()` blocks to organize related tests
+- Write async test functions
+- Follow the AAA pattern: Arrange, Act, Assert
+- **Integration tests must be completely self-contained** — each test creates its own data and does not depend on other tests or seed data
+
+---
+
 ## Development Guidelines
 
 _See Style Guide: [STYLE_GUIDE.md](https://github.com/hack4impact/operations-api/blob/main/STYLE_GUIDE.md)_
+
+### Database Management
+
+- **Do not** edit `schema.prisma` directly — schema is managed through Supabase
+- Use the Supabase Table Editor for schema changes in production
+- After any database change, always run `pnpm exec prisma db pull` then `pnpm exec prisma generate` to keep the client in sync
 
 ### Branch Naming Convention
 
@@ -77,7 +151,7 @@ Follow the pattern listed in your issue: `feature/issue-number-description`
 
 - Example: `feature/1-add-volunteer-endpoints`
 - This automatically links branches to GitHub issues
-- Create your branch off of the "develop" branch, not the main.
+- Create your branch off of the `develop` branch, not `main`
 
 ### Making Changes
 
@@ -104,12 +178,28 @@ When interacting with Git/GitHub, feel free to use the command line, VSCode exte
 5. Request a reviewer to check your code
 6. Once approved, your code is ready to be merged in 🎉
 
-### Testing
+---
 
-```bash
-pnpm run test               # Run all tests (Unit &  Integration)
-pnpm run test:coverage      # Generate coverage report for Unit tests only
-pnpm run test:integration   # Integration tests only
-pnpm run test:unit          # Unit tests only
-pnpm run test:watch         # Watch mode for unit tests
-```
+## Adding New Endpoints
+
+### 1. Service Layer (`src/core/services/`)
+
+- Create business logic functions using async/await
+- Services throw custom errors (`NotFoundError`, `DatabaseError`) — the error middleware handles them automatically
+- Use function declarations, not arrow functions
+- Follow existing naming conventions and export from `src/core/services/index.ts`
+
+### 2. GraphQL (`src/api/graphql/`)
+
+- Add schema definitions in `schemas/`
+- Implement resolvers in `resolvers/`
+- Export from the respective index files
+- Register in `graphql/schemas.ts` and `graphql/resolvers.ts`
+
+### 3. REST (`src/api/rest/`)
+
+- Add a controller in `controllers/`
+- Define routes in `routes/`
+- Export from the respective index files
+- Apply Zod validation from `core/validators`
+- Register the route in `rest/routes.ts`
