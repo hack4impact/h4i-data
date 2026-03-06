@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
 
-module.exports = async function integrationSetup() {
+export default async function integrationSetup() {
   execSync('pnpm run docker:up', { stdio: 'inherit' });
-};
+}

@@ -7,6 +7,6 @@ module.exports = {
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/*.test.ts'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testTimeout: 15000,
-  globalSetup: '<rootDir>/tests/integration/integrationSetup.js',
-  globalTeardown: '<rootDir>/tests/integration/integrationTeardown.js',
+  globalSetup: '<rootDir>/tests/integration/integrationSetup.ts',
+  globalTeardown: '<rootDir>/tests/integration/integrationTeardown.ts',
 };

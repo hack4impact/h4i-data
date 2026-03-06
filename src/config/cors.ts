@@ -9,8 +9,7 @@ function getAllowedOrigins() {
   if (env.NODE_ENV === 'development') {
     origins.push(
       'http://localhost:3000', // Common frontend port
-      'http://127.0.0.1:3000', // Alternative localhost
-      'https://operations-api-gsephsd6c9hyfbfp.centralus-01.azurewebsites.net'
+      'http://127.0.0.1:3000' // Alternative localhost
     );
   }
 
@@ -25,21 +24,6 @@ function getAllowedOrigins() {
       customOrigins: parsedOrigins,
     });
   }
-
-  // Default production origins
-  if (env.NODE_ENV === 'production') {
-    // TODO: Add production frontend URLs here
-    // origins.push(
-    //   'https://yourdomain.com',
-    //   'https://www.yourdomain.com'
-    // );
-  }
-
-  // If we need staging environment, add 'staging' to the NODE_ENV enum
-  // in src/config/server.ts and uncomment the following:
-  // if (env.NODE_ENV === 'staging') {
-  //   origins.push('https://staging.yourdomain.com');
-  // }
 
   logger.info('CORS configuration initialized', {
     environment: env.NODE_ENV,
