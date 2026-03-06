@@ -2,114 +2,183 @@ import request from 'supertest';
 import { createGraphqlApp } from '../../../src/api/graphql/server';
 import { createRestApp } from '../../../src/api/rest/server';
 
-const gqlApp = createGraphqlApp();
+const app = createGraphqlApp();
 const restApp = createRestApp();
 
 const createTestProject = async () => {
   const res = await request(restApp)
     .post('/projects')
-    .send({ name: `Project ${Date.now()}` });
+    .send({ name: `Project ${Date.now()}.${Math.random()}` });
   return res.body.project_id;
 };
 
+const createTestEngagement = async (projectId: string) => {
+  const mutation = `
+    mutation CreateProjectEngagement($input: CreateProjectEngagementInput!) {
+      createProjectEngagement(input: $input) {
+        engagement_id
+        project_id
+        status
+      }
+    }
+  `;
+  const response = await request(app)
+    .post('/')
+    .send({
+      query: mutation,
+      variables: { input: { project_id: projectId, status: 'ACTIVE' } },
+    });
+  return response.body.data.createProjectEngagement;
+};
+
 describe('GraphQL API - Project Engagements', () => {
-  it('should create a project engagement', async () => {
+  it('should create a new project engagement via mutation', async () => {
+    // Arrange
     const projectId = await createTestProject();
 
-    const res = await request(gqlApp)
+    // Act
+    const mutation = `
+      mutation CreateProjectEngagement($input: CreateProjectEngagementInput!) {
+        createProjectEngagement(input: $input) {
+          engagement_id
+          project_id
+          status
+          domain
+        }
+      }
+    `;
+    const variables = {
+      input: { project_id: projectId, status: 'ACTIVE', domain: 'FULL_STACK' },
+    };
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectEngagementInput!) { createProjectEngagement(input: $input) { engagement_id project_id status } }`,
-        variables: {
-          input: {
-            project_id: projectId,
-            status: 'ACTIVE',
-            domain: 'FULL_STACK',
-          },
-        },
-      });
+      .send({ query: mutation, variables });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.createProjectEngagement).toHaveProperty(
-      'engagement_id'
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    const engagement = response.body.data.createProjectEngagement;
+    expect(engagement).toHaveProperty('engagement_id');
+    expect(engagement.project_id).toBe(projectId);
+    expect(engagement.status).toBe('ACTIVE');
+    expect(engagement.domain).toBe('FULL_STACK');
+  });
+
+  it('should fetch a project engagement by ID via query', async () => {
+    // Arrange
+    const projectId = await createTestProject();
+    const created = await createTestEngagement(projectId);
+
+    // Act
+    const query = `
+      query ProjectEngagement($id: ID!) {
+        projectEngagement(id: $id) {
+          engagement_id
+          project_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({ query, variables: { id: created.engagement_id } });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.projectEngagement.engagement_id).toBe(
+      created.engagement_id
     );
-    expect(res.body.data.createProjectEngagement.project_id).toBe(projectId);
   });
 
-  it('should fetch a project engagement by ID', async () => {
-    const projectId = await createTestProject();
-    const created = await request(gqlApp)
-      .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectEngagementInput!) { createProjectEngagement(input: $input) { engagement_id } }`,
-        variables: { input: { project_id: projectId } },
-      });
-    const id = created.body.data.createProjectEngagement.engagement_id;
+  it('should return null for a non-existent project engagement ID', async () => {
+    // Act
+    const query = `
+      query {
+        projectEngagement(id: "00000000-0000-0000-0000-000000000000") {
+          engagement_id
+        }
+      }
+    `;
+    const response = await request(app).post('/').send({ query });
 
-    const res = await request(gqlApp).post('/').send({
-      query: `query ($id: ID!) { projectEngagement(id: $id) { engagement_id project_id } }`,
-      variables: { id },
-    });
-
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.projectEngagement.engagement_id).toBe(id);
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.data.projectEngagement).toBeNull();
   });
 
-  it('should fetch all project engagements', async () => {
+  it('should fetch all project engagements via query', async () => {
+    // Arrange
     const projectId = await createTestProject();
-    await request(gqlApp)
-      .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectEngagementInput!) { createProjectEngagement(input: $input) { engagement_id } }`,
-        variables: { input: { project_id: projectId } },
-      });
+    await createTestEngagement(projectId);
 
-    const res = await request(gqlApp).post('/').send({
-      query: `query { projectEngagements { engagement_id } }`,
-    });
+    // Act
+    const query = `query { projectEngagements { engagement_id } }`;
+    const response = await request(app).post('/').send({ query });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(Array.isArray(res.body.data.projectEngagements)).toBe(true);
-    expect(res.body.data.projectEngagements.length).toBeGreaterThan(0);
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(Array.isArray(response.body.data.projectEngagements)).toBe(true);
+    expect(response.body.data.projectEngagements.length).toBeGreaterThan(0);
   });
 
-  it('should update a project engagement', async () => {
+  it('should update a project engagement via mutation', async () => {
+    // Arrange
     const projectId = await createTestProject();
-    const created = await request(gqlApp)
-      .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectEngagementInput!) { createProjectEngagement(input: $input) { engagement_id } }`,
-        variables: { input: { project_id: projectId, status: 'ACTIVE' } },
-      });
-    const id = created.body.data.createProjectEngagement.engagement_id;
+    const created = await createTestEngagement(projectId);
 
-    const res = await request(gqlApp)
+    // Act
+    const mutation = `
+      mutation UpdateProjectEngagement($id: ID!, $input: UpdateProjectEngagementInput!) {
+        updateProjectEngagement(id: $id, input: $input) {
+          engagement_id
+          status
+        }
+      }
+    `;
+    const variables = {
+      id: created.engagement_id,
+      input: { status: 'COMPLETED' },
+    };
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `mutation ($id: ID!, $input: UpdateProjectEngagementInput!) { updateProjectEngagement(id: $id, input: $input) { status } }`,
-        variables: { id, input: { status: 'COMPLETED' } },
-      });
+      .send({ query: mutation, variables });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.updateProjectEngagement.status).toBe('COMPLETED');
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.updateProjectEngagement.status).toBe('COMPLETED');
   });
 
-  it('should delete a project engagement', async () => {
+  it('should delete a project engagement via mutation', async () => {
+    // Arrange
     const projectId = await createTestProject();
-    const created = await request(gqlApp)
+    const created = await createTestEngagement(projectId);
+
+    // Act
+    const mutation = `
+      mutation DeleteProjectEngagement($id: ID!) {
+        deleteProjectEngagement(id: $id) {
+          engagement_id
+        }
+      }
+    `;
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectEngagementInput!) { createProjectEngagement(input: $input) { engagement_id } }`,
-        variables: { input: { project_id: projectId } },
-      });
-    const id = created.body.data.createProjectEngagement.engagement_id;
+      .send({ query: mutation, variables: { id: created.engagement_id } });
 
-    const res = await request(gqlApp).post('/').send({
-      query: `mutation ($id: ID!) { deleteProjectEngagement(id: $id) { engagement_id } }`,
-      variables: { id },
-    });
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.deleteProjectEngagement.engagement_id).toBe(
+      created.engagement_id
+    );
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.deleteProjectEngagement.engagement_id).toBe(id);
+    // Verify it's gone
+    const verifyQuery = `query { projectEngagement(id: "${created.engagement_id}") { engagement_id } }`;
+    const verifyResponse = await request(app)
+      .post('/')
+      .send({ query: verifyQuery });
+    expect(verifyResponse.body.data.projectEngagement).toBeNull();
   });
 });

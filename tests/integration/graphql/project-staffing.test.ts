@@ -2,7 +2,7 @@ import request from 'supertest';
 import { createGraphqlApp } from '../../../src/api/graphql/server';
 import { createRestApp } from '../../../src/api/rest/server';
 
-const gqlApp = createGraphqlApp();
+const app = createGraphqlApp();
 const restApp = createRestApp();
 
 const createTestVolunteer = async () => {
@@ -23,7 +23,7 @@ const createTestVolunteer = async () => {
 const createTestEngagement = async () => {
   const projectRes = await request(restApp)
     .post('/projects')
-    .send({ name: `Project ${Date.now()}` });
+    .send({ name: `Project ${Date.now()}.${Math.random()}` });
   const projectId = projectRes.body.project_id;
   const engagementRes = await request(restApp)
     .post('/project-engagements')
@@ -31,115 +31,187 @@ const createTestEngagement = async () => {
   return engagementRes.body.engagement_id;
 };
 
+const createTestStaffing = async (
+  volunteerId: string,
+  engagementId: string
+) => {
+  const mutation = `
+    mutation CreateProjectStaffing($input: CreateProjectStaffingInput!) {
+      createProjectStaffing(input: $input) {
+        staffing_id
+        volunteer_id
+        engagement_id
+      }
+    }
+  `;
+  const response = await request(app)
+    .post('/')
+    .send({
+      query: mutation,
+      variables: {
+        input: { volunteer_id: volunteerId, engagement_id: engagementId },
+      },
+    });
+  return response.body.data.createProjectStaffing;
+};
+
 describe('GraphQL API - Project Staffing', () => {
-  it('should create a project staffing record', async () => {
+  it('should create a new project staffing record via mutation', async () => {
+    // Arrange
     const volunteerId = await createTestVolunteer();
     const engagementId = await createTestEngagement();
 
-    const res = await request(gqlApp)
+    // Act
+    const mutation = `
+      mutation CreateProjectStaffing($input: CreateProjectStaffingInput!) {
+        createProjectStaffing(input: $input) {
+          staffing_id
+          volunteer_id
+          engagement_id
+          is_lead_contact
+        }
+      }
+    `;
+    const variables = {
+      input: {
+        volunteer_id: volunteerId,
+        engagement_id: engagementId,
+        is_lead_contact: true,
+      },
+    };
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectStaffingInput!) { createProjectStaffing(input: $input) { staffing_id volunteer_id engagement_id } }`,
-        variables: {
-          input: { volunteer_id: volunteerId, engagement_id: engagementId },
-        },
-      });
+      .send({ query: mutation, variables });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.createProjectStaffing).toHaveProperty('staffing_id');
-    expect(res.body.data.createProjectStaffing.volunteer_id).toBe(volunteerId);
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    const staffing = response.body.data.createProjectStaffing;
+    expect(staffing).toHaveProperty('staffing_id');
+    expect(staffing.volunteer_id).toBe(volunteerId);
+    expect(staffing.engagement_id).toBe(engagementId);
+    expect(staffing.is_lead_contact).toBe(true);
   });
 
-  it('should fetch a project staffing record by ID', async () => {
+  it('should fetch a project staffing record by ID via query', async () => {
+    // Arrange
     const volunteerId = await createTestVolunteer();
     const engagementId = await createTestEngagement();
-    const created = await request(gqlApp)
+    const created = await createTestStaffing(volunteerId, engagementId);
+
+    // Act
+    const query = `
+      query ProjectStaffing($id: ID!) {
+        projectStaffing(id: $id) {
+          staffing_id
+          volunteer_id
+        }
+      }
+    `;
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectStaffingInput!) { createProjectStaffing(input: $input) { staffing_id } }`,
-        variables: {
-          input: { volunteer_id: volunteerId, engagement_id: engagementId },
-        },
-      });
-    const id = created.body.data.createProjectStaffing.staffing_id;
+      .send({ query, variables: { id: created.staffing_id } });
 
-    const res = await request(gqlApp).post('/').send({
-      query: `query ($id: ID!) { projectStaffing(id: $id) { staffing_id volunteer_id } }`,
-      variables: { id },
-    });
-
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.projectStaffing.staffing_id).toBe(id);
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.projectStaffing.staffing_id).toBe(
+      created.staffing_id
+    );
   });
 
-  it('should fetch all project staffing records', async () => {
-    const volunteerId = await createTestVolunteer();
-    const engagementId = await createTestEngagement();
-    await request(gqlApp)
-      .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectStaffingInput!) { createProjectStaffing(input: $input) { staffing_id } }`,
-        variables: {
-          input: { volunteer_id: volunteerId, engagement_id: engagementId },
-        },
-      });
+  it('should return null for a non-existent project staffing ID', async () => {
+    // Act
+    const query = `
+      query {
+        projectStaffing(id: "00000000-0000-0000-0000-000000000000") {
+          staffing_id
+        }
+      }
+    `;
+    const response = await request(app).post('/').send({ query });
 
-    const res = await request(gqlApp).post('/').send({
-      query: `query { projectStaffings { staffing_id } }`,
-    });
-
-    expect(res.body.errors).toBeUndefined();
-    expect(Array.isArray(res.body.data.projectStaffings)).toBe(true);
-    expect(res.body.data.projectStaffings.length).toBeGreaterThan(0);
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.data.projectStaffing).toBeNull();
   });
 
-  it('should update a project staffing record', async () => {
+  it('should fetch all project staffing records via query', async () => {
+    // Arrange
     const volunteerId = await createTestVolunteer();
     const engagementId = await createTestEngagement();
-    const created = await request(gqlApp)
-      .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectStaffingInput!) { createProjectStaffing(input: $input) { staffing_id } }`,
-        variables: {
-          input: {
-            volunteer_id: volunteerId,
-            engagement_id: engagementId,
-            is_lead_contact: false,
-          },
-        },
-      });
-    const id = created.body.data.createProjectStaffing.staffing_id;
+    await createTestStaffing(volunteerId, engagementId);
 
-    const res = await request(gqlApp)
-      .post('/')
-      .send({
-        query: `mutation ($id: ID!, $input: UpdateProjectStaffingInput!) { updateProjectStaffing(id: $id, input: $input) { is_lead_contact } }`,
-        variables: { id, input: { is_lead_contact: true } },
-      });
+    // Act
+    const query = `query { projectStaffings { staffing_id } }`;
+    const response = await request(app).post('/').send({ query });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.updateProjectStaffing.is_lead_contact).toBe(true);
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(Array.isArray(response.body.data.projectStaffings)).toBe(true);
+    expect(response.body.data.projectStaffings.length).toBeGreaterThan(0);
   });
 
-  it('should delete a project staffing record', async () => {
+  it('should update a project staffing record via mutation', async () => {
+    // Arrange
     const volunteerId = await createTestVolunteer();
     const engagementId = await createTestEngagement();
-    const created = await request(gqlApp)
+    const created = await createTestStaffing(volunteerId, engagementId);
+
+    // Act
+    const mutation = `
+      mutation UpdateProjectStaffing($id: ID!, $input: UpdateProjectStaffingInput!) {
+        updateProjectStaffing(id: $id, input: $input) {
+          staffing_id
+          is_lead_contact
+        }
+      }
+    `;
+    const variables = {
+      id: created.staffing_id,
+      input: { is_lead_contact: true },
+    };
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectStaffingInput!) { createProjectStaffing(input: $input) { staffing_id } }`,
-        variables: {
-          input: { volunteer_id: volunteerId, engagement_id: engagementId },
-        },
-      });
-    const id = created.body.data.createProjectStaffing.staffing_id;
+      .send({ query: mutation, variables });
 
-    const res = await request(gqlApp).post('/').send({
-      query: `mutation ($id: ID!) { deleteProjectStaffing(id: $id) { staffing_id } }`,
-      variables: { id },
-    });
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.updateProjectStaffing.is_lead_contact).toBe(true);
+  });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.deleteProjectStaffing.staffing_id).toBe(id);
+  it('should delete a project staffing record via mutation', async () => {
+    // Arrange
+    const volunteerId = await createTestVolunteer();
+    const engagementId = await createTestEngagement();
+    const created = await createTestStaffing(volunteerId, engagementId);
+
+    // Act
+    const mutation = `
+      mutation DeleteProjectStaffing($id: ID!) {
+        deleteProjectStaffing(id: $id) {
+          staffing_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({ query: mutation, variables: { id: created.staffing_id } });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.deleteProjectStaffing.staffing_id).toBe(
+      created.staffing_id
+    );
+
+    // Verify it's gone
+    const verifyQuery = `query { projectStaffing(id: "${created.staffing_id}") { staffing_id } }`;
+    const verifyResponse = await request(app)
+      .post('/')
+      .send({ query: verifyQuery });
+    expect(verifyResponse.body.data.projectStaffing).toBeNull();
   });
 });

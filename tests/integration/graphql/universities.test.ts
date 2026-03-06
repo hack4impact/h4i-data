@@ -4,79 +4,162 @@ import { createGraphqlApp } from '../../../src/api/graphql/server';
 const app = createGraphqlApp();
 
 const createTestUniversity = async (name: string) => {
-  const res = await request(app)
+  const mutation = `
+    mutation CreateUniversity($input: CreateUniversityInput!) {
+      createUniversity(input: $input) {
+        university_id
+        name
+      }
+    }
+  `;
+  const response = await request(app)
     .post('/')
-    .send({
-      query: `mutation ($input: CreateUniversityInput!) { createUniversity(input: $input) { university_id name } }`,
-      variables: { input: { name } },
-    });
-  return res.body.data.createUniversity;
+    .send({ query: mutation, variables: { input: { name } } });
+  return response.body.data.createUniversity;
 };
 
 describe('GraphQL API - Universities', () => {
-  it('should create a university', async () => {
-    const university = await createTestUniversity('Test University');
+  it('should create a new university via mutation', async () => {
+    // Act
+    const mutation = `
+      mutation CreateUniversity($input: CreateUniversityInput!) {
+        createUniversity(input: $input) {
+          university_id
+          name
+          email_domain
+        }
+      }
+    `;
+    const variables = {
+      input: { name: 'Test University', email_domain: 'test.edu' },
+    };
+    const response = await request(app)
+      .post('/')
+      .send({ query: mutation, variables });
 
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    const university = response.body.data.createUniversity;
     expect(university).toHaveProperty('university_id');
     expect(university.name).toBe('Test University');
   });
 
-  it('should fetch a university by ID', async () => {
+  it('should fetch a university by ID via query', async () => {
+    // Arrange
     const created = await createTestUniversity(`University ${Date.now()}`);
 
-    const res = await request(app)
+    // Act
+    const query = `
+      query University($id: ID!) {
+        university(id: $id) {
+          university_id
+          name
+        }
+      }
+    `;
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `query ($id: ID!) { university(id: $id) { university_id name } }`,
-        variables: { id: created.university_id },
-      });
+      .send({ query, variables: { id: created.university_id } });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.university.university_id).toBe(created.university_id);
-  });
-
-  it('should fetch all universities', async () => {
-    await createTestUniversity(`University ${Date.now()}`);
-
-    const res = await request(app).post('/').send({
-      query: `query { universities { university_id name } }`,
-    });
-
-    expect(res.body.errors).toBeUndefined();
-    expect(Array.isArray(res.body.data.universities)).toBe(true);
-    expect(res.body.data.universities.length).toBeGreaterThan(0);
-  });
-
-  it('should update a university', async () => {
-    const created = await createTestUniversity(`University ${Date.now()}`);
-
-    const res = await request(app)
-      .post('/')
-      .send({
-        query: `mutation ($id: ID!, $input: UpdateUniversityInput!) { updateUniversity(id: $id, input: $input) { name email_domain } }`,
-        variables: {
-          id: created.university_id,
-          input: { name: 'Updated University', email_domain: 'updated.edu' },
-        },
-      });
-
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.updateUniversity.name).toBe('Updated University');
-  });
-
-  it('should delete a university', async () => {
-    const created = await createTestUniversity(`University ${Date.now()}`);
-
-    const res = await request(app)
-      .post('/')
-      .send({
-        query: `mutation ($id: ID!) { deleteUniversity(id: $id) { university_id } }`,
-        variables: { id: created.university_id },
-      });
-
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.deleteUniversity.university_id).toBe(
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.university.university_id).toBe(
       created.university_id
     );
+  });
+
+  it('should return null for a non-existent university ID', async () => {
+    // Act
+    const query = `
+      query {
+        university(id: "00000000-0000-0000-0000-000000000000") {
+          university_id
+        }
+      }
+    `;
+    const response = await request(app).post('/').send({ query });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.data.university).toBeNull();
+  });
+
+  it('should fetch all universities via query', async () => {
+    // Arrange
+    await createTestUniversity(`University ${Date.now()}`);
+
+    // Act
+    const query = `query { universities { university_id name } }`;
+    const response = await request(app).post('/').send({ query });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(Array.isArray(response.body.data.universities)).toBe(true);
+    expect(response.body.data.universities.length).toBeGreaterThan(0);
+  });
+
+  it('should update a university via mutation', async () => {
+    // Arrange
+    const created = await createTestUniversity(`University ${Date.now()}`);
+
+    // Act
+    const mutation = `
+      mutation UpdateUniversity($id: ID!, $input: UpdateUniversityInput!) {
+        updateUniversity(id: $id, input: $input) {
+          university_id
+          name
+          email_domain
+        }
+      }
+    `;
+    const variables = {
+      id: created.university_id,
+      input: { name: 'Updated University', email_domain: 'updated.edu' },
+    };
+    const response = await request(app)
+      .post('/')
+      .send({ query: mutation, variables });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.updateUniversity.name).toBe('Updated University');
+    expect(response.body.data.updateUniversity.email_domain).toBe(
+      'updated.edu'
+    );
+  });
+
+  it('should delete a university via mutation', async () => {
+    // Arrange
+    const created = await createTestUniversity(`University ${Date.now()}`);
+
+    // Act
+    const mutation = `
+      mutation DeleteUniversity($id: ID!) {
+        deleteUniversity(id: $id) {
+          university_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({ query: mutation, variables: { id: created.university_id } });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.deleteUniversity.university_id).toBe(
+      created.university_id
+    );
+
+    // Verify it's gone
+    const verifyQuery = `query { university(id: "${created.university_id}") { university_id } }`;
+    const verifyResponse = await request(app)
+      .post('/')
+      .send({ query: verifyQuery });
+    expect(verifyResponse.body.data.university).toBeNull();
   });
 });

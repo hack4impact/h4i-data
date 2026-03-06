@@ -2,115 +2,190 @@ import request from 'supertest';
 import { createGraphqlApp } from '../../../src/api/graphql/server';
 import { createRestApp } from '../../../src/api/rest/server';
 
-const gqlApp = createGraphqlApp();
+const app = createGraphqlApp();
 const restApp = createRestApp();
 
 const createTestProject = async () => {
   const res = await request(restApp)
     .post('/projects')
-    .send({ name: `Project ${Date.now()}` });
+    .send({ name: `Project ${Date.now()}.${Math.random()}` });
   return res.body.project_id;
 };
 
+const createTestDeliverable = async (projectId: string, label: string) => {
+  const mutation = `
+    mutation CreateProjectDeliverable($input: CreateProjectDeliverableInput!) {
+      createProjectDeliverable(input: $input) {
+        deliverable_id
+        project_id
+        label
+      }
+    }
+  `;
+  const response = await request(app)
+    .post('/')
+    .send({
+      query: mutation,
+      variables: { input: { project_id: projectId, label } },
+    });
+  return response.body.data.createProjectDeliverable;
+};
+
 describe('GraphQL API - Project Deliverables', () => {
-  it('should create a project deliverable', async () => {
+  it('should create a new project deliverable via mutation', async () => {
+    // Arrange
     const projectId = await createTestProject();
 
-    const res = await request(gqlApp)
+    // Act
+    const mutation = `
+      mutation CreateProjectDeliverable($input: CreateProjectDeliverableInput!) {
+        createProjectDeliverable(input: $input) {
+          deliverable_id
+          project_id
+          label
+          category
+        }
+      }
+    `;
+    const variables = {
+      input: {
+        project_id: projectId,
+        label: 'Source Code',
+        url: 'https://github.com/org/repo',
+        category: 'REPO',
+      },
+    };
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectDeliverableInput!) { createProjectDeliverable(input: $input) { deliverable_id project_id label } }`,
-        variables: {
-          input: {
-            project_id: projectId,
-            label: 'Source Code',
-            url: 'https://github.com/org/repo',
-            category: 'REPO',
-          },
-        },
-      });
+      .send({ query: mutation, variables });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.createProjectDeliverable).toHaveProperty(
-      'deliverable_id'
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    const deliverable = response.body.data.createProjectDeliverable;
+    expect(deliverable).toHaveProperty('deliverable_id');
+    expect(deliverable.project_id).toBe(projectId);
+    expect(deliverable.label).toBe('Source Code');
+    expect(deliverable.category).toBe('REPO');
+  });
+
+  it('should fetch a project deliverable by ID via query', async () => {
+    // Arrange
+    const projectId = await createTestProject();
+    const created = await createTestDeliverable(projectId, 'Design Spec');
+
+    // Act
+    const query = `
+      query ProjectDeliverable($id: ID!) {
+        projectDeliverable(id: $id) {
+          deliverable_id
+          label
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({ query, variables: { id: created.deliverable_id } });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.projectDeliverable.deliverable_id).toBe(
+      created.deliverable_id
     );
-    expect(res.body.data.createProjectDeliverable.project_id).toBe(projectId);
   });
 
-  it('should fetch a project deliverable by ID', async () => {
-    const projectId = await createTestProject();
-    const created = await request(gqlApp)
-      .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectDeliverableInput!) { createProjectDeliverable(input: $input) { deliverable_id } }`,
-        variables: { input: { project_id: projectId, label: 'Design Spec' } },
-      });
-    const id = created.body.data.createProjectDeliverable.deliverable_id;
+  it('should return null for a non-existent project deliverable ID', async () => {
+    // Act
+    const query = `
+      query {
+        projectDeliverable(id: "00000000-0000-0000-0000-000000000000") {
+          deliverable_id
+        }
+      }
+    `;
+    const response = await request(app).post('/').send({ query });
 
-    const res = await request(gqlApp).post('/').send({
-      query: `query ($id: ID!) { projectDeliverable(id: $id) { deliverable_id label } }`,
-      variables: { id },
-    });
-
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.projectDeliverable.deliverable_id).toBe(id);
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.data.projectDeliverable).toBeNull();
   });
 
-  it('should fetch all project deliverables', async () => {
+  it('should fetch all project deliverables via query', async () => {
+    // Arrange
     const projectId = await createTestProject();
-    await request(gqlApp)
-      .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectDeliverableInput!) { createProjectDeliverable(input: $input) { deliverable_id } }`,
-        variables: { input: { project_id: projectId } },
-      });
+    await createTestDeliverable(projectId, 'Documentation');
 
-    const res = await request(gqlApp).post('/').send({
-      query: `query { projectDeliverables { deliverable_id } }`,
-    });
+    // Act
+    const query = `query { projectDeliverables { deliverable_id } }`;
+    const response = await request(app).post('/').send({ query });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(Array.isArray(res.body.data.projectDeliverables)).toBe(true);
-    expect(res.body.data.projectDeliverables.length).toBeGreaterThan(0);
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(Array.isArray(response.body.data.projectDeliverables)).toBe(true);
+    expect(response.body.data.projectDeliverables.length).toBeGreaterThan(0);
   });
 
-  it('should update a project deliverable', async () => {
+  it('should update a project deliverable via mutation', async () => {
+    // Arrange
     const projectId = await createTestProject();
-    const created = await request(gqlApp)
-      .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectDeliverableInput!) { createProjectDeliverable(input: $input) { deliverable_id } }`,
-        variables: { input: { project_id: projectId, label: 'Original' } },
-      });
-    const id = created.body.data.createProjectDeliverable.deliverable_id;
+    const created = await createTestDeliverable(projectId, 'Original Label');
 
-    const res = await request(gqlApp)
+    // Act
+    const mutation = `
+      mutation UpdateProjectDeliverable($id: ID!, $input: UpdateProjectDeliverableInput!) {
+        updateProjectDeliverable(id: $id, input: $input) {
+          deliverable_id
+          label
+        }
+      }
+    `;
+    const variables = {
+      id: created.deliverable_id,
+      input: { label: 'Updated Label' },
+    };
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `mutation ($id: ID!, $input: UpdateProjectDeliverableInput!) { updateProjectDeliverable(id: $id, input: $input) { label } }`,
-        variables: { id, input: { label: 'Updated Label' } },
-      });
+      .send({ query: mutation, variables });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.updateProjectDeliverable.label).toBe('Updated Label');
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.updateProjectDeliverable.label).toBe(
+      'Updated Label'
+    );
   });
 
-  it('should delete a project deliverable', async () => {
+  it('should delete a project deliverable via mutation', async () => {
+    // Arrange
     const projectId = await createTestProject();
-    const created = await request(gqlApp)
+    const created = await createTestDeliverable(projectId, 'To Delete');
+
+    // Act
+    const mutation = `
+      mutation DeleteProjectDeliverable($id: ID!) {
+        deleteProjectDeliverable(id: $id) {
+          deliverable_id
+        }
+      }
+    `;
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `mutation ($input: CreateProjectDeliverableInput!) { createProjectDeliverable(input: $input) { deliverable_id } }`,
-        variables: { input: { project_id: projectId } },
-      });
-    const id = created.body.data.createProjectDeliverable.deliverable_id;
+      .send({ query: mutation, variables: { id: created.deliverable_id } });
 
-    const res = await request(gqlApp).post('/').send({
-      query: `mutation ($id: ID!) { deleteProjectDeliverable(id: $id) { deliverable_id } }`,
-      variables: { id },
-    });
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.deleteProjectDeliverable.deliverable_id).toBe(
+      created.deliverable_id
+    );
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.deleteProjectDeliverable.deliverable_id).toBe(id);
+    // Verify it's gone
+    const verifyQuery = `query { projectDeliverable(id: "${created.deliverable_id}") { deliverable_id } }`;
+    const verifyResponse = await request(app)
+      .post('/')
+      .send({ query: verifyQuery });
+    expect(verifyResponse.body.data.projectDeliverable).toBeNull();
   });
 });

@@ -4,78 +4,156 @@ import { createGraphqlApp } from '../../../src/api/graphql/server';
 const app = createGraphqlApp();
 
 const createTestProjectRole = async (name: string) => {
-  const res = await request(app)
+  const mutation = `
+    mutation CreateProjectRole($input: CreateProjectRoleInput!) {
+      createProjectRole(input: $input) {
+        role_id
+        name
+        is_leadership
+      }
+    }
+  `;
+  const response = await request(app)
     .post('/')
-    .send({
-      query: `mutation ($input: CreateProjectRoleInput!) { createProjectRole(input: $input) { role_id name is_leadership } }`,
-      variables: { input: { name } },
-    });
-  return res.body.data.createProjectRole;
+    .send({ query: mutation, variables: { input: { name } } });
+  return response.body.data.createProjectRole;
 };
 
 describe('GraphQL API - Project Roles', () => {
-  it('should create a project role', async () => {
-    const role = await createTestProjectRole('Tech Lead');
+  it('should create a new project role via mutation', async () => {
+    // Act
+    const mutation = `
+      mutation CreateProjectRole($input: CreateProjectRoleInput!) {
+        createProjectRole(input: $input) {
+          role_id
+          name
+          is_leadership
+        }
+      }
+    `;
+    const variables = { input: { name: 'Tech Lead', is_leadership: true } };
+    const response = await request(app)
+      .post('/')
+      .send({ query: mutation, variables });
 
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    const role = response.body.data.createProjectRole;
     expect(role).toHaveProperty('role_id');
     expect(role.name).toBe('Tech Lead');
+    expect(role.is_leadership).toBe(true);
   });
 
-  it('should fetch a project role by ID', async () => {
+  it('should fetch a project role by ID via query', async () => {
+    // Arrange
     const created = await createTestProjectRole(`Role ${Date.now()}`);
 
-    const res = await request(app)
+    // Act
+    const query = `
+      query ProjectRole($id: ID!) {
+        projectRole(id: $id) {
+          role_id
+          name
+        }
+      }
+    `;
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `query ($id: ID!) { projectRole(id: $id) { role_id name } }`,
-        variables: { id: created.role_id },
-      });
+      .send({ query, variables: { id: created.role_id } });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.projectRole.role_id).toBe(created.role_id);
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.projectRole.role_id).toBe(created.role_id);
   });
 
-  it('should fetch all project roles', async () => {
+  it('should return null for a non-existent project role ID', async () => {
+    // Act
+    const query = `
+      query {
+        projectRole(id: "00000000-0000-0000-0000-000000000000") {
+          role_id
+        }
+      }
+    `;
+    const response = await request(app).post('/').send({ query });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.data.projectRole).toBeNull();
+  });
+
+  it('should fetch all project roles via query', async () => {
+    // Arrange
     await createTestProjectRole(`Role ${Date.now()}`);
 
-    const res = await request(app).post('/').send({
-      query: `query { projectRoles { role_id name } }`,
-    });
+    // Act
+    const query = `query { projectRoles { role_id name } }`;
+    const response = await request(app).post('/').send({ query });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(Array.isArray(res.body.data.projectRoles)).toBe(true);
-    expect(res.body.data.projectRoles.length).toBeGreaterThan(0);
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(Array.isArray(response.body.data.projectRoles)).toBe(true);
+    expect(response.body.data.projectRoles.length).toBeGreaterThan(0);
   });
 
-  it('should update a project role', async () => {
+  it('should update a project role via mutation', async () => {
+    // Arrange
     const created = await createTestProjectRole(`Role ${Date.now()}`);
 
-    const res = await request(app)
+    // Act
+    const mutation = `
+      mutation UpdateProjectRole($id: ID!, $input: UpdateProjectRoleInput!) {
+        updateProjectRole(id: $id, input: $input) {
+          role_id
+          name
+          is_leadership
+        }
+      }
+    `;
+    const variables = {
+      id: created.role_id,
+      input: { name: 'Updated Role', is_leadership: true },
+    };
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `mutation ($id: ID!, $input: UpdateProjectRoleInput!) { updateProjectRole(id: $id, input: $input) { name is_leadership } }`,
-        variables: {
-          id: created.role_id,
-          input: { name: 'Updated Role', is_leadership: true },
-        },
-      });
+      .send({ query: mutation, variables });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.updateProjectRole.name).toBe('Updated Role');
-    expect(res.body.data.updateProjectRole.is_leadership).toBe(true);
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.updateProjectRole.name).toBe('Updated Role');
+    expect(response.body.data.updateProjectRole.is_leadership).toBe(true);
   });
 
-  it('should delete a project role', async () => {
+  it('should delete a project role via mutation', async () => {
+    // Arrange
     const created = await createTestProjectRole(`Role ${Date.now()}`);
 
-    const res = await request(app)
+    // Act
+    const mutation = `
+      mutation DeleteProjectRole($id: ID!) {
+        deleteProjectRole(id: $id) {
+          role_id
+        }
+      }
+    `;
+    const response = await request(app)
       .post('/')
-      .send({
-        query: `mutation ($id: ID!) { deleteProjectRole(id: $id) { role_id } }`,
-        variables: { id: created.role_id },
-      });
+      .send({ query: mutation, variables: { id: created.role_id } });
 
-    expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.deleteProjectRole.role_id).toBe(created.role_id);
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.deleteProjectRole.role_id).toBe(created.role_id);
+
+    // Verify it's gone
+    const verifyQuery = `query { projectRole(id: "${created.role_id}") { role_id } }`;
+    const verifyResponse = await request(app)
+      .post('/')
+      .send({ query: verifyQuery });
+    expect(verifyResponse.body.data.projectRole).toBeNull();
   });
 });
