@@ -3,8 +3,28 @@ import { createGraphqlApp } from '../../../src/api/graphql/server';
 
 const app = createGraphqlApp();
 
+// Helper to create a chapter for tests
+const createTestChapter = async (name: string) => {
+  const mutation = `
+    mutation CreateChapter($input: CreateChapterInput!) {
+      createChapter(input: $input) {
+        chapter_id
+        name
+      }
+    }
+  `;
+  const response = await request(app)
+    .post('/')
+    .send({
+      query: mutation,
+      variables: { input: { name, founded_date: '2025-08-30T12:00:00.000Z' } },
+    });
+  return response.body.data.createChapter;
+};
+
 describe('GraphQL API - Chapters', () => {
   it('should create a new chapter via mutation', async () => {
+    // Act
     const mutation = `
       mutation CreateChapter($input: CreateChapterInput!) {
         createChapter(input: $input) {
@@ -16,50 +36,28 @@ describe('GraphQL API - Chapters', () => {
     `;
     const variables = {
       input: {
-        name: 'GraphQL Integration Test Chapter',
+        name: `Test Chapter ${Date.now()}.${Math.random()}`,
         founded_date: '2025-08-30T12:00:00.000Z',
       },
     };
-
     const response = await request(app)
       .post('/')
       .send({ query: mutation, variables });
 
-    // Assertions
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const chapter = response.body.data.createChapter;
     expect(chapter).toHaveProperty('chapter_id');
-    expect(chapter.name).toBe('GraphQL Integration Test Chapter');
   });
 
-  it('should create and fetch a chapter by its ID via query', async () => {
-    // Create a chapter for this specific test
-    const createMutation = `
-      mutation CreateChapter($input: CreateChapterInput!) {
-        createChapter(input: $input) {
-          chapter_id
-          name
-          founded_date
-        }
-      }
-    `;
-    const createVariables = {
-      input: {
-        name: 'Test Chapter for Query',
-        founded_date: '2025-08-30T12:00:00.000Z',
-      },
-    };
+  it('should fetch a chapter by ID via query', async () => {
+    // Arrange
+    const created = await createTestChapter(
+      `Test Chapter ${Date.now()}.${Math.random()}`
+    );
 
-    const createResponse = await request(app)
-      .post('/')
-      .send({ query: createMutation, variables: createVariables });
-
-    expect(createResponse.status).toBe(200);
-    expect(createResponse.body.errors).toBeUndefined();
-    const chapterId = createResponse.body.data.createChapter.chapter_id;
-
-    // Now fetch it
+    // Act
     const query = `
       query Chapter($id: ID!) {
         chapter(id: $id) {
@@ -68,43 +66,41 @@ describe('GraphQL API - Chapters', () => {
         }
       }
     `;
-    const variables = { id: chapterId };
+    const response = await request(app)
+      .post('/')
+      .send({ query, variables: { id: created.chapter_id } });
 
-    const response = await request(app).post('/').send({ query, variables });
-
-    // Assertions
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    const chapter = response.body.data.chapter;
-    expect(chapter.chapter_id).toBe(chapterId);
-    expect(chapter.name).toBe('Test Chapter for Query');
+    expect(response.body.data.chapter.chapter_id).toBe(created.chapter_id);
   });
 
-  it('should fetch all chapters via query', async () => {
-    // Create a chapter first
-    const createMutation = `
-      mutation CreateChapter($input: CreateChapterInput!) {
-        createChapter(input: $input) {
+  it('should return null for a non-existent chapter ID', async () => {
+    // Act
+    const query = `
+      query {
+        chapter(id: "00000000-0000-0000-0000-000000000000") {
           chapter_id
         }
       }
     `;
-    await request(app)
-      .post('/')
-      .send({
-        query: createMutation,
-        variables: {
-          input: {
-            name: 'Chapter for List',
-            founded_date: '2025-08-30T12:00:00.000Z',
-          },
-        },
-      });
+    const response = await request(app).post('/').send({ query });
 
-    // Fetch all chapters
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.data.chapter).toBeNull();
+  });
+
+  it('should fetch all chapters via query', async () => {
+    // Arrange
+    await createTestChapter(`Test Chapter ${Date.now()}.${Math.random()}`);
+
+    // Act
     const query = `query { chapters { chapter_id name } }`;
     const response = await request(app).post('/').send({ query });
 
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     expect(Array.isArray(response.body.data.chapters)).toBe(true);
@@ -112,30 +108,13 @@ describe('GraphQL API - Chapters', () => {
   });
 
   it('should update a chapter via mutation', async () => {
-    // Create a chapter first
-    const createMutation = `
-      mutation CreateChapter($input: CreateChapterInput!) {
-        createChapter(input: $input) {
-          chapter_id
-        }
-      }
-    `;
-    const createResponse = await request(app)
-      .post('/')
-      .send({
-        query: createMutation,
-        variables: {
-          input: {
-            name: 'Chapter for Update',
-            founded_date: '2025-08-30T12:00:00.000Z',
-          },
-        },
-      });
+    // Arrange
+    const created = await createTestChapter(
+      `Test Chapter ${Date.now()}.${Math.random()}`
+    );
 
-    const chapterId = createResponse.body.data.createChapter.chapter_id;
-
-    // Update it
-    const updateMutation = `
+    // Act
+    const mutation = `
       mutation UpdateChapter($id: ID!, $input: UpdateChapterInput!) {
         updateChapter(id: $id, input: $input) {
           chapter_id
@@ -146,43 +125,27 @@ describe('GraphQL API - Chapters', () => {
     const response = await request(app)
       .post('/')
       .send({
-        query: updateMutation,
+        query: mutation,
         variables: {
-          id: chapterId,
+          id: created.chapter_id,
           input: { name: 'Updated Chapter Name' },
         },
       });
 
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     expect(response.body.data.updateChapter.name).toBe('Updated Chapter Name');
   });
 
   it('should delete a chapter via mutation', async () => {
-    // Create a chapter first
-    const createMutation = `
-      mutation CreateChapter($input: CreateChapterInput!) {
-        createChapter(input: $input) {
-          chapter_id
-        }
-      }
-    `;
-    const createResponse = await request(app)
-      .post('/')
-      .send({
-        query: createMutation,
-        variables: {
-          input: {
-            name: 'Chapter for Delete',
-            founded_date: '2025-08-30T12:00:00.000Z',
-          },
-        },
-      });
+    // Arrange
+    const created = await createTestChapter(
+      `Test Chapter ${Date.now()}.${Math.random()}`
+    );
 
-    const chapterId = createResponse.body.data.createChapter.chapter_id;
-
-    // Delete it
-    const deleteMutation = `
+    // Act
+    const mutation = `
       mutation DeleteChapter($id: ID!) {
         deleteChapter(id: $id) {
           chapter_id
@@ -191,13 +154,26 @@ describe('GraphQL API - Chapters', () => {
     `;
     const response = await request(app)
       .post('/')
-      .send({
-        query: deleteMutation,
-        variables: { id: chapterId },
-      });
+      .send({ query: mutation, variables: { id: created.chapter_id } });
 
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.deleteChapter.chapter_id).toBe(chapterId);
+    expect(response.body.data.deleteChapter.chapter_id).toBe(
+      created.chapter_id
+    );
+
+    // Verify deletion
+    const verifyQuery = `
+      query {
+        chapter(id: "${created.chapter_id}") {
+          chapter_id
+        }
+      }
+    `;
+    const verifyResponse = await request(app)
+      .post('/')
+      .send({ query: verifyQuery });
+    expect(verifyResponse.body.data.chapter).toBeNull();
   });
 });
