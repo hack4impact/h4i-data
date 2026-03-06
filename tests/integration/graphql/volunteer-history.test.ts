@@ -169,6 +169,79 @@ describe('GraphQL API - Volunteer History', () => {
     );
   });
 
+  it('should return errors when updating a non-existent volunteer history record', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateVolunteerHistory($id: ID!, $input: UpdateVolunteerHistoryInput!) {
+        updateVolunteerHistory(id: $id, input: $input) {
+          history_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { new_value_label: 'Updated' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid volunteer history input', async () => {
+    // Arrange
+    const volunteerId = await createTestVolunteer();
+    const created = await createTestHistoryRecord(volunteerId);
+
+    // Act
+    const mutation = `
+      mutation UpdateVolunteerHistory($id: ID!, $input: UpdateVolunteerHistoryInput!) {
+        updateVolunteerHistory(id: $id, input: $input) {
+          history_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: created.history_id,
+          input: { action_type: 'INVALID' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent volunteer history record', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteVolunteerHistory($id: ID!) {
+        deleteVolunteerHistory(id: $id) {
+          history_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a volunteer history record via mutation', async () => {
     // Arrange
     const volunteerId = await createTestVolunteer();

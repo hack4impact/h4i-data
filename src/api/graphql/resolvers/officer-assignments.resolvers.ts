@@ -7,7 +7,7 @@ import {
   updateOfficerAssignment,
   updateOfficerAssignmentSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateOfficerAssignmentInput = z.infer<
@@ -21,19 +21,12 @@ export const officerAssignmentResolvers = {
   Query: {
     officerAssignments: () => getAllOfficerAssignments(),
     officerAssignment: async (_parent: unknown, { id }: { id: string }) => {
-      const assignment = await getOfficerAssignmentById(id);
-      if (!assignment) {
-        throw new GraphQLError(
-          'Officer assignment not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+      try {
+        return await getOfficerAssignmentById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return assignment;
     },
   },
   Mutation: {

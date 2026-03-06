@@ -131,6 +131,23 @@ describe('REST API - /volunteers', () => {
       expect(response.status).toBe(200);
       expect(response.body.major_id).toBe(majorId);
     });
+
+    it('should return 404 for a non-existent volunteer', async () => {
+      const response = await request(app)
+        .patch('/volunteers/00000000-0000-0000-0000-000000000000')
+        .send({ org_email: 'updated@org.edu' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const constituentId = await createTestConstituent();
+      const volunteerId = await createTestVolunteer(constituentId);
+      const response = await request(app)
+        .patch(`/volunteers/${volunteerId}`)
+        .send({ org_email: 'invalid-email' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /volunteers/:id', () => {
@@ -148,6 +165,13 @@ describe('REST API - /volunteers', () => {
       // Verify deletion
       const getResponse = await request(app).get(`/volunteers/${volunteerId}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent volunteer', async () => {
+      const response = await request(app).delete(
+        '/volunteers/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

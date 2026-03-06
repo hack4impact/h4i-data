@@ -182,6 +182,80 @@ describe('GraphQL API - Project Staffing', () => {
     expect(response.body.data.updateProjectStaffing.is_lead_contact).toBe(true);
   });
 
+  it('should return errors when updating a non-existent project staffing record', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateProjectStaffing($id: ID!, $input: UpdateProjectStaffingInput!) {
+        updateProjectStaffing(id: $id, input: $input) {
+          staffing_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { is_lead_contact: true },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid project staffing input', async () => {
+    // Arrange
+    const volunteerId = await createTestVolunteer();
+    const engagementId = await createTestEngagement();
+    const created = await createTestStaffing(volunteerId, engagementId);
+
+    // Act
+    const mutation = `
+      mutation UpdateProjectStaffing($id: ID!, $input: UpdateProjectStaffingInput!) {
+        updateProjectStaffing(id: $id, input: $input) {
+          staffing_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: created.staffing_id,
+          input: { is_lead_contact: 'not-a-boolean' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent project staffing record', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteProjectStaffing($id: ID!) {
+        deleteProjectStaffing(id: $id) {
+          staffing_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a project staffing record via mutation', async () => {
     // Arrange
     const volunteerId = await createTestVolunteer();

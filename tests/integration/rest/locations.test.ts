@@ -50,7 +50,7 @@ describe('REST API - /locations', () => {
       // Assert
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBeGreaterThanOrEqual(1);
+      expect(response.body.length).toBeGreaterThan(0);
     });
   });
 
@@ -91,6 +91,22 @@ describe('REST API - /locations', () => {
       expect(response.status).toBe(200);
       expect(response.body.name).toBe('New York Office');
     });
+
+    it('should return 404 for a non-existent location', async () => {
+      const response = await request(app)
+        .patch('/locations/00000000-0000-0000-0000-000000000000')
+        .send({ name: 'Updated' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const location = await createTestLocation();
+      const response = await request(app)
+        .patch(`/locations/${location.location_id}`)
+        .send({ name: 'A' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /locations/:id', () => {
@@ -111,6 +127,13 @@ describe('REST API - /locations', () => {
         `/locations/${location.location_id}`
       );
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent location', async () => {
+      const response = await request(app).delete(
+        '/locations/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

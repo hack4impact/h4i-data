@@ -132,6 +132,77 @@ describe('GraphQL API - Project Roles', () => {
     expect(response.body.data.updateProjectRole.is_leadership).toBe(true);
   });
 
+  it('should return errors when updating a non-existent project role', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateProjectRole($id: ID!, $input: UpdateProjectRoleInput!) {
+        updateProjectRole(id: $id, input: $input) {
+          role_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { name: 'Updated Role' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid project role input', async () => {
+    // Arrange
+    const created = await createTestProjectRole(
+      `Role ${Date.now()}.${Math.random()}`
+    );
+
+    // Act
+    const mutation = `
+      mutation UpdateProjectRole($id: ID!, $input: UpdateProjectRoleInput!) {
+        updateProjectRole(id: $id, input: $input) {
+          role_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: created.role_id, input: { name: 'X' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent project role', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteProjectRole($id: ID!) {
+        deleteProjectRole(id: $id) {
+          role_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a project role via mutation', async () => {
     // Arrange
     const created = await createTestProjectRole(`Role ${Date.now()}`);

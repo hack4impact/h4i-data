@@ -1,3 +1,4 @@
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 import {
   createVolunteer,
@@ -16,7 +17,12 @@ export const volunteerResolvers = {
   Query: {
     volunteers: () => getAllVolunteers(),
     volunteer: async (_parent: unknown, { id }: { id: string }) => {
-      return getVolunteerById(id);
+      try {
+        return await getVolunteerById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
+      }
     },
   },
   Mutation: {

@@ -7,7 +7,7 @@ import {
   updateMentorship,
   updateMentorshipSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateMentorshipInput = z.infer<typeof createMentorshipSchema>;
@@ -17,19 +17,12 @@ export const mentorshipResolvers = {
   Query: {
     mentorships: () => getAllMentorships(),
     mentorship: async (_parent: unknown, { id }: { id: string }) => {
-      const mentorship = await getMentorshipById(id);
-      if (!mentorship) {
-        throw new GraphQLError(
-          'Mentorship not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+      try {
+        return await getMentorshipById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return mentorship;
     },
   },
   Mutation: {

@@ -7,7 +7,7 @@ import {
   updateUniversity,
   updateUniversitySchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateUniversityInput = z.infer<typeof createUniversitySchema>;
@@ -17,19 +17,12 @@ export const universityResolvers = {
   Query: {
     universities: () => getAllUniversities(),
     university: async (_parent: unknown, { id }: { id: string }) => {
-      const university = await getUniversityById(id);
-      if (!university) {
-        throw new GraphQLError(
-          'University not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+      try {
+        return await getUniversityById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return university;
     },
   },
   Mutation: {

@@ -165,6 +165,79 @@ describe('GraphQL API - Social Links', () => {
     expect(response.body.data.updateSocialLink.is_featured).toBe(true);
   });
 
+  it('should return errors when updating a non-existent social link', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateSocialLink($id: ID!, $input: UpdateSocialLinkInput!) {
+        updateSocialLink(id: $id, input: $input) {
+          link_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { url: 'https://github.com/updated' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid social link input', async () => {
+    // Arrange
+    const constituentId = await createTestConstituent();
+    const created = await createTestSocialLink(
+      constituentId,
+      'https://github.com/original'
+    );
+
+    // Act
+    const mutation = `
+      mutation UpdateSocialLink($id: ID!, $input: UpdateSocialLinkInput!) {
+        updateSocialLink(id: $id, input: $input) {
+          link_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: created.link_id, input: { url: 'not-a-url' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent social link', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteSocialLink($id: ID!) {
+        deleteSocialLink(id: $id) {
+          link_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a social link via mutation', async () => {
     // Arrange
     const constituentId = await createTestConstituent();

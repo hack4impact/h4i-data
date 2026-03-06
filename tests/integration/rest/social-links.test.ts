@@ -102,6 +102,28 @@ describe('REST API - /social-links', () => {
       expect(response.status).toBe(200);
       expect(response.body.url).toBe('https://github.com/updated');
     });
+
+    it('should return 404 for a non-existent social link', async () => {
+      const response = await request(app)
+        .patch('/social-links/00000000-0000-0000-0000-000000000000')
+        .send({ url: 'https://github.com/updated' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const constituentId = await createTestConstituent();
+      const created = await request(app).post('/social-links').send({
+        constituent_id: constituentId,
+        url: 'https://github.com/original',
+      });
+      const id = created.body.link_id;
+
+      const response = await request(app)
+        .patch(`/social-links/${id}`)
+        .send({ url: 'not-a-url' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /social-links/:id', () => {
@@ -119,6 +141,13 @@ describe('REST API - /social-links', () => {
 
       const getResponse = await request(app).get(`/social-links/${id}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent social link', async () => {
+      const response = await request(app).delete(
+        '/social-links/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

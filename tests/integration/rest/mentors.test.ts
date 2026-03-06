@@ -119,6 +119,23 @@ describe('REST API - /mentors', () => {
       expect(response.body.expertise_area).toBe('Machine Learning');
       expect(response.body.max_mentees).toBe(10);
     });
+
+    it('should return 404 for a non-existent mentor', async () => {
+      const response = await request(app)
+        .patch('/mentors/00000000-0000-0000-0000-000000000000')
+        .send({ expertise_area: 'Updated' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const constituentId = await createTestConstituent();
+      const mentorId = await createTestMentor(constituentId);
+      const response = await request(app)
+        .patch(`/mentors/${mentorId}`)
+        .send({ status: 'INVALID_STATUS' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /mentors/:id', () => {
@@ -136,6 +153,13 @@ describe('REST API - /mentors', () => {
       // Verify deletion
       const getResponse = await request(app).get(`/mentors/${mentorId}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent mentor', async () => {
+      const response = await request(app).delete(
+        '/mentors/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

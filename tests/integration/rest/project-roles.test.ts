@@ -76,6 +76,26 @@ describe('REST API - /project-roles', () => {
       expect(response.status).toBe(200);
       expect(response.body.name).toBe('Updated Role');
     });
+
+    it('should return 404 for a non-existent project role', async () => {
+      const response = await request(app)
+        .patch('/project-roles/00000000-0000-0000-0000-000000000000')
+        .send({ name: 'Updated Role' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const created = await request(app)
+        .post('/project-roles')
+        .send({ name: `Role ${Date.now()}.${Math.random()}` });
+      const id = created.body.role_id;
+
+      const response = await request(app)
+        .patch(`/project-roles/${id}`)
+        .send({ name: 'X' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /project-roles/:id', () => {
@@ -91,6 +111,13 @@ describe('REST API - /project-roles', () => {
 
       const getResponse = await request(app).get(`/project-roles/${id}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent project role', async () => {
+      const response = await request(app).delete(
+        '/project-roles/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

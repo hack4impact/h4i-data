@@ -7,7 +7,7 @@ import {
   updateProjectDeliverable,
   updateProjectDeliverableSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateProjectDeliverableInput = z.infer<
@@ -21,19 +21,12 @@ export const projectDeliverableResolvers = {
   Query: {
     projectDeliverables: () => getAllProjectDeliverables(),
     projectDeliverable: async (_parent: unknown, { id }: { id: string }) => {
-      const deliverable = await getProjectDeliverableById(id);
-      if (!deliverable) {
-        throw new GraphQLError(
-          'Project deliverable not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+      try {
+        return await getProjectDeliverableById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return deliverable;
     },
   },
   Mutation: {

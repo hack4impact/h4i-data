@@ -75,6 +75,26 @@ describe('REST API - /officer-roles', () => {
       expect(response.status).toBe(200);
       expect(response.body.name).toBe('Updated Role');
     });
+
+    it('should return 404 for a non-existent officer role', async () => {
+      const response = await request(app)
+        .patch('/officer-roles/00000000-0000-0000-0000-000000000000')
+        .send({ name: 'Updated Role' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const created = await request(app)
+        .post('/officer-roles')
+        .send({ name: `Role ${Date.now()}.${Math.random()}` });
+      const id = created.body.role_id;
+
+      const response = await request(app)
+        .patch(`/officer-roles/${id}`)
+        .send({ name: 'X' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /officer-roles/:id', () => {
@@ -90,6 +110,13 @@ describe('REST API - /officer-roles', () => {
 
       const getResponse = await request(app).get(`/officer-roles/${id}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent officer role', async () => {
+      const response = await request(app).delete(
+        '/officer-roles/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

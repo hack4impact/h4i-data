@@ -100,6 +100,22 @@ describe('REST API - /projects', () => {
       expect(response.status).toBe(200);
       expect(response.body.name).toBe('Updated Project Name');
     });
+
+    it('should return 404 for a non-existent project', async () => {
+      const response = await request(app)
+        .patch('/projects/00000000-0000-0000-0000-000000000000')
+        .send({ name: 'Updated Project' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const project = await createTestProject();
+      const response = await request(app)
+        .patch(`/projects/${project.project_id}`)
+        .send({ financial: 'INVALID' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /projects/:id', () => {
@@ -120,6 +136,13 @@ describe('REST API - /projects', () => {
         `/projects/${project.project_id}`
       );
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent project', async () => {
+      const response = await request(app).delete(
+        '/projects/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

@@ -127,6 +127,77 @@ describe('GraphQL API - Majors', () => {
     expect(response.body.data.updateMajor.name).toBe('Updated Major');
   });
 
+  it('should return errors when updating a non-existent major', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateMajor($id: ID!, $input: UpdateMajorInput!) {
+        updateMajor(id: $id, input: $input) {
+          major_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { name: 'Updated Major' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid major input', async () => {
+    // Arrange
+    const created = await createTestMajor(
+      `Major ${Date.now()}.${Math.random()}`
+    );
+
+    // Act
+    const mutation = `
+      mutation UpdateMajor($id: ID!, $input: UpdateMajorInput!) {
+        updateMajor(id: $id, input: $input) {
+          major_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: created.major_id, input: { name: 'X' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent major', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteMajor($id: ID!) {
+        deleteMajor(id: $id) {
+          major_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a major via mutation', async () => {
     // Arrange
     const created = await createTestMajor(

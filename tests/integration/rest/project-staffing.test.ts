@@ -118,6 +118,29 @@ describe('REST API - /project-staffing', () => {
       expect(response.status).toBe(200);
       expect(response.body.is_lead_contact).toBe(true);
     });
+
+    it('should return 404 for a non-existent project staffing record', async () => {
+      const response = await request(app)
+        .patch('/project-staffing/00000000-0000-0000-0000-000000000000')
+        .send({ is_lead_contact: true });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const volunteerId = await createTestVolunteer();
+      const engagementId = await createTestEngagement();
+      const created = await request(app).post('/project-staffing').send({
+        volunteer_id: volunteerId,
+        engagement_id: engagementId,
+      });
+      const id = created.body.staffing_id;
+
+      const response = await request(app)
+        .patch(`/project-staffing/${id}`)
+        .send({ is_lead_contact: 'not-a-boolean' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /project-staffing/:id', () => {
@@ -136,6 +159,13 @@ describe('REST API - /project-staffing', () => {
 
       const getResponse = await request(app).get(`/project-staffing/${id}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent project staffing record', async () => {
+      const response = await request(app).delete(
+        '/project-staffing/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

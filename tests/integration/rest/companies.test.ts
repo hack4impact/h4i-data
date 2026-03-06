@@ -89,6 +89,22 @@ describe('REST API - /companies', () => {
       expect(response.status).toBe(200);
       expect(response.body.name).toBe('Updated Company Name');
     });
+
+    it('should return 404 for a non-existent company', async () => {
+      const response = await request(app)
+        .patch('/companies/00000000-0000-0000-0000-000000000000')
+        .send({ name: 'Updated Company' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const company = await createTestCompany();
+      const response = await request(app)
+        .patch(`/companies/${company.company_id}`)
+        .send({ name: '' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /companies/:id', () => {
@@ -109,6 +125,13 @@ describe('REST API - /companies', () => {
         `/companies/${company.company_id}`
       );
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent company', async () => {
+      const response = await request(app).delete(
+        '/companies/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

@@ -106,6 +106,22 @@ describe('REST API - /constituents', () => {
       expect(response.status).toBe(200);
       expect(response.body.first_name).toBe('Updated');
     });
+
+    it('should return 404 for a non-existent constituent', async () => {
+      const response = await request(app)
+        .patch('/constituents/00000000-0000-0000-0000-000000000000')
+        .send({ first_name: 'Updated' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const constituent = await createTestConstituent();
+      const response = await request(app)
+        .patch(`/constituents/${constituent.constituent_id}`)
+        .send({ primary_email: 'invalid-email' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /constituents/:id', () => {
@@ -126,6 +142,13 @@ describe('REST API - /constituents', () => {
         `/constituents/${constituent.constituent_id}`
       );
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent constituent', async () => {
+      const response = await request(app).delete(
+        '/constituents/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

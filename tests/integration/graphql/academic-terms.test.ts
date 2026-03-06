@@ -50,7 +50,9 @@ describe('GraphQL API - Academic Terms', () => {
 
   it('should fetch an academic term by ID via query', async () => {
     // Arrange
-    const created = await createTestAcademicTerm(`Term ${Date.now()}`);
+    const created = await createTestAcademicTerm(
+      `Term ${Date.now()}.${Math.random()}`
+    );
 
     // Act
     const query = `
@@ -131,6 +133,80 @@ describe('GraphQL API - Academic Terms', () => {
     expect(response.body.errors).toBeUndefined();
     expect(response.body.data.updateAcademicTerm.name).toBe('Spring 2026');
     expect(response.body.data.updateAcademicTerm.type).toBe('QUARTER');
+  });
+
+  it('should return an error when updating a non-existent academic term', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateAcademicTerm($id: ID!, $input: UpdateAcademicTermInput!) {
+        updateAcademicTerm(id: $id, input: $input) {
+          term_id
+          name
+          type
+        }
+      }
+    `;
+    const variables = {
+      id: '00000000-0000-0000-0000-000000000000',
+      input: { name: 'Spring 2026', type: 'QUARTER' },
+    };
+    const response = await request(app)
+      .post('/')
+      .send({ query: mutation, variables });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid academic term input', async () => {
+    // Arrange
+    const created = await createTestAcademicTerm(
+      `Term ${Date.now()}.${Math.random()}`
+    );
+
+    // Act
+    const mutation = `
+      mutation UpdateAcademicTerm($id: ID!, $input: UpdateAcademicTermInput!) {
+        updateAcademicTerm(id: $id, input: $input) {
+          term_id
+          name
+          type
+        }
+      }
+    `;
+    const variables = {
+      id: created.term_id,
+      input: { type: 'INVALID_ENUM_VALUE' },
+    };
+    const response = await request(app)
+      .post('/')
+      .send({ query: mutation, variables });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent academic term', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteAcademicTerm($id: ID!) {
+        deleteAcademicTerm(id: $id) {
+          term_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
   });
 
   it('should delete an academic term via mutation', async () => {

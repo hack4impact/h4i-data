@@ -138,6 +138,75 @@ describe('GraphQL API - Partners', () => {
     expect(response.body.data.updatePartner.legal_name).toBe('Updated Partner');
   });
 
+  it('should return errors when updating a non-existent partner', async () => {
+    // Act
+    const mutation = `
+      mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {
+        updatePartner(id: $id, input: $input) {
+          partner_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { legal_name: 'Updated Partner' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid partner input', async () => {
+    // Arrange
+    const created = await createTestPartner();
+
+    // Act
+    const mutation = `
+      mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {
+        updatePartner(id: $id, input: $input) {
+          partner_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: created.partner_id, input: { legal_name: '' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent partner', async () => {
+    // Act
+    const mutation = `
+      mutation DeletePartner($id: ID!) {
+        deletePartner(id: $id) {
+          partner_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a partner', async () => {
     // Arrange
     const created = await createTestPartner();

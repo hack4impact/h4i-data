@@ -150,6 +150,76 @@ describe('GraphQL API - Project Engagements', () => {
     expect(response.body.data.updateProjectEngagement.status).toBe('COMPLETED');
   });
 
+  it('should return errors when updating a non-existent project engagement', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateProjectEngagement($id: ID!, $input: UpdateProjectEngagementInput!) {
+        updateProjectEngagement(id: $id, input: $input) {
+          engagement_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { status: 'ACTIVE' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid project engagement input', async () => {
+    // Arrange
+    const projectId = await createTestProject();
+    const created = await createTestEngagement(projectId);
+
+    // Act
+    const mutation = `
+      mutation UpdateProjectEngagement($id: ID!, $input: UpdateProjectEngagementInput!) {
+        updateProjectEngagement(id: $id, input: $input) {
+          engagement_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: created.engagement_id, input: { status: 'INVALID' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent project engagement', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteProjectEngagement($id: ID!) {
+        deleteProjectEngagement(id: $id) {
+          engagement_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a project engagement via mutation', async () => {
     // Arrange
     const projectId = await createTestProject();

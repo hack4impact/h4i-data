@@ -152,6 +152,78 @@ describe('GraphQL API - Constituents', () => {
     expect(response.body.data.updateConstituent.first_name).toBe('Updated');
   });
 
+  it('should return errors when updating a non-existent constituent', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateConstituent($id: ID!, $input: UpdateConstituentInput!) {
+        updateConstituent(id: $id, input: $input) {
+          constituent_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { first_name: 'Updated' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid constituent input', async () => {
+    // Arrange
+    const created = await createTestConstituent();
+
+    // Act
+    const mutation = `
+      mutation UpdateConstituent($id: ID!, $input: UpdateConstituentInput!) {
+        updateConstituent(id: $id, input: $input) {
+          constituent_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: created.constituent_id,
+          input: { primary_email: 'not-an-email' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent constituent', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteConstituent($id: ID!) {
+        deleteConstituent(id: $id) {
+          constituent_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a constituent', async () => {
     // Arrange
     const created = await createTestConstituent();

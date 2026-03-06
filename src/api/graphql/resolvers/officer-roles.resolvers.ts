@@ -7,7 +7,7 @@ import {
   updateOfficerRole,
   updateOfficerRoleSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateOfficerRoleInput = z.infer<typeof createOfficerRoleSchema>;
@@ -17,19 +17,12 @@ export const officerRoleResolvers = {
   Query: {
     officerRoles: () => getAllOfficerRoles(),
     officerRole: async (_parent: unknown, { id }: { id: string }) => {
-      const role = await getOfficerRoleById(id);
-      if (!role) {
-        throw new GraphQLError(
-          'Officer role not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+      try {
+        return await getOfficerRoleById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return role;
     },
   },
   Mutation: {

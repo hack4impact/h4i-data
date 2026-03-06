@@ -7,7 +7,7 @@ import {
   updatePartner,
   updatePartnerSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreatePartnerInput = z.infer<typeof createPartnerSchema>;
@@ -17,19 +17,12 @@ export const partnerResolvers = {
   Query: {
     partners: () => getAllPartners(),
     partner: async (_parent: unknown, { id }: { id: string }) => {
-      const partner = await getPartnerById(id);
-      if (!partner) {
-        throw new GraphQLError(
-          'Partner not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+      try {
+        return await getPartnerById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return partner;
     },
   },
   Mutation: {

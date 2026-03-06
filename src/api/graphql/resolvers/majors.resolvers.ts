@@ -7,6 +7,7 @@ import {
   updateMajor,
   updateMajorSchema,
 } from '../../../core';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateMajorInput = z.infer<typeof createMajorSchema>;
@@ -16,7 +17,12 @@ export const majorResolvers = {
   Query: {
     majors: () => getAllMajors(),
     major: async (_parent: unknown, { id }: { id: string }) => {
-      return getMajorById(id);
+      try {
+        return await getMajorById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
+      }
     },
   },
   Mutation: {

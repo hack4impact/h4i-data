@@ -7,6 +7,7 @@ import {
   updateChapter,
   updateChapterSchema,
 } from '../../../core';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 // Infer TypeScript types directly from your Zod schemas
@@ -16,8 +17,13 @@ type UpdateChapterInput = z.infer<typeof updateChapterSchema>;
 export const chapterResolvers = {
   Query: {
     chapters: () => getAllChapters(),
-    chapter: (_parent: unknown, { id }: { id: string }) => {
-      return getChapterById(id);
+    chapter: async (_parent: unknown, { id }: { id: string }) => {
+      try {
+        return await getChapterById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
+      }
     },
   },
   Mutation: {

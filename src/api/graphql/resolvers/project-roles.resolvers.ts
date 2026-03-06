@@ -7,7 +7,7 @@ import {
   updateProjectRole,
   updateProjectRoleSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateProjectRoleInput = z.infer<typeof createProjectRoleSchema>;
@@ -17,19 +17,12 @@ export const projectRoleResolvers = {
   Query: {
     projectRoles: () => getAllProjectRoles(),
     projectRole: async (_parent: unknown, { id }: { id: string }) => {
-      const role = await getProjectRoleById(id);
-      if (!role) {
-        throw new GraphQLError(
-          'Project role not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+      try {
+        return await getProjectRoleById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return role;
     },
   },
   Mutation: {

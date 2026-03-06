@@ -1,3 +1,4 @@
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 import {
   createMentor,
@@ -16,7 +17,12 @@ export const mentorResolvers = {
   Query: {
     mentors: () => getAllMentors(),
     mentor: async (_parent: unknown, { id }: { id: string }) => {
-      return getMentorById(id);
+      try {
+        return await getMentorById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
+      }
     },
   },
   Mutation: {

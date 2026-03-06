@@ -168,6 +168,77 @@ describe('GraphQL API - Mentorships', () => {
     );
   });
 
+  it('should return errors when updating a non-existent mentorship', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateMentorship($id: ID!, $input: UpdateMentorshipInput!) {
+        updateMentorship(id: $id, input: $input) {
+          mentorship_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { status: 'ACTIVE' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid mentorship input', async () => {
+    // Arrange
+    const mentorId = await createTestMentor();
+    const menteeId = await createTestMentor();
+    const created = await createTestMentorship(mentorId, menteeId);
+
+    // Act
+    const mutation = `
+      mutation UpdateMentorship($id: ID!, $input: UpdateMentorshipInput!) {
+        updateMentorship(id: $id, input: $input) {
+          mentorship_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: created.mentorship_id, input: { status: 'INVALID' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent mentorship', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteMentorship($id: ID!) {
+        deleteMentorship(id: $id) {
+          mentorship_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a mentorship via mutation', async () => {
     // Arrange
     const mentorId = await createTestMentor();

@@ -112,6 +112,62 @@ describe('GraphQL API - Companies', () => {
     expect(res.body.data.updateCompany.name).toBe('Test Co Updated');
   });
 
+  it('should return errors when updating a non-existent company', async () => {
+    // Act
+    const res = await request(app)
+      .post('/')
+      .send({
+        query: `
+        mutation Update($id: ID!, $input: UpdateCompanyInput!) {
+          updateCompany(id: $id, input: $input) { company_id }
+        }
+      `,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { name: 'Updated' },
+        },
+      });
+
+    // Assert
+    expect(res.status).toBe(200);
+    expect(res.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid company input', async () => {
+    // Arrange
+    const company = await createTestCompany();
+
+    // Act
+    const res = await request(app)
+      .post('/')
+      .send({
+        query: `
+        mutation Update($id: ID!, $input: UpdateCompanyInput!) {
+          updateCompany(id: $id, input: $input) { company_id }
+        }
+      `,
+        variables: { id: company.company_id, input: { name: '' } },
+      });
+
+    // Assert
+    expect(res.status).toBe(200);
+    expect(res.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent company', async () => {
+    // Act
+    const res = await request(app)
+      .post('/')
+      .send({
+        query: `mutation Delete($id: ID!) { deleteCompany(id: $id) { company_id } }`,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(res.status).toBe(200);
+    expect(res.body.errors).toBeDefined();
+  });
+
   it('should delete a company via mutation', async () => {
     // Arrange
     const company = await createTestCompany();

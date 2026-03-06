@@ -140,6 +140,75 @@ describe('GraphQL API - Projects', () => {
     expect(response.body.data.updateProject.name).toBe('Updated Project Name');
   });
 
+  it('should return errors when updating a non-existent project', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateProject($id: ID!, $input: UpdateProjectInput!) {
+        updateProject(id: $id, input: $input) {
+          project_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { name: 'Updated' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid project input', async () => {
+    // Arrange
+    const project = await createTestProject();
+
+    // Act
+    const mutation = `
+      mutation UpdateProject($id: ID!, $input: UpdateProjectInput!) {
+        updateProject(id: $id, input: $input) {
+          project_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: project.project_id, input: { financial: 'INVALID' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent project', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteProject($id: ID!) {
+        deleteProject(id: $id) {
+          project_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a project via mutation', async () => {
     // Arrange
     const project = await createTestProject();

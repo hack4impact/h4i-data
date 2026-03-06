@@ -93,6 +93,28 @@ describe('REST API - /project-deliverables', () => {
       expect(response.status).toBe(200);
       expect(response.body.label).toBe('Updated Label');
     });
+
+    it('should return 404 for a non-existent project deliverable', async () => {
+      const response = await request(app)
+        .patch('/project-deliverables/00000000-0000-0000-0000-000000000000')
+        .send({ label: 'Updated Label' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const projectId = await createTestProject();
+      const created = await request(app).post('/project-deliverables').send({
+        project_id: projectId,
+        label: 'Original Label',
+      });
+      const id = created.body.deliverable_id;
+
+      const response = await request(app)
+        .patch(`/project-deliverables/${id}`)
+        .send({ url: 'not-a-url' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /project-deliverables/:id', () => {
@@ -110,6 +132,13 @@ describe('REST API - /project-deliverables', () => {
 
       const getResponse = await request(app).get(`/project-deliverables/${id}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent project deliverable', async () => {
+      const response = await request(app).delete(
+        '/project-deliverables/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

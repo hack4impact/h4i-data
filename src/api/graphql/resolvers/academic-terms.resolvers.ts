@@ -7,7 +7,7 @@ import {
   updateAcademicTerm,
   updateAcademicTermSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateAcademicTermInput = z.infer<typeof createAcademicTermSchema>;
@@ -17,19 +17,12 @@ export const academicTermResolvers = {
   Query: {
     academicTerms: () => getAllAcademicTerms(),
     academicTerm: async (_parent: unknown, { id }: { id: string }) => {
-      const term = await getAcademicTermById(id);
-      if (!term) {
-        throw new GraphQLError(
-          'Academic term not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+      try {
+        return await getAcademicTermById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return term;
     },
   },
   Mutation: {

@@ -7,6 +7,7 @@ import {
   updateConstituent,
   updateConstituentSchema,
 } from '../../../core';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateConstituentInput = z.infer<typeof createConstituentSchema>;
@@ -15,8 +16,13 @@ type UpdateConstituentInput = z.infer<typeof updateConstituentSchema>;
 export const constituentResolvers = {
   Query: {
     constituents: () => getAllConstituents(),
-    constituent: (_parent: unknown, { id }: { id: string }) => {
-      return getConstituentById(id);
+    constituent: async (_parent: unknown, { id }: { id: string }) => {
+      try {
+        return await getConstituentById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
+      }
     },
   },
   Mutation: {

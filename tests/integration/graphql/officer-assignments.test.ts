@@ -194,6 +194,81 @@ describe('GraphQL API - Officer Assignments', () => {
     expect(response.body.data.updateOfficerAssignment.end_date).toBeDefined();
   });
 
+  it('should return errors when updating a non-existent officer assignment', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateOfficerAssignment($id: ID!, $input: UpdateOfficerAssignmentInput!) {
+        updateOfficerAssignment(id: $id, input: $input) {
+          assignment_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { end_date: '2025-12-31' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid officer assignment input', async () => {
+    // Arrange
+    const volunteerId = await createTestVolunteer();
+    const roleId = await createTestOfficerRole();
+    const chapterId = await createTestChapter();
+    const created = await createTestAssignment(volunteerId, roleId, chapterId);
+
+    // Act
+    const mutation = `
+      mutation UpdateOfficerAssignment($id: ID!, $input: UpdateOfficerAssignmentInput!) {
+        updateOfficerAssignment(id: $id, input: $input) {
+          assignment_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: created.assignment_id,
+          input: { end_date: 'not-a-date' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent officer assignment', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteOfficerAssignment($id: ID!) {
+        deleteOfficerAssignment(id: $id) {
+          assignment_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete an officer assignment via mutation', async () => {
     // Arrange
     const volunteerId = await createTestVolunteer();

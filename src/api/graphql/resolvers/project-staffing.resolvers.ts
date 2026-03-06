@@ -7,7 +7,7 @@ import {
   updateProjectStaffing,
   updateProjectStaffingSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateProjectStaffingInput = z.infer<typeof createProjectStaffingSchema>;
@@ -17,19 +17,12 @@ export const projectStaffingResolvers = {
   Query: {
     projectStaffings: () => getAllProjectStaffing(),
     projectStaffing: async (_parent: unknown, { id }: { id: string }) => {
-      const staffing = await getProjectStaffingById(id);
-      if (!staffing) {
-        throw new GraphQLError(
-          'Project staffing not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+      try {
+        return await getProjectStaffingById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return staffing;
     },
   },
   Mutation: {

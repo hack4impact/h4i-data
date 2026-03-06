@@ -75,6 +75,26 @@ describe('REST API - /universities', () => {
       expect(response.status).toBe(200);
       expect(response.body.name).toBe('Updated University');
     });
+
+    it('should return 404 for a non-existent university', async () => {
+      const response = await request(app)
+        .patch('/universities/00000000-0000-0000-0000-000000000000')
+        .send({ name: 'Updated University' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const created = await request(app)
+        .post('/universities')
+        .send({ name: `University ${Date.now()}.${Math.random()}` });
+      const id = created.body.university_id;
+
+      const response = await request(app)
+        .patch(`/universities/${id}`)
+        .send({ name: 'X' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /universities/:id', () => {
@@ -90,6 +110,13 @@ describe('REST API - /universities', () => {
 
       const getResponse = await request(app).get(`/universities/${id}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent university', async () => {
+      const response = await request(app).delete(
+        '/universities/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

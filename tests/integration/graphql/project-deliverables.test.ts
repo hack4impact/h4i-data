@@ -157,6 +157,76 @@ describe('GraphQL API - Project Deliverables', () => {
     );
   });
 
+  it('should return errors when updating a non-existent project deliverable', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateProjectDeliverable($id: ID!, $input: UpdateProjectDeliverableInput!) {
+        updateProjectDeliverable(id: $id, input: $input) {
+          deliverable_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { label: 'Updated Label' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid project deliverable input', async () => {
+    // Arrange
+    const projectId = await createTestProject();
+    const created = await createTestDeliverable(projectId, 'Original Label');
+
+    // Act
+    const mutation = `
+      mutation UpdateProjectDeliverable($id: ID!, $input: UpdateProjectDeliverableInput!) {
+        updateProjectDeliverable(id: $id, input: $input) {
+          deliverable_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: created.deliverable_id, input: { url: 'not-a-url' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent project deliverable', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteProjectDeliverable($id: ID!) {
+        deleteProjectDeliverable(id: $id) {
+          deliverable_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a project deliverable via mutation', async () => {
     // Arrange
     const projectId = await createTestProject();

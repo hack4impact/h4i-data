@@ -106,6 +106,29 @@ describe('REST API - /volunteer-history', () => {
       expect(response.status).toBe(200);
       expect(response.body.new_value_label).toBe('Updated label');
     });
+
+    it('should return 404 for a non-existent volunteer history record', async () => {
+      const response = await request(app)
+        .patch('/volunteer-history/00000000-0000-0000-0000-000000000000')
+        .send({ new_value_label: 'Updated' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const volunteerId = await createTestVolunteer();
+      const created = await request(app).post('/volunteer-history').send({
+        volunteer_id: volunteerId,
+        action_type: 'ENROLLED',
+        effective_date: '2025-01-01T00:00:00.000Z',
+      });
+      const id = created.body.history_id;
+
+      const response = await request(app)
+        .patch(`/volunteer-history/${id}`)
+        .send({ action_type: 'INVALID' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /volunteer-history/:id', () => {
@@ -124,6 +147,13 @@ describe('REST API - /volunteer-history', () => {
 
       const getResponse = await request(app).get(`/volunteer-history/${id}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent volunteer history record', async () => {
+      const response = await request(app).delete(
+        '/volunteer-history/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

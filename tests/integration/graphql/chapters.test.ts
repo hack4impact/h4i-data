@@ -138,6 +138,77 @@ describe('GraphQL API - Chapters', () => {
     expect(response.body.data.updateChapter.name).toBe('Updated Chapter Name');
   });
 
+  it('should return errors when updating a non-existent chapter', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateChapter($id: ID!, $input: UpdateChapterInput!) {
+        updateChapter(id: $id, input: $input) {
+          chapter_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { name: 'Updated' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid chapter input', async () => {
+    // Arrange
+    const created = await createTestChapter(
+      `Test Chapter ${Date.now()}.${Math.random()}`
+    );
+
+    // Act
+    const mutation = `
+      mutation UpdateChapter($id: ID!, $input: UpdateChapterInput!) {
+        updateChapter(id: $id, input: $input) {
+          chapter_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: created.chapter_id, input: { name: '' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent chapter', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteChapter($id: ID!) {
+        deleteChapter(id: $id) {
+          chapter_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a chapter via mutation', async () => {
     // Arrange
     const created = await createTestChapter(

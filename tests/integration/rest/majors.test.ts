@@ -73,6 +73,26 @@ describe('REST API - /majors', () => {
       expect(response.status).toBe(200);
       expect(response.body.name).toBe('Updated Major');
     });
+
+    it('should return 404 for a non-existent major', async () => {
+      const response = await request(app)
+        .patch('/majors/00000000-0000-0000-0000-000000000000')
+        .send({ name: 'Updated Major' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const created = await request(app)
+        .post('/majors')
+        .send({ name: `Major ${Date.now()}.${Math.random()}` });
+      const id = created.body.major_id;
+
+      const response = await request(app)
+        .patch(`/majors/${id}`)
+        .send({ name: 'X' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /majors/:id', () => {
@@ -88,6 +108,13 @@ describe('REST API - /majors', () => {
 
       const getResponse = await request(app).get(`/majors/${id}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent major', async () => {
+      const response = await request(app).delete(
+        '/majors/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

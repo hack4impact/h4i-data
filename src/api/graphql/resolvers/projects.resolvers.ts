@@ -7,6 +7,7 @@ import {
   updateProject,
   updateProjectSchema,
 } from '../../../core';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 // Infer TypeScript types directly from your Zod schemas
@@ -31,8 +32,13 @@ export const projectResolvers = {
         return (a.name ?? '').localeCompare(b.name ?? '');
       });
     },
-    project: (_parent: unknown, args: { id: string }) => {
-      return getProjectById(args.id);
+    project: async (_parent: unknown, args: { id: string }) => {
+      try {
+        return await getProjectById(args.id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
+      }
     },
   },
   Mutation: {

@@ -101,6 +101,29 @@ describe('REST API - /chapters', () => {
       expect(response.status).toBe(200);
       expect(response.body.name).toBe('Updated Chapter Name');
     });
+
+    it('should return 404 for a non-existent chapter', async () => {
+      const response = await request(app)
+        .patch('/chapters/00000000-0000-0000-0000-000000000000')
+        .send({ name: 'Updated Chapter Name' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const createResponse = await request(app)
+        .post('/chapters')
+        .send({
+          name: `Test Chapter ${Date.now()}.${Math.random()}`,
+          founded_date: '2025-08-30T12:00:00.000Z',
+        });
+      const chapterId = createResponse.body.chapter_id;
+
+      const response = await request(app)
+        .patch(`/chapters/${chapterId}`)
+        .send({ name: '' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /chapters/:id', () => {
@@ -123,6 +146,13 @@ describe('REST API - /chapters', () => {
       // Verify deletion
       const getResponse = await request(app).get(`/chapters/${chapterId}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent chapter', async () => {
+      const response = await request(app).delete(
+        '/chapters/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

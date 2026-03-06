@@ -7,7 +7,7 @@ import {
   updateProjectEngagement,
   updateProjectEngagementSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateProjectEngagementInput = z.infer<
@@ -21,19 +21,12 @@ export const projectEngagementResolvers = {
   Query: {
     projectEngagements: () => getAllProjectEngagements(),
     projectEngagement: async (_parent: unknown, { id }: { id: string }) => {
-      const engagement = await getProjectEngagementById(id);
-      if (!engagement) {
-        throw new GraphQLError(
-          'Project engagement not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+      try {
+        return await getProjectEngagementById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return engagement;
     },
   },
   Mutation: {

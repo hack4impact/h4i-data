@@ -107,6 +107,29 @@ describe('REST API - /mentorships', () => {
       expect(response.status).toBe(200);
       expect(response.body.status).toBe('COMPLETED');
     });
+
+    it('should return 404 for a non-existent mentorship', async () => {
+      const response = await request(app)
+        .patch('/mentorships/00000000-0000-0000-0000-000000000000')
+        .send({ status: 'COMPLETED' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const mentorId = await createTestMentor();
+      const menteeId = await createTestMentor();
+      const created = await request(app).post('/mentorships').send({
+        mentor_id: mentorId,
+        mentee_id: menteeId,
+      });
+      const id = created.body.mentorship_id;
+
+      const response = await request(app)
+        .patch(`/mentorships/${id}`)
+        .send({ status: 'INVALID' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /mentorships/:id', () => {
@@ -125,6 +148,13 @@ describe('REST API - /mentorships', () => {
 
       const getResponse = await request(app).get(`/mentorships/${id}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent mentorship', async () => {
+      const response = await request(app).delete(
+        '/mentorships/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

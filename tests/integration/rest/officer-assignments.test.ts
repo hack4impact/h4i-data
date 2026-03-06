@@ -126,6 +126,31 @@ describe('REST API - /officer-assignments', () => {
       expect(response.status).toBe(200);
       expect(response.body.assignment_id).toBe(id);
     });
+
+    it('should return 404 for a non-existent officer assignment', async () => {
+      const response = await request(app)
+        .patch('/officer-assignments/00000000-0000-0000-0000-000000000000')
+        .send({ end_date: '2025-12-31T00:00:00.000Z' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const volunteerId = await createTestVolunteer();
+      const roleId = await createTestOfficerRole();
+      const chapterId = await createTestChapter();
+      const created = await request(app).post('/officer-assignments').send({
+        volunteer_id: volunteerId,
+        role_id: roleId,
+        chapter_id: chapterId,
+      });
+      const id = created.body.assignment_id;
+
+      const response = await request(app)
+        .patch(`/officer-assignments/${id}`)
+        .send({ end_date: 'not-a-date' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /officer-assignments/:id', () => {
@@ -146,6 +171,13 @@ describe('REST API - /officer-assignments', () => {
 
       const getResponse = await request(app).get(`/officer-assignments/${id}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent officer assignment', async () => {
+      const response = await request(app).delete(
+        '/officer-assignments/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

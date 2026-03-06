@@ -174,6 +174,79 @@ describe('GraphQL API - Mentors', () => {
     expect(updated.max_mentees).toBe(10);
   });
 
+  it('should return errors when updating a non-existent mentor', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateMentor($id: ID!, $input: UpdateMentorInput!) {
+        updateMentor(id: $id, input: $input) {
+          mentor_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { expertise_area: 'Updated' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid mentor input', async () => {
+    // Arrange
+    const constituentId = await createTestConstituent();
+    const created = await createTestMentor(constituentId);
+
+    // Act
+    const mutation = `
+      mutation UpdateMentor($id: ID!, $input: UpdateMentorInput!) {
+        updateMentor(id: $id, input: $input) {
+          mentor_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: created.mentor_id,
+          input: { status: 'INVALID_STATUS' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent mentor', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteMentor($id: ID!) {
+        deleteMentor(id: $id) {
+          mentor_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a mentor', async () => {
     // Arrange
     const constituentId = await createTestConstituent();

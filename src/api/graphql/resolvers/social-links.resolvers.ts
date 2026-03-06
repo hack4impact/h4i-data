@@ -7,7 +7,7 @@ import {
   updateSocialLink,
   updateSocialLinkSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateSocialLinkInput = z.infer<typeof createSocialLinkSchema>;
@@ -17,19 +17,12 @@ export const socialLinkResolvers = {
   Query: {
     socialLinks: () => getAllSocialLinks(),
     socialLink: async (_parent: unknown, { id }: { id: string }) => {
-      const link = await getSocialLinkById(id);
-      if (!link) {
-        throw new GraphQLError(
-          'Social link not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+      try {
+        return await getSocialLinkById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return link;
     },
   },
   Mutation: {

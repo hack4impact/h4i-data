@@ -100,6 +100,22 @@ describe('REST API - /partners', () => {
       expect(response.status).toBe(200);
       expect(response.body.legal_name).toBe('Updated Partner Name');
     });
+
+    it('should return 404 for a non-existent partner', async () => {
+      const response = await request(app)
+        .patch('/partners/00000000-0000-0000-0000-000000000000')
+        .send({ legal_name: 'Updated Partner' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const partner = await createTestPartner();
+      const response = await request(app)
+        .patch(`/partners/${partner.partner_id}`)
+        .send({ legal_name: '' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /partners/:id', () => {
@@ -120,6 +136,13 @@ describe('REST API - /partners', () => {
         `/partners/${partner.partner_id}`
       );
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent partner', async () => {
+      const response = await request(app).delete(
+        '/partners/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

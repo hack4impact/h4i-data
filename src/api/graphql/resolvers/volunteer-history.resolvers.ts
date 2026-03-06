@@ -7,7 +7,7 @@ import {
   updateVolunteerHistory,
   updateVolunteerHistorySchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateVolunteerHistoryInput = z.infer<typeof createVolunteerHistorySchema>;
@@ -17,19 +17,12 @@ export const volunteerHistoryResolvers = {
   Query: {
     volunteerHistories: () => getAllVolunteerHistory(),
     volunteerHistory: async (_parent: unknown, { id }: { id: string }) => {
-      const history = await getVolunteerHistoryById(id);
-      if (!history) {
-        throw new GraphQLError(
-          'Volunteer history not found',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          { code: 'NOT_FOUND' }
-        );
+      try {
+        return await getVolunteerHistoryById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return history;
     },
   },
   Mutation: {

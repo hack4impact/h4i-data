@@ -133,6 +133,77 @@ describe('GraphQL API - Officer Roles', () => {
     expect(response.body.data.updateOfficerRole.scope).toBe('CENTRAL');
   });
 
+  it('should return errors when updating a non-existent officer role', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateOfficerRole($id: ID!, $input: UpdateOfficerRoleInput!) {
+        updateOfficerRole(id: $id, input: $input) {
+          role_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { name: 'Updated Role' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid officer role input', async () => {
+    // Arrange
+    const created = await createTestOfficerRole(
+      `Role ${Date.now()}.${Math.random()}`
+    );
+
+    // Act
+    const mutation = `
+      mutation UpdateOfficerRole($id: ID!, $input: UpdateOfficerRoleInput!) {
+        updateOfficerRole(id: $id, input: $input) {
+          role_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: created.role_id, input: { name: 'X' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent officer role', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteOfficerRole($id: ID!) {
+        deleteOfficerRole(id: $id) {
+          role_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete an officer role via mutation', async () => {
     // Arrange
     const created = await createTestOfficerRole(

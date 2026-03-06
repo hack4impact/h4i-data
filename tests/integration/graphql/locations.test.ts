@@ -138,6 +138,75 @@ describe('GraphQL API - Locations', () => {
     expect(response.body.data.updateLocation.name).toBe('Updated Location');
   });
 
+  it('should return errors when updating a non-existent location', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateLocation($id: ID!, $input: UpdateLocationInput!) {
+        updateLocation(id: $id, input: $input) {
+          location_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { name: 'Updated Location' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid location input', async () => {
+    // Arrange
+    const location = await createTestLocation();
+
+    // Act
+    const mutation = `
+      mutation UpdateLocation($id: ID!, $input: UpdateLocationInput!) {
+        updateLocation(id: $id, input: $input) {
+          location_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: location.location_id, input: { name: 'A' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent location', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteLocation($id: ID!) {
+        deleteLocation(id: $id) {
+          location_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a location by its ID via mutation', async () => {
     // Arrange
     const location = await createTestLocation();

@@ -188,6 +188,76 @@ describe('GraphQL API - Volunteers', () => {
     expect(updatedVolunteer.major_id).toBe(majorId);
   });
 
+  it('should return errors when updating a non-existent volunteer', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateVolunteer($id: ID!, $input: UpdateVolunteerInput!) {
+        updateVolunteer(id: $id, input: $input) {
+          volunteer_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { org_email: 'updated@org.edu' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid volunteer input', async () => {
+    // Arrange
+    const constituentId = await createTestConstituent();
+    const volunteerId = await createTestVolunteer(constituentId);
+
+    // Act
+    const mutation = `
+      mutation UpdateVolunteer($id: ID!, $input: UpdateVolunteerInput!) {
+        updateVolunteer(id: $id, input: $input) {
+          volunteer_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: volunteerId, input: { org_email: 'not-an-email' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent volunteer', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteVolunteer($id: ID!) {
+        deleteVolunteer(id: $id) {
+          volunteer_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
   it('should delete a volunteer', async () => {
     // Arrange
     const constituentId = await createTestConstituent();

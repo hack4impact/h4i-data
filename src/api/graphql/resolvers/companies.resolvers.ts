@@ -7,6 +7,7 @@ import {
   updateCompany,
   updateCompanySchema,
 } from '../../../core';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 type CreateCompanyInput = z.infer<typeof createCompanySchema>;
@@ -15,8 +16,13 @@ type UpdateCompanyInput = z.infer<typeof updateCompanySchema>;
 export const companyResolvers = {
   Query: {
     companies: () => getAllCompanies(),
-    company: (_parent: unknown, { id }: { id: string }) => {
-      return getCompanyById(id);
+    company: async (_parent: unknown, { id }: { id: string }) => {
+      try {
+        return await getCompanyById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
+      }
     },
   },
   Mutation: {

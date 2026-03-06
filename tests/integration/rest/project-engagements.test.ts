@@ -89,6 +89,27 @@ describe('REST API - /project-engagements', () => {
       expect(response.status).toBe(200);
       expect(response.body.status).toBe('COMPLETED');
     });
+
+    it('should return 404 for a non-existent project engagement', async () => {
+      const response = await request(app)
+        .patch('/project-engagements/00000000-0000-0000-0000-000000000000')
+        .send({ status: 'COMPLETED' });
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 for invalid data', async () => {
+      const projectId = await createTestProject();
+      const created = await request(app)
+        .post('/project-engagements')
+        .send({ project_id: projectId });
+      const id = created.body.engagement_id;
+
+      const response = await request(app)
+        .patch(`/project-engagements/${id}`)
+        .send({ status: 'INVALID' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+    });
   });
 
   describe('DELETE /project-engagements/:id', () => {
@@ -105,6 +126,13 @@ describe('REST API - /project-engagements', () => {
 
       const getResponse = await request(app).get(`/project-engagements/${id}`);
       expect(getResponse.status).toBe(404);
+    });
+
+    it('should return 404 for a non-existent project engagement', async () => {
+      const response = await request(app).delete(
+        '/project-engagements/00000000-0000-0000-0000-000000000000'
+      );
+      expect(response.status).toBe(404);
     });
   });
 });

@@ -7,6 +7,7 @@ import {
   updateLocation,
   updateLocationSchema,
 } from '../../../core';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 // Infer TypeScript types directly from your Zod schemas
@@ -16,8 +17,13 @@ type UpdateLocationInput = z.infer<typeof updateLocationSchema>;
 export const locationResolvers = {
   Query: {
     locations: () => getAllLocations(),
-    location: (_parent: unknown, { id }: { id: string }) => {
-      return getLocationById(id);
+    location: async (_parent: unknown, { id }: { id: string }) => {
+      try {
+        return await getLocationById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
+      }
     },
   },
   Mutation: {
