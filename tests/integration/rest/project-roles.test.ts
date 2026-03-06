@@ -30,7 +30,7 @@ describe('REST API - /project-roles', () => {
     it('should fetch all project roles', async () => {
       await request(app)
         .post('/project-roles')
-        .send({ name: `Role ${Date.now()}` });
+        .send({ name: `Role ${Date.now()}.${Math.random()}` });
 
       const response = await request(app).get('/project-roles');
 
@@ -44,7 +44,7 @@ describe('REST API - /project-roles', () => {
     it('should fetch a project role by ID', async () => {
       const created = await request(app)
         .post('/project-roles')
-        .send({ name: `Role ${Date.now()}` });
+        .send({ name: `Role ${Date.now()}.${Math.random()}` });
       const id = created.body.role_id;
 
       const response = await request(app).get(`/project-roles/${id}`);
@@ -66,7 +66,7 @@ describe('REST API - /project-roles', () => {
     it('should update a project role', async () => {
       const created = await request(app)
         .post('/project-roles')
-        .send({ name: `Role ${Date.now()}` });
+        .send({ name: `Role ${Date.now()}.${Math.random()}` });
       const id = created.body.role_id;
 
       const response = await request(app)
@@ -82,7 +82,7 @@ describe('REST API - /project-roles', () => {
     it('should delete a project role', async () => {
       const created = await request(app)
         .post('/project-roles')
-        .send({ name: `Role ${Date.now()}` });
+        .send({ name: `Role ${Date.now()}.${Math.random()}` });
       const id = created.body.role_id;
 
       const response = await request(app).delete(`/project-roles/${id}`);

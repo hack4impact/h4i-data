@@ -29,7 +29,7 @@ describe('REST API - /officer-roles', () => {
     it('should fetch all officer roles', async () => {
       await request(app)
         .post('/officer-roles')
-        .send({ name: `Role ${Date.now()}` });
+        .send({ name: `Role ${Date.now()}.${Math.random()}` });
 
       const response = await request(app).get('/officer-roles');
 
@@ -43,7 +43,7 @@ describe('REST API - /officer-roles', () => {
     it('should fetch an officer role by ID', async () => {
       const created = await request(app)
         .post('/officer-roles')
-        .send({ name: `Role ${Date.now()}` });
+        .send({ name: `Role ${Date.now()}.${Math.random()}` });
       const id = created.body.role_id;
 
       const response = await request(app).get(`/officer-roles/${id}`);
@@ -65,7 +65,7 @@ describe('REST API - /officer-roles', () => {
     it('should update an officer role', async () => {
       const created = await request(app)
         .post('/officer-roles')
-        .send({ name: `Role ${Date.now()}` });
+        .send({ name: `Role ${Date.now()}.${Math.random()}` });
       const id = created.body.role_id;
 
       const response = await request(app)
@@ -81,7 +81,7 @@ describe('REST API - /officer-roles', () => {
     it('should delete an officer role', async () => {
       const created = await request(app)
         .post('/officer-roles')
-        .send({ name: `Role ${Date.now()}` });
+        .send({ name: `Role ${Date.now()}.${Math.random()}` });
       const id = created.body.role_id;
 
       const response = await request(app).delete(`/officer-roles/${id}`);

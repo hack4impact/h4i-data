@@ -29,7 +29,7 @@ describe('REST API - /academic-terms', () => {
     it('should fetch all academic terms', async () => {
       await request(app)
         .post('/academic-terms')
-        .send({ name: `Term ${Date.now()}` });
+        .send({ name: `Term ${Date.now()}.${Math.random()}` });
 
       const response = await request(app).get('/academic-terms');
 
@@ -43,7 +43,7 @@ describe('REST API - /academic-terms', () => {
     it('should fetch an academic term by ID', async () => {
       const created = await request(app)
         .post('/academic-terms')
-        .send({ name: `Term ${Date.now()}` });
+        .send({ name: `Term ${Date.now()}.${Math.random()}` });
       const id = created.body.term_id;
 
       const response = await request(app).get(`/academic-terms/${id}`);
@@ -65,7 +65,7 @@ describe('REST API - /academic-terms', () => {
     it('should update an academic term', async () => {
       const created = await request(app)
         .post('/academic-terms')
-        .send({ name: `Term ${Date.now()}` });
+        .send({ name: `Term ${Date.now()}.${Math.random()}` });
       const id = created.body.term_id;
 
       const response = await request(app)
@@ -81,7 +81,7 @@ describe('REST API - /academic-terms', () => {
     it('should delete an academic term', async () => {
       const created = await request(app)
         .post('/academic-terms')
-        .send({ name: `Term ${Date.now()}` });
+        .send({ name: `Term ${Date.now()}.${Math.random()}` });
       const id = created.body.term_id;
 
       const response = await request(app).delete(`/academic-terms/${id}`);

@@ -29,7 +29,7 @@ describe('REST API - /universities', () => {
     it('should fetch all universities', async () => {
       await request(app)
         .post('/universities')
-        .send({ name: `University ${Date.now()}` });
+        .send({ name: `University ${Date.now()}.${Math.random()}` });
 
       const response = await request(app).get('/universities');
 
@@ -43,7 +43,7 @@ describe('REST API - /universities', () => {
     it('should fetch a university by ID', async () => {
       const created = await request(app)
         .post('/universities')
-        .send({ name: `University ${Date.now()}` });
+        .send({ name: `University ${Date.now()}.${Math.random()}` });
       const id = created.body.university_id;
 
       const response = await request(app).get(`/universities/${id}`);
@@ -65,7 +65,7 @@ describe('REST API - /universities', () => {
     it('should update a university', async () => {
       const created = await request(app)
         .post('/universities')
-        .send({ name: `University ${Date.now()}` });
+        .send({ name: `University ${Date.now()}.${Math.random()}` });
       const id = created.body.university_id;
 
       const response = await request(app)
@@ -81,7 +81,7 @@ describe('REST API - /universities', () => {
     it('should delete a university', async () => {
       const created = await request(app)
         .post('/universities')
-        .send({ name: `University ${Date.now()}` });
+        .send({ name: `University ${Date.now()}.${Math.random()}` });
       const id = created.body.university_id;
 
       const response = await request(app).delete(`/universities/${id}`);

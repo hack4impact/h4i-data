@@ -27,7 +27,7 @@ describe('REST API - /majors', () => {
     it('should fetch all majors', async () => {
       await request(app)
         .post('/majors')
-        .send({ name: `Major ${Date.now()}` });
+        .send({ name: `Major ${Date.now()}.${Math.random()}` });
 
       const response = await request(app).get('/majors');
 
@@ -41,7 +41,7 @@ describe('REST API - /majors', () => {
     it('should fetch a major by ID', async () => {
       const created = await request(app)
         .post('/majors')
-        .send({ name: `Major ${Date.now()}` });
+        .send({ name: `Major ${Date.now()}.${Math.random()}` });
       const id = created.body.major_id;
 
       const response = await request(app).get(`/majors/${id}`);
@@ -63,7 +63,7 @@ describe('REST API - /majors', () => {
     it('should update a major', async () => {
       const created = await request(app)
         .post('/majors')
-        .send({ name: `Major ${Date.now()}` });
+        .send({ name: `Major ${Date.now()}.${Math.random()}` });
       const id = created.body.major_id;
 
       const response = await request(app)
@@ -79,7 +79,7 @@ describe('REST API - /majors', () => {
     it('should delete a major', async () => {
       const created = await request(app)
         .post('/majors')
-        .send({ name: `Major ${Date.now()}` });
+        .send({ name: `Major ${Date.now()}.${Math.random()}` });
       const id = created.body.major_id;
 
       const response = await request(app).delete(`/majors/${id}`);
