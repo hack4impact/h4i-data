@@ -1,4 +1,5 @@
 import { prisma } from '../../config/database';
+import { Prisma } from '@prisma/client';
 import { createUniversitySchema, updateUniversitySchema } from '../validators';
 import { logger } from '../../config/logger';
 import {
@@ -96,8 +97,8 @@ export async function updateUniversity(
     return university;
   } catch (error) {
     if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('University', id);
     }
@@ -124,8 +125,8 @@ export async function deleteUniversity(id: string) {
     return university;
   } catch (error) {
     if (
-      error instanceof Error &&
-      error.message.includes('Record to delete does not exist')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('University', id);
     }

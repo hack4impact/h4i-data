@@ -1,4 +1,5 @@
 import { prisma } from '../../config/database';
+import { Prisma } from '@prisma/client';
 import {
   createOfficerAssignmentSchema,
   updateOfficerAssignmentSchema,
@@ -110,8 +111,8 @@ export async function updateOfficerAssignment(
     return assignment;
   } catch (error) {
     if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('OfficerAssignment', id);
     }
@@ -140,8 +141,8 @@ export async function deleteOfficerAssignment(id: string) {
     return assignment;
   } catch (error) {
     if (
-      error instanceof Error &&
-      error.message.includes('Record to delete does not exist')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('OfficerAssignment', id);
     }

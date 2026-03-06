@@ -1,4 +1,5 @@
 import { prisma } from '../../config/database';
+import { Prisma } from '@prisma/client';
 import { createLocationSchema, updateLocationSchema } from '../validators';
 import { logger } from '../../config/logger';
 import {
@@ -78,8 +79,8 @@ export const updateLocation = async (id: string, data: UpdateLocationInput) => {
     return location;
   } catch (error) {
     if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('Location', id);
     }
@@ -102,8 +103,8 @@ export const deleteLocation = async (id: string) => {
     return location;
   } catch (error) {
     if (
-      error instanceof Error &&
-      error.message.includes('Record to delete does not exist')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('Location', id);
     }

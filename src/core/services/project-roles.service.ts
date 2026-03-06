@@ -1,4 +1,5 @@
 import { prisma } from '../../config/database';
+import { Prisma } from '@prisma/client';
 import {
   createProjectRoleSchema,
   updateProjectRoleSchema,
@@ -97,8 +98,8 @@ export async function updateProjectRole(
     return role;
   } catch (error) {
     if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('ProjectRole', id);
     }
@@ -125,8 +126,8 @@ export async function deleteProjectRole(id: string) {
     return role;
   } catch (error) {
     if (
-      error instanceof Error &&
-      error.message.includes('Record to delete does not exist')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('ProjectRole', id);
     }

@@ -121,13 +121,6 @@ export async function updatePartner(id: string, input: UpdatePartnerInput) {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
 
-    if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
-    ) {
-      throw new NotFoundError('Partner', id);
-    }
-
     throw new DatabaseError('Failed to update partner');
   }
 }
@@ -162,13 +155,6 @@ export async function deletePartner(id: string) {
       partnerId: id,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
-
-    if (
-      error instanceof Error &&
-      error.message.includes('Record to delete does not exist')
-    ) {
-      throw new NotFoundError('Partner', id);
-    }
 
     throw new DatabaseError('Failed to delete partner');
   }

@@ -1,5 +1,6 @@
 // src/core/services/chapter.service.ts
 import { prisma } from '../../config/database';
+import { Prisma } from '@prisma/client';
 import { createChapterSchema, updateChapterSchema } from '../validators';
 import { logger } from '../../config/logger';
 import {
@@ -115,8 +116,8 @@ export async function updateChapter(id: string, data: UpdateChapterInput) {
 
     // Check if chapter doesn't exist
     if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('Chapter', id);
     }
@@ -147,8 +148,8 @@ export async function deleteChapter(id: string) {
 
     // Check if chapter doesn't exist
     if (
-      error instanceof Error &&
-      error.message.includes('Record to delete does not exist')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('Chapter', id);
     }

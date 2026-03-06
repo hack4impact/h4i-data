@@ -1,5 +1,6 @@
 // src/core/services/company.service.ts
 import { prisma } from '../../config/database';
+import { Prisma } from '@prisma/client';
 import { createCompanySchema, updateCompanySchema } from '../validators';
 import { logger } from '../../config/logger';
 import {
@@ -113,8 +114,8 @@ export async function updateCompany(id: string, data: UpdateCompanyInput) {
 
     // Check if company doesn't exist
     if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('Company', id);
     }
@@ -145,8 +146,8 @@ export async function deleteCompany(id: string) {
 
     // Check if company doesn't exist
     if (
-      error instanceof Error &&
-      error.message.includes('Record to delete does not exist')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('Company', id);
     }

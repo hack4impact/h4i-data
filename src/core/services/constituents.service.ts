@@ -1,4 +1,5 @@
 import { prisma } from '../../config/database';
+import { Prisma } from '@prisma/client';
 import {
   createConstituentSchema,
   updateConstituentSchema,
@@ -114,8 +115,8 @@ export async function updateConstituent(
     });
 
     if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('Constituent', id);
     }
@@ -144,8 +145,8 @@ export async function deleteConstituent(id: string) {
     });
 
     if (
-      error instanceof Error &&
-      error.message.includes('Record to delete does not exist')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('Constituent', id);
     }

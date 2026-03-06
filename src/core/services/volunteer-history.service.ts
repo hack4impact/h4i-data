@@ -1,4 +1,5 @@
 import { prisma } from '../../config/database';
+import { Prisma } from '@prisma/client';
 import {
   createVolunteerHistorySchema,
   updateVolunteerHistorySchema,
@@ -102,8 +103,8 @@ export async function updateVolunteerHistory(
     return history;
   } catch (error) {
     if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('VolunteerHistory', id);
     }
@@ -130,8 +131,8 @@ export async function deleteVolunteerHistory(id: string) {
     return history;
   } catch (error) {
     if (
-      error instanceof Error &&
-      error.message.includes('Record to delete does not exist')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('VolunteerHistory', id);
     }

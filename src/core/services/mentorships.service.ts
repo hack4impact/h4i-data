@@ -1,4 +1,5 @@
 import { prisma } from '../../config/database';
+import { Prisma } from '@prisma/client';
 import { createMentorshipSchema, updateMentorshipSchema } from '../validators';
 import { logger } from '../../config/logger';
 import {
@@ -94,8 +95,8 @@ export async function updateMentorship(
     return mentorship;
   } catch (error) {
     if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('Mentorship', id);
     }
@@ -122,8 +123,8 @@ export async function deleteMentorship(id: string) {
     return mentorship;
   } catch (error) {
     if (
-      error instanceof Error &&
-      error.message.includes('Record to delete does not exist')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('Mentorship', id);
     }
