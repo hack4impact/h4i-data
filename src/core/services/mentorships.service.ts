@@ -60,7 +60,7 @@ export async function getMentorshipById(id: string) {
 
 export async function createMentorship(data: CreateMentorshipInput) {
   try {
-    logger.info('Creating new mentorship', { mentorshipData: data });
+    logger.info('Creating new mentorship');
 
     const mentorship = await prisma.mentorships.create({ data });
 
@@ -71,7 +71,6 @@ export async function createMentorship(data: CreateMentorshipInput) {
     return mentorship;
   } catch (error) {
     logger.error('Failed to create mentorship', {
-      mentorshipData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create mentorship');

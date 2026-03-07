@@ -60,7 +60,7 @@ export async function getMajorById(id: string) {
 
 export async function createMajor(data: CreateMajorInput) {
   try {
-    logger.info('Creating new major', { majorData: data });
+    logger.info('Creating new major');
 
     const major = await prisma.majors.create({ data });
 
@@ -71,7 +71,6 @@ export async function createMajor(data: CreateMajorInput) {
     return major;
   } catch (error) {
     logger.error('Failed to create major', {
-      majorData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create major');

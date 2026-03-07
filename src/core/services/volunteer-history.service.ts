@@ -65,7 +65,7 @@ export async function createVolunteerHistory(
   data: CreateVolunteerHistoryInput
 ) {
   try {
-    logger.info('Creating new volunteer history', { historyData: data });
+    logger.info('Creating new volunteer history');
 
     const history = await prisma.volunteer_history.create({ data });
 
@@ -76,7 +76,6 @@ export async function createVolunteerHistory(
     return history;
   } catch (error) {
     logger.error('Failed to create volunteer history', {
-      historyData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create volunteer history');

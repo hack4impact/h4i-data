@@ -70,9 +70,7 @@ export async function getVolunteerById(id: string) {
 
 export async function createVolunteer(data: CreateVolunteerInput) {
   try {
-    logger.info('Creating new volunteer', {
-      volunteerData: data,
-    });
+    logger.info('Creating new volunteer');
 
     // The volunteer_id must reference an existing constituent
     const constituent = await prisma.constituents.findUnique({
@@ -101,7 +99,6 @@ export async function createVolunteer(data: CreateVolunteerInput) {
     }
 
     logger.error('Failed to create volunteer', {
-      volunteerData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create volunteer');
@@ -129,12 +126,6 @@ export async function updateVolunteer(id: string, data: UpdateVolunteerInput) {
 
     return volunteer;
   } catch (error) {
-    logger.error('Failed to update volunteer', {
-      volunteerId: id,
-      updateData: data,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2025'
@@ -142,6 +133,11 @@ export async function updateVolunteer(id: string, data: UpdateVolunteerInput) {
       throw new NotFoundError('Volunteer', id);
     }
 
+    logger.error('Failed to update volunteer', {
+      volunteerId: id,
+      updateData: data,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     throw new DatabaseError('Failed to update volunteer');
   }
 }
@@ -163,11 +159,6 @@ export async function deleteVolunteer(id: string) {
 
     return volunteer;
   } catch (error) {
-    logger.error('Failed to delete volunteer', {
-      volunteerId: id,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2025'
@@ -175,6 +166,10 @@ export async function deleteVolunteer(id: string) {
       throw new NotFoundError('Volunteer', id);
     }
 
+    logger.error('Failed to delete volunteer', {
+      volunteerId: id,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     throw new DatabaseError('Failed to delete volunteer');
   }
 }

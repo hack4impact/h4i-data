@@ -70,9 +70,7 @@ export async function getMentorById(id: string) {
 
 export async function createMentor(data: CreateMentorInput) {
   try {
-    logger.info('Creating new mentor', {
-      mentorData: data,
-    });
+    logger.info('Creating new mentor');
 
     // The mentor_id must reference an existing constituent
     const constituent = await prisma.constituents.findUnique({
@@ -101,7 +99,6 @@ export async function createMentor(data: CreateMentorInput) {
     }
 
     logger.error('Failed to create mentor', {
-      mentorData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create mentor');
@@ -129,12 +126,6 @@ export async function updateMentor(id: string, data: UpdateMentorInput) {
 
     return mentor;
   } catch (error) {
-    logger.error('Failed to update mentor', {
-      mentorId: id,
-      updateData: data,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2025'
@@ -142,6 +133,11 @@ export async function updateMentor(id: string, data: UpdateMentorInput) {
       throw new NotFoundError('Mentor', id);
     }
 
+    logger.error('Failed to update mentor', {
+      mentorId: id,
+      updateData: data,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     throw new DatabaseError('Failed to update mentor');
   }
 }
@@ -163,11 +159,6 @@ export async function deleteMentor(id: string) {
 
     return mentor;
   } catch (error) {
-    logger.error('Failed to delete mentor', {
-      mentorId: id,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2025'
@@ -175,6 +166,10 @@ export async function deleteMentor(id: string) {
       throw new NotFoundError('Mentor', id);
     }
 
+    logger.error('Failed to delete mentor', {
+      mentorId: id,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     throw new DatabaseError('Failed to delete mentor');
   }
 }

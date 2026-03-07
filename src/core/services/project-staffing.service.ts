@@ -65,7 +65,7 @@ export async function getProjectStaffingById(id: string) {
 
 export async function createProjectStaffing(data: CreateProjectStaffingInput) {
   try {
-    logger.info('Creating new project staffing', { staffingData: data });
+    logger.info('Creating new project staffing');
 
     const staffing = await prisma.project_staffing.create({ data });
 
@@ -76,7 +76,6 @@ export async function createProjectStaffing(data: CreateProjectStaffingInput) {
     return staffing;
   } catch (error) {
     logger.error('Failed to create project staffing', {
-      staffingData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create project staffing');

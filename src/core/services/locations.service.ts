@@ -11,7 +11,7 @@ import { z } from 'zod';
 type CreateLocationInput = z.infer<typeof createLocationSchema>;
 type UpdateLocationInput = z.infer<typeof updateLocationSchema>;
 
-export const getAllLocations = async () => {
+export async function getAllLocations() {
   try {
     logger.info('Fetching all locations');
     const locations = await prisma.locations.findMany();
@@ -25,9 +25,9 @@ export const getAllLocations = async () => {
     });
     throw new DatabaseError('Failed to fetch locations');
   }
-};
+}
 
-export const getLocationById = async (id: string) => {
+export async function getLocationById(id: string) {
   try {
     logger.info('Fetching location by ID', { locationId: id });
     const location = await prisma.locations.findUnique({
@@ -49,11 +49,11 @@ export const getLocationById = async (id: string) => {
     });
     throw new DatabaseError('Failed to fetch location');
   }
-};
+}
 
-export const createLocation = async (data: CreateLocationInput) => {
+export async function createLocation(data: CreateLocationInput) {
   try {
-    logger.info('Creating new location', { locationData: data });
+    logger.info('Creating new location');
     const location = await prisma.locations.create({ data });
     logger.info('Successfully created location', {
       locationId: location.location_id,
@@ -61,14 +61,13 @@ export const createLocation = async (data: CreateLocationInput) => {
     return location;
   } catch (error) {
     logger.error('Failed to create location', {
-      locationData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create location');
   }
-};
+}
 
-export const updateLocation = async (id: string, data: UpdateLocationInput) => {
+export async function updateLocation(id: string, data: UpdateLocationInput) {
   try {
     logger.info('Updating location', { locationId: id, updateData: data });
     const location = await prisma.locations.update({
@@ -91,9 +90,9 @@ export const updateLocation = async (id: string, data: UpdateLocationInput) => {
     });
     throw new DatabaseError('Failed to update location');
   }
-};
+}
 
-export const deleteLocation = async (id: string) => {
+export async function deleteLocation(id: string) {
   try {
     logger.info('Deleting location', { locationId: id });
     const location = await prisma.locations.delete({
@@ -114,4 +113,4 @@ export const deleteLocation = async (id: string) => {
     });
     throw new DatabaseError('Failed to delete location');
   }
-};
+}

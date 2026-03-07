@@ -71,7 +71,7 @@ export async function createProjectEngagement(
   data: CreateProjectEngagementInput
 ) {
   try {
-    logger.info('Creating new project engagement', { engagementData: data });
+    logger.info('Creating new project engagement');
 
     const engagement = await prisma.project_engagements.create({ data });
 
@@ -82,7 +82,6 @@ export async function createProjectEngagement(
     return engagement;
   } catch (error) {
     logger.error('Failed to create project engagement', {
-      engagementData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create project engagement');

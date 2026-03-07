@@ -63,7 +63,7 @@ export async function getAcademicTermById(id: string) {
 
 export async function createAcademicTerm(data: CreateAcademicTermInput) {
   try {
-    logger.info('Creating new academic term', { termData: data });
+    logger.info('Creating new academic term');
 
     const term = await prisma.academic_terms.create({ data });
 
@@ -74,7 +74,6 @@ export async function createAcademicTerm(data: CreateAcademicTermInput) {
     return term;
   } catch (error) {
     logger.error('Failed to create academic term', {
-      termData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create academic term');

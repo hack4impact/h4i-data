@@ -16,7 +16,9 @@ type UpdateCompanyInput = z.infer<typeof updateCompanySchema>;
 export async function getAllCompanies() {
   try {
     logger.info('Fetching all companies');
-    const companies = await prisma.companies.findMany();
+    const companies = await prisma.companies.findMany({
+      orderBy: { name: 'asc' },
+    });
 
     logger.info('Successfully retrieved companies', {
       count: companies.length,
@@ -65,10 +67,7 @@ export async function getCompanyById(id: string) {
 
 export async function createCompany(data: CreateCompanyInput) {
   try {
-    logger.info('Creating new company', {
-      companyName: data.name,
-      companyData: data,
-    });
+    logger.info('Creating new company', { companyName: data.name });
 
     const company = await prisma.companies.create({ data });
 
@@ -80,7 +79,6 @@ export async function createCompany(data: CreateCompanyInput) {
     return company;
   } catch (error) {
     logger.error('Failed to create company', {
-      companyData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create company');
@@ -106,13 +104,6 @@ export async function updateCompany(id: string, data: UpdateCompanyInput) {
 
     return company;
   } catch (error) {
-    logger.error('Failed to update company', {
-      companyId: id,
-      updateData: data,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-
-    // Check if company doesn't exist
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2025'
@@ -120,6 +111,11 @@ export async function updateCompany(id: string, data: UpdateCompanyInput) {
       throw new NotFoundError('Company', id);
     }
 
+    logger.error('Failed to update company', {
+      companyId: id,
+      updateData: data,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     throw new DatabaseError('Failed to update company');
   }
 }
@@ -139,12 +135,6 @@ export async function deleteCompany(id: string) {
 
     return company;
   } catch (error) {
-    logger.error('Failed to delete company', {
-      companyId: id,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-
-    // Check if company doesn't exist
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2025'
@@ -152,6 +142,10 @@ export async function deleteCompany(id: string) {
       throw new NotFoundError('Company', id);
     }
 
+    logger.error('Failed to delete company', {
+      companyId: id,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     throw new DatabaseError('Failed to delete company');
   }
 }

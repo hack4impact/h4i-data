@@ -71,7 +71,7 @@ export async function createOfficerAssignment(
   data: CreateOfficerAssignmentInput
 ) {
   try {
-    logger.info('Creating new officer assignment', { assignmentData: data });
+    logger.info('Creating new officer assignment');
 
     const assignment = await prisma.officer_assignments.create({ data });
 
@@ -82,7 +82,6 @@ export async function createOfficerAssignment(
     return assignment;
   } catch (error) {
     logger.error('Failed to create officer assignment', {
-      assignmentData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create officer assignment');

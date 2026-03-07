@@ -65,10 +65,7 @@ export async function getPartnerById(id: string) {
 
 export async function createPartner(input: CreatePartnerInput) {
   try {
-    logger.info('Creating new partner', {
-      partnerName: input.legal_name,
-      partnerData: input,
-    });
+    logger.info('Creating new partner', { partnerName: input.legal_name });
 
     const partner = await prisma.partners.create({
       data: input,
@@ -82,7 +79,6 @@ export async function createPartner(input: CreatePartnerInput) {
     return partner;
   } catch (error) {
     logger.error('Failed to create partner', {
-      partnerData: input,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create partner');
@@ -140,10 +136,6 @@ export async function deletePartner(id: string) {
 
     return partner;
   } catch (error) {
-    if (error instanceof NotFoundError) {
-      throw error;
-    }
-
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2025'

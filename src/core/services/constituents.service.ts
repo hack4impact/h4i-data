@@ -67,9 +67,7 @@ export async function getConstituentById(id: string) {
 
 export async function createConstituent(data: CreateConstituentInput) {
   try {
-    logger.info('Creating new constituent', {
-      constituentData: data,
-    });
+    logger.info('Creating new constituent');
 
     const constituent = await prisma.constituents.create({ data });
 
@@ -80,7 +78,6 @@ export async function createConstituent(data: CreateConstituentInput) {
     return constituent;
   } catch (error) {
     logger.error('Failed to create constituent', {
-      constituentData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create constituent');
@@ -108,12 +105,6 @@ export async function updateConstituent(
 
     return constituent;
   } catch (error) {
-    logger.error('Failed to update constituent', {
-      constituentId: id,
-      updateData: data,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2025'
@@ -121,6 +112,11 @@ export async function updateConstituent(
       throw new NotFoundError('Constituent', id);
     }
 
+    logger.error('Failed to update constituent', {
+      constituentId: id,
+      updateData: data,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     throw new DatabaseError('Failed to update constituent');
   }
 }
@@ -139,11 +135,6 @@ export async function deleteConstituent(id: string) {
 
     return constituent;
   } catch (error) {
-    logger.error('Failed to delete constituent', {
-      constituentId: id,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2025'
@@ -151,6 +142,10 @@ export async function deleteConstituent(id: string) {
       throw new NotFoundError('Constituent', id);
     }
 
+    logger.error('Failed to delete constituent', {
+      constituentId: id,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     throw new DatabaseError('Failed to delete constituent');
   }
 }

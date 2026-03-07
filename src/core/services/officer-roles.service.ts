@@ -65,10 +65,7 @@ export async function getOfficerRoleById(id: string) {
 
 export async function createOfficerRole(data: CreateOfficerRoleInput) {
   try {
-    logger.info('Creating new officer role', {
-      roleName: data.name,
-      roleData: data,
-    });
+    logger.info('Creating new officer role', { roleName: data.name });
 
     const role = await prisma.officer_roles.create({ data });
 
@@ -80,7 +77,6 @@ export async function createOfficerRole(data: CreateOfficerRoleInput) {
     return role;
   } catch (error) {
     logger.error('Failed to create officer role', {
-      roleData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create officer role');

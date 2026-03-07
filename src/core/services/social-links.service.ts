@@ -60,7 +60,7 @@ export async function getSocialLinkById(id: string) {
 
 export async function createSocialLink(data: CreateSocialLinkInput) {
   try {
-    logger.info('Creating new social link', { linkData: data });
+    logger.info('Creating new social link');
 
     const link = await prisma.social_links.create({ data });
 
@@ -71,7 +71,6 @@ export async function createSocialLink(data: CreateSocialLinkInput) {
     return link;
   } catch (error) {
     logger.error('Failed to create social link', {
-      linkData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create social link');

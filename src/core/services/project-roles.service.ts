@@ -63,7 +63,7 @@ export async function getProjectRoleById(id: string) {
 
 export async function createProjectRole(data: CreateProjectRoleInput) {
   try {
-    logger.info('Creating new project role', { roleData: data });
+    logger.info('Creating new project role');
 
     const role = await prisma.project_roles.create({ data });
 
@@ -74,7 +74,6 @@ export async function createProjectRole(data: CreateProjectRoleInput) {
     return role;
   } catch (error) {
     logger.error('Failed to create project role', {
-      roleData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create project role');

@@ -71,7 +71,7 @@ export async function createProjectDeliverable(
   data: CreateProjectDeliverableInput
 ) {
   try {
-    logger.info('Creating new project deliverable', { deliverableData: data });
+    logger.info('Creating new project deliverable');
 
     const deliverable = await prisma.project_deliverables.create({ data });
 
@@ -82,7 +82,6 @@ export async function createProjectDeliverable(
     return deliverable;
   } catch (error) {
     logger.error('Failed to create project deliverable', {
-      deliverableData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create project deliverable');

@@ -62,7 +62,7 @@ export async function getUniversityById(id: string) {
 
 export async function createUniversity(data: CreateUniversityInput) {
   try {
-    logger.info('Creating new university', { universityData: data });
+    logger.info('Creating new university');
 
     const university = await prisma.universities.create({ data });
 
@@ -73,7 +73,6 @@ export async function createUniversity(data: CreateUniversityInput) {
     return university;
   } catch (error) {
     logger.error('Failed to create university', {
-      universityData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create university');
