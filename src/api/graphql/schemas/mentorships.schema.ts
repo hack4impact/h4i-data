@@ -35,8 +35,6 @@ export const mentorshipSchemaString = `
   }
 
   input UpdateMentorshipInput {
-    mentor_id: ID
-    mentee_id: ID
     program_type: String
     status: EngagementStatus
     start_date: String

@@ -11,4 +11,6 @@ export const createMentorshipSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const updateMentorshipSchema = createMentorshipSchema.partial();
+export const updateMentorshipSchema = createMentorshipSchema
+  .omit({ mentor_id: true, mentee_id: true })
+  .partial();

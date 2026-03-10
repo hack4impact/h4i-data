@@ -33,7 +33,8 @@ export function requestLogger(
     timestamp: new Date().toISOString(),
   });
 
-  // Capture original res.end to log when response completes
+  // Capture original res.send to log when response completes
+  // res.json() calls res.send() internally, so this intercepts both
   const originalSend = res.send;
   res.send = function (data) {
     const duration = Date.now() - start;
