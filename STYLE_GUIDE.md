@@ -1,8 +1,12 @@
-# Styling Guidelines
+# Style Guide
 
-### Recommended IDE - Visual Studio Code
+## Tooling
 
-### Commits Messages
+### Recommended IDE
+
+Visual Studio Code
+
+### Commit Messages
 
 Let's follow Conventional Commits when writing our commit messages: <https://www.conventionalcommits.org/en/v1.0.0/>
 
@@ -14,11 +18,11 @@ Structure:
 
 [optional footer(s)]
 
-Example: feature(core): add submit functionality in Button.tsx
+Example: `feat(volunteers): add GET endpoint for volunteer by ID`
 
 ### ESLint
 
-Run before committing:
+Husky runs ESLint automatically on commit. To run manually:
 
 ```
 pnpm exec eslint .
@@ -32,7 +36,7 @@ pnpm exec eslint --fix .
 
 ### Unused Dependencies
 
-Run to check for unused dependencies
+Run to check for unused dependencies (requires `depcheck` installed globally: `npm i -g depcheck`):
 
 ```
 pnpm exec depcheck
@@ -187,7 +191,9 @@ import { UserService } from '@services/UserService';
 - Add any additional notes at the bottom in the **"Notes"** section
 - Assign at least 2 reviewers
 
-### Best Practices to Write REST API
+---
+
+## REST API Best Practices
 
 ### 1. Test Structure
 
