@@ -29,7 +29,7 @@ describe('Officer Role Service', () => {
     it('should return an array of officer roles', async () => {
       const mockRoles = [
         {
-          role_id: '1',
+          officer_role_id: '1',
           name: 'President',
           scope: 'CHAPTER',
           rank_level: 1,
@@ -64,7 +64,7 @@ describe('Officer Role Service', () => {
     it('should return a single officer role when a valid ID is provided', async () => {
       const roleId = '1';
       const mockRole = {
-        role_id: roleId,
+        officer_role_id: roleId,
         name: 'President',
         scope: 'CHAPTER',
         rank_level: 1,
@@ -107,7 +107,7 @@ describe('Officer Role Service', () => {
         rank_level: 2,
       };
       const createdRole = {
-        role_id: 'new-id-123',
+        officer_role_id: 'new-id-123',
         created_at: new Date(),
         updated_at: new Date(),
         ...inputData,
@@ -138,7 +138,7 @@ describe('Officer Role Service', () => {
       const roleId = '1';
       const updateData = { name: 'Updated President' };
       const updatedRole = {
-        role_id: roleId,
+        officer_role_id: roleId,
         name: 'Updated President',
         scope: 'CHAPTER',
         rank_level: 1,
@@ -178,7 +178,7 @@ describe('Officer Role Service', () => {
     it('should call delete with the correct ID and return the deleted officer role', async () => {
       const roleId = '1';
       const deletedRole = {
-        role_id: roleId,
+        officer_role_id: roleId,
         name: 'President',
         scope: 'CHAPTER',
         rank_level: 1,

@@ -7,7 +7,7 @@ const createTestOfficerRole = async (name: string) => {
   const mutation = `
     mutation CreateOfficerRole($input: CreateOfficerRoleInput!) {
       createOfficerRole(input: $input) {
-        role_id
+        officer_role_id
         name
       }
     }
@@ -24,7 +24,7 @@ describe('GraphQL API - Officer Roles', () => {
     const mutation = `
       mutation CreateOfficerRole($input: CreateOfficerRoleInput!) {
         createOfficerRole(input: $input) {
-          role_id
+          officer_role_id
           name
           scope
         }
@@ -41,7 +41,7 @@ describe('GraphQL API - Officer Roles', () => {
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const role = response.body.data.createOfficerRole;
-    expect(role).toHaveProperty('role_id');
+    expect(role).toHaveProperty('officer_role_id');
     expect(role.name).toBe('Chapter President');
     expect(role.scope).toBe('CHAPTER');
   });
@@ -56,19 +56,21 @@ describe('GraphQL API - Officer Roles', () => {
     const query = `
       query OfficerRole($id: ID!) {
         officerRole(id: $id) {
-          role_id
+          officer_role_id
           name
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query, variables: { id: created.role_id } });
+      .send({ query, variables: { id: created.officer_role_id } });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.officerRole.role_id).toBe(created.role_id);
+    expect(response.body.data.officerRole.officer_role_id).toBe(
+      created.officer_role_id
+    );
   });
 
   it('should return null for a non-existent officer role ID', async () => {
@@ -76,7 +78,7 @@ describe('GraphQL API - Officer Roles', () => {
     const query = `
       query {
         officerRole(id: "00000000-0000-0000-0000-000000000000") {
-          role_id
+          officer_role_id
         }
       }
     `;
@@ -92,7 +94,7 @@ describe('GraphQL API - Officer Roles', () => {
     await createTestOfficerRole(`Role ${Date.now()}.${Math.random()}`);
 
     // Act
-    const query = `query { officerRoles { role_id name } }`;
+    const query = `query { officerRoles { officer_role_id name } }`;
     const response = await request(app).post('/').send({ query });
 
     // Assert
@@ -112,14 +114,14 @@ describe('GraphQL API - Officer Roles', () => {
     const mutation = `
       mutation UpdateOfficerRole($id: ID!, $input: UpdateOfficerRoleInput!) {
         updateOfficerRole(id: $id, input: $input) {
-          role_id
+          officer_role_id
           name
           scope
         }
       }
     `;
     const variables = {
-      id: created.role_id,
+      id: created.officer_role_id,
       input: { name: 'Updated Role', scope: 'CENTRAL' },
     };
     const response = await request(app)
@@ -138,7 +140,7 @@ describe('GraphQL API - Officer Roles', () => {
     const mutation = `
       mutation UpdateOfficerRole($id: ID!, $input: UpdateOfficerRoleInput!) {
         updateOfficerRole(id: $id, input: $input) {
-          role_id
+          officer_role_id
         }
       }
     `;
@@ -167,7 +169,7 @@ describe('GraphQL API - Officer Roles', () => {
     const mutation = `
       mutation UpdateOfficerRole($id: ID!, $input: UpdateOfficerRoleInput!) {
         updateOfficerRole(id: $id, input: $input) {
-          role_id
+          officer_role_id
         }
       }
     `;
@@ -175,7 +177,7 @@ describe('GraphQL API - Officer Roles', () => {
       .post('/')
       .send({
         query: mutation,
-        variables: { id: created.role_id, input: { name: 'X' } },
+        variables: { id: created.officer_role_id, input: { name: 'X' } },
       });
 
     // Assert
@@ -188,7 +190,7 @@ describe('GraphQL API - Officer Roles', () => {
     const mutation = `
       mutation DeleteOfficerRole($id: ID!) {
         deleteOfficerRole(id: $id) {
-          role_id
+          officer_role_id
         }
       }
     `;
@@ -214,21 +216,23 @@ describe('GraphQL API - Officer Roles', () => {
     const mutation = `
       mutation DeleteOfficerRole($id: ID!) {
         deleteOfficerRole(id: $id) {
-          role_id
+          officer_role_id
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query: mutation, variables: { id: created.role_id } });
+      .send({ query: mutation, variables: { id: created.officer_role_id } });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.deleteOfficerRole.role_id).toBe(created.role_id);
+    expect(response.body.data.deleteOfficerRole.officer_role_id).toBe(
+      created.officer_role_id
+    );
 
     // Verify it's gone
-    const verifyQuery = `query { officerRole(id: "${created.role_id}") { role_id } }`;
+    const verifyQuery = `query { officerRole(id: "${created.officer_role_id}") { officer_role_id } }`;
     const verifyResponse = await request(app)
       .post('/')
       .send({ query: verifyQuery });

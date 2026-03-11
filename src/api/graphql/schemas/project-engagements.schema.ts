@@ -14,7 +14,7 @@ export const projectEngagementSchemaString = `
   }
 
   type ProjectEngagement {
-    engagement_id: ID!
+    project_engagement_id: ID!
     project_id: ID!
     partner_id: ID
     chapter_id: ID

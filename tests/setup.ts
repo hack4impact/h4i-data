@@ -49,7 +49,7 @@ beforeEach(async () => {
       await prisma.officer_assignments.deleteMany({});
       await prisma.volunteer_history.deleteMany({});
       await prisma.mentorships.deleteMany({});
-      await prisma.social_links.deleteMany({});
+      await prisma.constituent_links.deleteMany({});
       await prisma.mentors.deleteMany({});
       await prisma.volunteers.deleteMany({});
       await prisma.academic_terms.deleteMany({});

@@ -38,7 +38,7 @@ export async function getOfficerRoleById(id: string) {
     logger.info('Fetching officer role by ID', { roleId: id });
 
     const role = await prisma.officer_roles.findUnique({
-      where: { role_id: id },
+      where: { officer_role_id: id },
     });
 
     if (!role) {
@@ -70,7 +70,7 @@ export async function createOfficerRole(data: CreateOfficerRoleInput) {
     const role = await prisma.officer_roles.create({ data });
 
     logger.info('Successfully created officer role', {
-      roleId: role.role_id,
+      roleId: role.officer_role_id,
       roleName: role.name,
     });
 
@@ -91,7 +91,7 @@ export async function updateOfficerRole(
     logger.info('Updating officer role', { roleId: id, updateData: data });
 
     const role = await prisma.officer_roles.update({
-      where: { role_id: id },
+      where: { officer_role_id: id },
       data,
     });
 
@@ -124,7 +124,7 @@ export async function deleteOfficerRole(id: string) {
     logger.info('Deleting officer role', { roleId: id });
 
     const role = await prisma.officer_roles.delete({
-      where: { role_id: id },
+      where: { officer_role_id: id },
     });
 
     logger.info('Successfully deleted officer role', {

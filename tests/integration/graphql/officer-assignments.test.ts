@@ -24,7 +24,7 @@ const createTestOfficerRole = async () => {
   const res = await request(restApp)
     .post('/officer-roles')
     .send({ name: `Role ${Date.now()}.${Math.random()}` });
-  return res.body.role_id;
+  return res.body.officer_role_id;
 };
 
 const createTestChapter = async () => {
@@ -42,9 +42,9 @@ const createTestAssignment = async (
   const mutation = `
     mutation CreateOfficerAssignment($input: CreateOfficerAssignmentInput!) {
       createOfficerAssignment(input: $input) {
-        assignment_id
+        officer_assignment_id
         volunteer_id
-        role_id
+        officer_role_id
         chapter_id
       }
     }
@@ -56,7 +56,7 @@ const createTestAssignment = async (
       variables: {
         input: {
           volunteer_id: volunteerId,
-          role_id: roleId,
+          officer_role_id: roleId,
           chapter_id: chapterId,
         },
       },
@@ -75,9 +75,9 @@ describe('GraphQL API - Officer Assignments', () => {
     const mutation = `
       mutation CreateOfficerAssignment($input: CreateOfficerAssignmentInput!) {
         createOfficerAssignment(input: $input) {
-          assignment_id
+          officer_assignment_id
           volunteer_id
-          role_id
+          officer_role_id
           chapter_id
         }
       }
@@ -85,7 +85,7 @@ describe('GraphQL API - Officer Assignments', () => {
     const variables = {
       input: {
         volunteer_id: volunteerId,
-        role_id: roleId,
+        officer_role_id: roleId,
         chapter_id: chapterId,
       },
     };
@@ -97,9 +97,9 @@ describe('GraphQL API - Officer Assignments', () => {
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const assignment = response.body.data.createOfficerAssignment;
-    expect(assignment).toHaveProperty('assignment_id');
+    expect(assignment).toHaveProperty('officer_assignment_id');
     expect(assignment.volunteer_id).toBe(volunteerId);
-    expect(assignment.role_id).toBe(roleId);
+    expect(assignment.officer_role_id).toBe(roleId);
   });
 
   it('should fetch an officer assignment by ID via query', async () => {
@@ -113,20 +113,20 @@ describe('GraphQL API - Officer Assignments', () => {
     const query = `
       query OfficerAssignment($id: ID!) {
         officerAssignment(id: $id) {
-          assignment_id
+          officer_assignment_id
           volunteer_id
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query, variables: { id: created.assignment_id } });
+      .send({ query, variables: { id: created.officer_assignment_id } });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.officerAssignment.assignment_id).toBe(
-      created.assignment_id
+    expect(response.body.data.officerAssignment.officer_assignment_id).toBe(
+      created.officer_assignment_id
     );
   });
 
@@ -135,7 +135,7 @@ describe('GraphQL API - Officer Assignments', () => {
     const query = `
       query {
         officerAssignment(id: "00000000-0000-0000-0000-000000000000") {
-          assignment_id
+          officer_assignment_id
         }
       }
     `;
@@ -154,7 +154,7 @@ describe('GraphQL API - Officer Assignments', () => {
     await createTestAssignment(volunteerId, roleId, chapterId);
 
     // Act
-    const query = `query { officerAssignments { assignment_id } }`;
+    const query = `query { officerAssignments { officer_assignment_id } }`;
     const response = await request(app).post('/').send({ query });
 
     // Assert
@@ -175,13 +175,13 @@ describe('GraphQL API - Officer Assignments', () => {
     const mutation = `
       mutation UpdateOfficerAssignment($id: ID!, $input: UpdateOfficerAssignmentInput!) {
         updateOfficerAssignment(id: $id, input: $input) {
-          assignment_id
+          officer_assignment_id
           end_date
         }
       }
     `;
     const variables = {
-      id: created.assignment_id,
+      id: created.officer_assignment_id,
       input: { end_date: '2025-12-31' },
     };
     const response = await request(app)
@@ -199,7 +199,7 @@ describe('GraphQL API - Officer Assignments', () => {
     const mutation = `
       mutation UpdateOfficerAssignment($id: ID!, $input: UpdateOfficerAssignmentInput!) {
         updateOfficerAssignment(id: $id, input: $input) {
-          assignment_id
+          officer_assignment_id
         }
       }
     `;
@@ -229,7 +229,7 @@ describe('GraphQL API - Officer Assignments', () => {
     const mutation = `
       mutation UpdateOfficerAssignment($id: ID!, $input: UpdateOfficerAssignmentInput!) {
         updateOfficerAssignment(id: $id, input: $input) {
-          assignment_id
+          officer_assignment_id
         }
       }
     `;
@@ -238,7 +238,7 @@ describe('GraphQL API - Officer Assignments', () => {
       .send({
         query: mutation,
         variables: {
-          id: created.assignment_id,
+          id: created.officer_assignment_id,
           input: { end_date: 'not-a-date' },
         },
       });
@@ -253,7 +253,7 @@ describe('GraphQL API - Officer Assignments', () => {
     const mutation = `
       mutation DeleteOfficerAssignment($id: ID!) {
         deleteOfficerAssignment(id: $id) {
-          assignment_id
+          officer_assignment_id
         }
       }
     `;
@@ -280,23 +280,26 @@ describe('GraphQL API - Officer Assignments', () => {
     const mutation = `
       mutation DeleteOfficerAssignment($id: ID!) {
         deleteOfficerAssignment(id: $id) {
-          assignment_id
+          officer_assignment_id
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query: mutation, variables: { id: created.assignment_id } });
+      .send({
+        query: mutation,
+        variables: { id: created.officer_assignment_id },
+      });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.deleteOfficerAssignment.assignment_id).toBe(
-      created.assignment_id
-    );
+    expect(
+      response.body.data.deleteOfficerAssignment.officer_assignment_id
+    ).toBe(created.officer_assignment_id);
 
     // Verify it's gone
-    const verifyQuery = `query { officerAssignment(id: "${created.assignment_id}") { assignment_id } }`;
+    const verifyQuery = `query { officerAssignment(id: "${created.officer_assignment_id}") { officer_assignment_id } }`;
     const verifyResponse = await request(app)
       .post('/')
       .send({ query: verifyQuery });

@@ -6,7 +6,7 @@ export const academicTermSchemaString = `
   }
 
   type AcademicTerm {
-    term_id: ID!
+    academic_term_id: ID!
     university_id: ID
     name: String!
     canonical_label: String

@@ -29,7 +29,7 @@ describe('REST API - /social-links', () => {
 
       // Assert
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('link_id');
+      expect(response.body).toHaveProperty('constituent_link_id');
       expect(response.body.constituent_id).toBe(constituentId);
     });
 
@@ -69,12 +69,12 @@ describe('REST API - /social-links', () => {
         constituent_id: constituentId,
         url: 'https://linkedin.com/in/testuser',
       });
-      const id = created.body.link_id;
+      const id = created.body.constituent_link_id;
 
       const response = await request(app).get(`/social-links/${id}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.link_id).toBe(id);
+      expect(response.body.constituent_link_id).toBe(id);
     });
 
     it('should return 404 for a non-existent social link', async () => {
@@ -93,11 +93,11 @@ describe('REST API - /social-links', () => {
         constituent_id: constituentId,
         url: 'https://github.com/original',
       });
-      const id = created.body.link_id;
+      const id = created.body.constituent_link_id;
 
       const response = await request(app)
         .patch(`/social-links/${id}`)
-        .send({ url: 'https://github.com/updated', is_featured: true });
+        .send({ url: 'https://github.com/updated' });
 
       expect(response.status).toBe(200);
       expect(response.body.url).toBe('https://github.com/updated');
@@ -116,7 +116,7 @@ describe('REST API - /social-links', () => {
         constituent_id: constituentId,
         url: 'https://github.com/original',
       });
-      const id = created.body.link_id;
+      const id = created.body.constituent_link_id;
 
       const response = await request(app)
         .patch(`/social-links/${id}`)
@@ -133,7 +133,7 @@ describe('REST API - /social-links', () => {
         constituent_id: constituentId,
         url: 'https://github.com/todelete',
       });
-      const id = created.body.link_id;
+      const id = created.body.constituent_link_id;
 
       const response = await request(app).delete(`/social-links/${id}`);
 

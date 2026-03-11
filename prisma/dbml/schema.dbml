@@ -63,7 +63,7 @@ Table projects {
 }
 
 Table volunteer_history {
-  history_id String [pk]
+  volunteer_history_id String [pk]
   volunteer_id String [not null]
   action_type action_type [not null]
   related_entity_id String
@@ -80,8 +80,8 @@ Table volunteers {
   volunteer_id String [pk]
   org_email String
   status volunteer_status [not null, default: 'ACTIVE']
-  volunteer_class volunteer_class [default: 'COLLEGIATE']
-  engagement_track engagement_track [default: 'PROGRAMS']
+  volunteer_class volunteer_class [not null, default: 'COLLEGIATE']
+  engagement_track engagement_track [not null, default: 'PROGRAMS']
   major_id String
   education_level education_level
   graduation_term_id String
@@ -102,7 +102,7 @@ Table volunteers {
 }
 
 Table academic_terms {
-  term_id String [pk]
+  academic_term_id String [pk]
   university_id String
   name String [not null]
   canonical_label String
@@ -127,7 +127,7 @@ Table constituents {
   mentorships_mentee mentorships [not null]
   mentors mentors
   project_engagements project_engagements [not null]
-  social_links social_links [not null]
+  constituent_links constituent_links [not null]
   volunteers volunteers
 }
 
@@ -147,7 +147,7 @@ Table mentorships {
   mentor_id String [not null]
   mentee_id String [not null]
   program_type String
-  status engagement_status [default: 'ACTIVE']
+  status engagement_status [not null, default: 'ACTIVE']
   start_date DateTime
   end_date DateTime
   notes String
@@ -158,9 +158,9 @@ Table mentorships {
 }
 
 Table officer_assignments {
-  assignment_id String [pk]
+  officer_assignment_id String [pk]
   volunteer_id String [not null]
-  role_id String [not null]
+  officer_role_id String [not null]
   chapter_id String [not null]
   start_date DateTime
   end_date DateTime
@@ -169,14 +169,10 @@ Table officer_assignments {
   chapters chapters [not null]
   officer_roles officer_roles [not null]
   volunteers volunteers [not null]
-
-  indexes {
-    (volunteer_id, role_id, chapter_id) [unique]
-  }
 }
 
 Table officer_roles {
-  role_id String [pk]
+  officer_role_id String [pk]
   name String [unique, not null]
   scope role_scope
   rank_level Int
@@ -199,7 +195,7 @@ Table partners {
 }
 
 Table project_resources {
-  deliverable_id String [pk]
+  resource_id String [pk]
   project_id String [not null]
   label String
   url String
@@ -210,15 +206,15 @@ Table project_resources {
 }
 
 Table project_engagements {
-  engagement_id String [pk]
+  project_engagement_id String [pk]
   project_id String [not null]
   partner_id String
   chapter_id String
   academic_term_id String
   client_contact_id String
-  status engagement_status [default: 'ACTIVE']
-  domain project_type [default: 'FULL_STACK']
-  financial financial_type [default: 'PRO_BONO']
+  status engagement_status [not null, default: 'ACTIVE']
+  domain project_type [not null, default: 'FULL_STACK']
+  financial financial_type [not null, default: 'PRO_BONO']
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   academic_terms academic_terms
@@ -230,20 +226,19 @@ Table project_engagements {
 }
 
 Table project_roles {
-  role_id String [pk]
+  project_role_id String [pk]
   name String [unique, not null]
-  is_leadership Boolean [default: false]
+  is_leadership Boolean [not null, default: false]
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   project_staffing project_staffing [not null]
 }
 
 Table project_staffing {
-  staffing_id String [pk]
+  project_staffing_id String [pk]
   volunteer_id String [not null]
-  engagement_id String [not null]
-  role_id String
-  is_lead_contact Boolean [default: false]
+  project_engagement_id String [not null]
+  project_role_id String
   start_date DateTime
   end_date DateTime
   created_at DateTime [default: `now()`, not null]
@@ -253,16 +248,15 @@ Table project_staffing {
   volunteers volunteers [not null]
 
   indexes {
-    (volunteer_id, engagement_id) [unique]
+    (volunteer_id, project_engagement_id) [unique]
   }
 }
 
-Table social_links {
-  link_id String [pk]
+Table constituent_links {
+  constituent_link_id String [pk]
   constituent_id String [not null]
-  platform social_platform_type
+  platform link_type
   url String [not null]
-  is_featured Boolean [default: false]
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   constituents constituents [not null]
@@ -341,12 +335,12 @@ Enum role_scope {
   CENTRAL
 }
 
-Enum social_platform_type {
+Enum link_type {
+  SOCIAL_MEDIA
   GITHUB
+  FIGMA
   LINKEDIN
-  PORTFOLIO
-  TWITTER
-  DRIBBBLE
+  WEBSITE
   OTHER
 }
 
@@ -403,7 +397,7 @@ Ref: volunteer_history.volunteer_id > volunteers.volunteer_id [delete: Cascade]
 
 Ref: volunteers.employer_id > companies.company_id [delete: No Action]
 
-Ref: volunteers.graduation_term_id > academic_terms.term_id [delete: No Action]
+Ref: volunteers.graduation_term_id > academic_terms.academic_term_id [delete: No Action]
 
 Ref: volunteers.home_chapter_id > chapters.chapter_id [delete: No Action]
 
@@ -423,13 +417,13 @@ Ref: mentorships.mentor_id > mentors.mentor_id [delete: Cascade]
 
 Ref: officer_assignments.chapter_id > chapters.chapter_id [delete: No Action]
 
-Ref: officer_assignments.role_id > officer_roles.role_id [delete: No Action]
+Ref: officer_assignments.officer_role_id > officer_roles.officer_role_id [delete: No Action]
 
 Ref: officer_assignments.volunteer_id > volunteers.volunteer_id [delete: No Action]
 
 Ref: project_resources.project_id > projects.project_id [delete: Cascade]
 
-Ref: project_engagements.academic_term_id > academic_terms.term_id [delete: No Action]
+Ref: project_engagements.academic_term_id > academic_terms.academic_term_id [delete: No Action]
 
 Ref: project_engagements.chapter_id > chapters.chapter_id [delete: No Action]
 
@@ -439,12 +433,12 @@ Ref: project_engagements.partner_id > partners.partner_id [delete: No Action]
 
 Ref: project_engagements.project_id > projects.project_id [delete: No Action]
 
-Ref: project_staffing.engagement_id > project_engagements.engagement_id [delete: No Action]
+Ref: project_staffing.project_engagement_id > project_engagements.project_engagement_id [delete: No Action]
 
-Ref: project_staffing.role_id > project_roles.role_id [delete: No Action]
+Ref: project_staffing.project_role_id > project_roles.project_role_id [delete: No Action]
 
 Ref: project_staffing.volunteer_id > volunteers.volunteer_id [delete: No Action]
 
-Ref: social_links.constituent_id > constituents.constituent_id [delete: Cascade]
+Ref: constituent_links.constituent_id > constituents.constituent_id [delete: Cascade]
 
 Ref: universities.location_id > locations.location_id [delete: No Action]

@@ -73,16 +73,16 @@ export type FinancialType = z.infer<typeof financialTypeSchema>;
 export const roleScopeSchema = z.enum(['CHAPTER', 'CENTRAL']);
 export type RoleScope = z.infer<typeof roleScopeSchema>;
 
-// Social platform types for social links
-export const socialPlatformTypeSchema = z.enum([
+// Link types for constituent links
+export const linkTypeSchema = z.enum([
+  'SOCIAL_MEDIA',
   'GITHUB',
+  'FIGMA',
   'LINKEDIN',
-  'PORTFOLIO',
-  'TWITTER',
-  'DRIBBBLE',
+  'WEBSITE',
   'OTHER',
 ]);
-export type SocialPlatformType = z.infer<typeof socialPlatformTypeSchema>;
+export type LinkType = z.infer<typeof linkTypeSchema>;
 
 // Term types for academic terms
 export const termTypeSchema = z.enum(['SEMESTER', 'QUARTER', 'TRIMESTER']);

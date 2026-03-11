@@ -14,7 +14,7 @@ CREATE TYPE public.engagement_status AS ENUM ('PROSPECT', 'ACTIVE', 'COMPLETED',
 CREATE TYPE public.engagement_track AS ENUM ('PROGRAMS', 'CENTRAL', 'ADVISORY');
 CREATE TYPE public.financial_type AS ENUM ('PRO_BONO', 'INTERNAL', 'PAID_CONSULT');
 CREATE TYPE public.role_scope AS ENUM ('CHAPTER', 'CENTRAL');
-CREATE TYPE public.social_platform_type AS ENUM ('GITHUB', 'LINKEDIN', 'PORTFOLIO', 'TWITTER', 'DRIBBBLE', 'OTHER');
+CREATE TYPE public.link_type AS ENUM ('SOCIAL_MEDIA', 'GITHUB', 'FIGMA', 'LINKEDIN', 'WEBSITE', 'OTHER');
 CREATE TYPE public.term_type AS ENUM ('SEMESTER', 'QUARTER', 'TRIMESTER');
 CREATE TYPE public.volunteer_class AS ENUM ('COLLEGIATE', 'ALUMNI', 'ASSOCIATE');
 CREATE TYPE public.volunteer_status AS ENUM ('PROSPECT', 'ACTIVE', 'INACTIVE', 'HIATUS');
@@ -61,23 +61,23 @@ CREATE TABLE public.projects (
 );
 
 CREATE TABLE public.officer_roles (
-    role_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    officer_role_id uuid NOT NULL DEFAULT gen_random_uuid(),
     name text NOT NULL,
     scope role_scope NULL,
     rank_level int NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (role_id),
+    PRIMARY KEY (officer_role_id),
     UNIQUE (name)
 );
 
 CREATE TABLE public.project_roles (
-    role_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    project_role_id uuid NOT NULL DEFAULT gen_random_uuid(),
     name text NOT NULL,
-    is_leadership boolean NULL DEFAULT false,
+    is_leadership boolean NOT NULL DEFAULT false,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (role_id),
+    PRIMARY KEY (project_role_id),
     UNIQUE (name)
 );
 
@@ -128,7 +128,7 @@ CREATE TABLE public.companies (
 CREATE INDEX idx_companies_location_id ON public.companies(location_id);
 
 CREATE TABLE public.academic_terms (
-    term_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    academic_term_id uuid NOT NULL DEFAULT gen_random_uuid(),
     university_id uuid NULL,
     name text NOT NULL,
     canonical_label text NULL,
@@ -137,7 +137,7 @@ CREATE TABLE public.academic_terms (
     end_date date NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (term_id),
+    PRIMARY KEY (academic_term_id),
     FOREIGN KEY (university_id) REFERENCES public.universities(university_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 CREATE INDEX idx_academic_terms_university_id ON public.academic_terms(university_id);
@@ -158,18 +158,17 @@ CREATE TABLE public.chapters (
 CREATE INDEX idx_chapters_university_id ON public.chapters(university_id);
 CREATE INDEX idx_chapters_location_id ON public.chapters(location_id);
 
-CREATE TABLE public.social_links (
-    link_id uuid NOT NULL DEFAULT gen_random_uuid(),
+CREATE TABLE public.constituent_links (
+    constituent_link_id uuid NOT NULL DEFAULT gen_random_uuid(),
     constituent_id uuid NOT NULL,
-    platform social_platform_type NULL,
+    platform link_type NULL,
     url text NOT NULL,
-    is_featured boolean NULL DEFAULT false,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (link_id),
+    PRIMARY KEY (constituent_link_id),
     FOREIGN KEY (constituent_id) REFERENCES public.constituents(constituent_id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
-CREATE INDEX idx_social_links_constituent_id ON public.social_links(constituent_id);
+CREATE INDEX idx_constituent_links_constituent_id ON public.constituent_links(constituent_id);
 
 CREATE TABLE public.mentors (
     mentor_id uuid NOT NULL,
@@ -186,8 +185,8 @@ CREATE TABLE public.volunteers (
     volunteer_id uuid NOT NULL,
     org_email text NULL,
     status volunteer_status NOT NULL DEFAULT 'ACTIVE',
-    volunteer_class volunteer_class NULL DEFAULT 'COLLEGIATE',
-    engagement_track engagement_track NULL DEFAULT 'PROGRAMS',
+    volunteer_class volunteer_class NOT NULL DEFAULT 'COLLEGIATE',
+    engagement_track engagement_track NOT NULL DEFAULT 'PROGRAMS',
     major_id uuid NULL,
     education_level education_level NULL,
     graduation_term_id uuid NULL,
@@ -199,7 +198,7 @@ CREATE TABLE public.volunteers (
     PRIMARY KEY (volunteer_id),
     FOREIGN KEY (volunteer_id) REFERENCES public.constituents(constituent_id) ON UPDATE NO ACTION ON DELETE CASCADE,
     FOREIGN KEY (employer_id) REFERENCES public.companies(company_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-    FOREIGN KEY (graduation_term_id) REFERENCES public.academic_terms(term_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (graduation_term_id) REFERENCES public.academic_terms(academic_term_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (home_chapter_id) REFERENCES public.chapters(chapter_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (major_id) REFERENCES public.majors(major_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (university_id) REFERENCES public.universities(university_id) ON UPDATE NO ACTION ON DELETE NO ACTION
@@ -215,7 +214,7 @@ CREATE TABLE public.mentorships (
     mentor_id uuid NOT NULL,
     mentee_id uuid NOT NULL,
     program_type text NULL,
-    status engagement_status NULL DEFAULT 'ACTIVE',
+    status engagement_status NOT NULL DEFAULT 'ACTIVE',
     start_date date NULL,
     end_date date NULL,
     notes text NULL,
@@ -229,35 +228,35 @@ CREATE INDEX idx_mentorships_mentor_id ON public.mentorships(mentor_id);
 CREATE INDEX idx_mentorships_mentee_id ON public.mentorships(mentee_id);
 
 CREATE TABLE public.project_resources (
-    deliverable_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    resource_id uuid NOT NULL DEFAULT gen_random_uuid(),
     project_id uuid NOT NULL,
     label text NULL,
     url text NULL,
     category project_resource_type NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (deliverable_id),
+    PRIMARY KEY (resource_id),
     FOREIGN KEY (project_id) REFERENCES public.projects(project_id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 CREATE INDEX idx_project_resources_project_id ON public.project_resources(project_id);
 
 CREATE TABLE public.project_engagements (
-    engagement_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    project_engagement_id uuid NOT NULL DEFAULT gen_random_uuid(),
     project_id uuid NOT NULL,
     partner_id uuid NULL,
     chapter_id uuid NULL,
     academic_term_id uuid NULL,
     client_contact_id uuid NULL,
-    status engagement_status NULL DEFAULT 'ACTIVE',
-    domain project_type NULL DEFAULT 'FULL_STACK',
-    financial financial_type NULL DEFAULT 'PRO_BONO',
+    status engagement_status NOT NULL DEFAULT 'ACTIVE',
+    domain project_type NOT NULL DEFAULT 'FULL_STACK',
+    financial financial_type NOT NULL DEFAULT 'PRO_BONO',
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (engagement_id),
+    PRIMARY KEY (project_engagement_id),
     FOREIGN KEY (project_id) REFERENCES public.projects(project_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (partner_id) REFERENCES public.partners(partner_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-    FOREIGN KEY (academic_term_id) REFERENCES public.academic_terms(term_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (academic_term_id) REFERENCES public.academic_terms(academic_term_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
     FOREIGN KEY (client_contact_id) REFERENCES public.constituents(constituent_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 CREATE INDEX idx_project_engagements_project_id ON public.project_engagements(project_id);
@@ -267,46 +266,44 @@ CREATE INDEX idx_project_engagements_academic_term_id ON public.project_engageme
 CREATE INDEX idx_project_engagements_client_contact_id ON public.project_engagements(client_contact_id);
 
 CREATE TABLE public.officer_assignments (
-    assignment_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    officer_assignment_id uuid NOT NULL DEFAULT gen_random_uuid(),
     volunteer_id uuid NOT NULL,
-    role_id uuid NOT NULL,
+    officer_role_id uuid NOT NULL,
     chapter_id uuid NOT NULL,
     start_date date NULL,
     end_date date NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (assignment_id),
+    PRIMARY KEY (officer_assignment_id),
     FOREIGN KEY (volunteer_id) REFERENCES public.volunteers(volunteer_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-    FOREIGN KEY (role_id) REFERENCES public.officer_roles(role_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-    FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-    UNIQUE (volunteer_id, role_id, chapter_id)
+    FOREIGN KEY (officer_role_id) REFERENCES public.officer_roles(officer_role_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (chapter_id) REFERENCES public.chapters(chapter_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 CREATE INDEX idx_officer_assignments_volunteer_id ON public.officer_assignments(volunteer_id);
-CREATE INDEX idx_officer_assignments_role_id ON public.officer_assignments(role_id);
+CREATE INDEX idx_officer_assignments_officer_role_id ON public.officer_assignments(officer_role_id);
 CREATE INDEX idx_officer_assignments_chapter_id ON public.officer_assignments(chapter_id);
 
 CREATE TABLE public.project_staffing (
-    staffing_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    project_staffing_id uuid NOT NULL DEFAULT gen_random_uuid(),
     volunteer_id uuid NOT NULL,
-    engagement_id uuid NOT NULL,
-    role_id uuid NULL,
-    is_lead_contact boolean NULL DEFAULT false,
+    project_engagement_id uuid NOT NULL,
+    project_role_id uuid NULL,
     start_date date NULL,
     end_date date NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (staffing_id),
+    PRIMARY KEY (project_staffing_id),
     FOREIGN KEY (volunteer_id) REFERENCES public.volunteers(volunteer_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-    FOREIGN KEY (engagement_id) REFERENCES public.project_engagements(engagement_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-    FOREIGN KEY (role_id) REFERENCES public.project_roles(role_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-    UNIQUE (volunteer_id, engagement_id)
+    FOREIGN KEY (project_engagement_id) REFERENCES public.project_engagements(project_engagement_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    FOREIGN KEY (project_role_id) REFERENCES public.project_roles(project_role_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+    UNIQUE (volunteer_id, project_engagement_id)
 );
 CREATE INDEX idx_project_staffing_volunteer_id ON public.project_staffing(volunteer_id);
-CREATE INDEX idx_project_staffing_engagement_id ON public.project_staffing(engagement_id);
-CREATE INDEX idx_project_staffing_role_id ON public.project_staffing(role_id);
+CREATE INDEX idx_project_staffing_project_engagement_id ON public.project_staffing(project_engagement_id);
+CREATE INDEX idx_project_staffing_project_role_id ON public.project_staffing(project_role_id);
 
 CREATE TABLE public.volunteer_history (
-    history_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    volunteer_history_id uuid NOT NULL DEFAULT gen_random_uuid(),
     volunteer_id uuid NOT NULL,
     action_type action_type NOT NULL,
     related_entity_id uuid NULL,
@@ -316,7 +313,7 @@ CREATE TABLE public.volunteer_history (
     effective_date date NOT NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (history_id),
+    PRIMARY KEY (volunteer_history_id),
     FOREIGN KEY (volunteer_id) REFERENCES public.volunteers(volunteer_id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 CREATE INDEX idx_volunteer_history_volunteer_id ON public.volunteer_history(volunteer_id);

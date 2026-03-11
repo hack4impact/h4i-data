@@ -29,7 +29,7 @@ describe('Project Deliverable Service', () => {
     it('should return an array of project deliverables', async () => {
       const mockDeliverables = [
         {
-          deliverable_id: '1',
+          resource_id: '1',
           project_id: 'proj-1',
           label: 'Main Repository',
           url: 'https://github.com/org/repo',
@@ -67,7 +67,7 @@ describe('Project Deliverable Service', () => {
     it('should return a single project deliverable when a valid ID is provided', async () => {
       const deliverableId = '1';
       const mockDeliverable = {
-        deliverable_id: deliverableId,
+        resource_id: deliverableId,
         project_id: 'proj-1',
         label: 'Main Repository',
         url: 'https://github.com/org/repo',
@@ -114,7 +114,7 @@ describe('Project Deliverable Service', () => {
         category: 'DESIGNS' as const,
       };
       const createdDeliverable = {
-        deliverable_id: 'new-id-123',
+        resource_id: 'new-id-123',
         created_at: new Date(),
         updated_at: new Date(),
         ...inputData,
@@ -148,7 +148,7 @@ describe('Project Deliverable Service', () => {
       const deliverableId = '1';
       const updateData = { label: 'Updated Repository' };
       const updatedDeliverable = {
-        deliverable_id: deliverableId,
+        resource_id: deliverableId,
         project_id: 'proj-1',
         label: 'Updated Repository',
         url: 'https://github.com/org/repo',
@@ -193,7 +193,7 @@ describe('Project Deliverable Service', () => {
     it('should call delete with the correct ID and return the deleted deliverable', async () => {
       const deliverableId = '1';
       const deletedDeliverable = {
-        deliverable_id: deliverableId,
+        resource_id: deliverableId,
         project_id: 'proj-1',
         label: 'Main Repository',
         url: 'https://github.com/org/repo',

@@ -16,7 +16,7 @@ const createTestEngagement = async (projectId: string) => {
   const mutation = `
     mutation CreateProjectEngagement($input: CreateProjectEngagementInput!) {
       createProjectEngagement(input: $input) {
-        engagement_id
+        project_engagement_id
         project_id
         status
       }
@@ -40,7 +40,7 @@ describe('GraphQL API - Project Engagements', () => {
     const mutation = `
       mutation CreateProjectEngagement($input: CreateProjectEngagementInput!) {
         createProjectEngagement(input: $input) {
-          engagement_id
+          project_engagement_id
           project_id
           status
           domain
@@ -58,7 +58,7 @@ describe('GraphQL API - Project Engagements', () => {
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const engagement = response.body.data.createProjectEngagement;
-    expect(engagement).toHaveProperty('engagement_id');
+    expect(engagement).toHaveProperty('project_engagement_id');
     expect(engagement.project_id).toBe(projectId);
     expect(engagement.status).toBe('ACTIVE');
     expect(engagement.domain).toBe('FULL_STACK');
@@ -73,20 +73,20 @@ describe('GraphQL API - Project Engagements', () => {
     const query = `
       query ProjectEngagement($id: ID!) {
         projectEngagement(id: $id) {
-          engagement_id
+          project_engagement_id
           project_id
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query, variables: { id: created.engagement_id } });
+      .send({ query, variables: { id: created.project_engagement_id } });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.projectEngagement.engagement_id).toBe(
-      created.engagement_id
+    expect(response.body.data.projectEngagement.project_engagement_id).toBe(
+      created.project_engagement_id
     );
   });
 
@@ -95,7 +95,7 @@ describe('GraphQL API - Project Engagements', () => {
     const query = `
       query {
         projectEngagement(id: "00000000-0000-0000-0000-000000000000") {
-          engagement_id
+          project_engagement_id
         }
       }
     `;
@@ -112,7 +112,7 @@ describe('GraphQL API - Project Engagements', () => {
     await createTestEngagement(projectId);
 
     // Act
-    const query = `query { projectEngagements { engagement_id } }`;
+    const query = `query { projectEngagements { project_engagement_id } }`;
     const response = await request(app).post('/').send({ query });
 
     // Assert
@@ -131,13 +131,13 @@ describe('GraphQL API - Project Engagements', () => {
     const mutation = `
       mutation UpdateProjectEngagement($id: ID!, $input: UpdateProjectEngagementInput!) {
         updateProjectEngagement(id: $id, input: $input) {
-          engagement_id
+          project_engagement_id
           status
         }
       }
     `;
     const variables = {
-      id: created.engagement_id,
+      id: created.project_engagement_id,
       input: { status: 'COMPLETED' },
     };
     const response = await request(app)
@@ -155,7 +155,7 @@ describe('GraphQL API - Project Engagements', () => {
     const mutation = `
       mutation UpdateProjectEngagement($id: ID!, $input: UpdateProjectEngagementInput!) {
         updateProjectEngagement(id: $id, input: $input) {
-          engagement_id
+          project_engagement_id
         }
       }
     `;
@@ -183,7 +183,7 @@ describe('GraphQL API - Project Engagements', () => {
     const mutation = `
       mutation UpdateProjectEngagement($id: ID!, $input: UpdateProjectEngagementInput!) {
         updateProjectEngagement(id: $id, input: $input) {
-          engagement_id
+          project_engagement_id
         }
       }
     `;
@@ -191,7 +191,10 @@ describe('GraphQL API - Project Engagements', () => {
       .post('/')
       .send({
         query: mutation,
-        variables: { id: created.engagement_id, input: { status: 'INVALID' } },
+        variables: {
+          id: created.project_engagement_id,
+          input: { status: 'INVALID' },
+        },
       });
 
     // Assert
@@ -204,7 +207,7 @@ describe('GraphQL API - Project Engagements', () => {
     const mutation = `
       mutation DeleteProjectEngagement($id: ID!) {
         deleteProjectEngagement(id: $id) {
-          engagement_id
+          project_engagement_id
         }
       }
     `;
@@ -229,23 +232,26 @@ describe('GraphQL API - Project Engagements', () => {
     const mutation = `
       mutation DeleteProjectEngagement($id: ID!) {
         deleteProjectEngagement(id: $id) {
-          engagement_id
+          project_engagement_id
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query: mutation, variables: { id: created.engagement_id } });
+      .send({
+        query: mutation,
+        variables: { id: created.project_engagement_id },
+      });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.deleteProjectEngagement.engagement_id).toBe(
-      created.engagement_id
-    );
+    expect(
+      response.body.data.deleteProjectEngagement.project_engagement_id
+    ).toBe(created.project_engagement_id);
 
     // Verify it's gone
-    const verifyQuery = `query { projectEngagement(id: "${created.engagement_id}") { engagement_id } }`;
+    const verifyQuery = `query { projectEngagement(id: "${created.project_engagement_id}") { project_engagement_id } }`;
     const verifyResponse = await request(app)
       .post('/')
       .send({ query: verifyQuery });

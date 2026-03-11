@@ -7,7 +7,7 @@ const createTestProjectRole = async (name: string) => {
   const mutation = `
     mutation CreateProjectRole($input: CreateProjectRoleInput!) {
       createProjectRole(input: $input) {
-        role_id
+        project_role_id
         name
         is_leadership
       }
@@ -25,7 +25,7 @@ describe('GraphQL API - Project Roles', () => {
     const mutation = `
       mutation CreateProjectRole($input: CreateProjectRoleInput!) {
         createProjectRole(input: $input) {
-          role_id
+          project_role_id
           name
           is_leadership
         }
@@ -40,7 +40,7 @@ describe('GraphQL API - Project Roles', () => {
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const role = response.body.data.createProjectRole;
-    expect(role).toHaveProperty('role_id');
+    expect(role).toHaveProperty('project_role_id');
     expect(role.name).toBe('Tech Lead');
     expect(role.is_leadership).toBe(true);
   });
@@ -55,19 +55,21 @@ describe('GraphQL API - Project Roles', () => {
     const query = `
       query ProjectRole($id: ID!) {
         projectRole(id: $id) {
-          role_id
+          project_role_id
           name
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query, variables: { id: created.role_id } });
+      .send({ query, variables: { id: created.project_role_id } });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.projectRole.role_id).toBe(created.role_id);
+    expect(response.body.data.projectRole.project_role_id).toBe(
+      created.project_role_id
+    );
   });
 
   it('should return null for a non-existent project role ID', async () => {
@@ -75,7 +77,7 @@ describe('GraphQL API - Project Roles', () => {
     const query = `
       query {
         projectRole(id: "00000000-0000-0000-0000-000000000000") {
-          role_id
+          project_role_id
         }
       }
     `;
@@ -91,7 +93,7 @@ describe('GraphQL API - Project Roles', () => {
     await createTestProjectRole(`Role ${Date.now()}.${Math.random()}`);
 
     // Act
-    const query = `query { projectRoles { role_id name } }`;
+    const query = `query { projectRoles { project_role_id name } }`;
     const response = await request(app).post('/').send({ query });
 
     // Assert
@@ -111,14 +113,14 @@ describe('GraphQL API - Project Roles', () => {
     const mutation = `
       mutation UpdateProjectRole($id: ID!, $input: UpdateProjectRoleInput!) {
         updateProjectRole(id: $id, input: $input) {
-          role_id
+          project_role_id
           name
           is_leadership
         }
       }
     `;
     const variables = {
-      id: created.role_id,
+      id: created.project_role_id,
       input: { name: 'Updated Role', is_leadership: true },
     };
     const response = await request(app)
@@ -137,7 +139,7 @@ describe('GraphQL API - Project Roles', () => {
     const mutation = `
       mutation UpdateProjectRole($id: ID!, $input: UpdateProjectRoleInput!) {
         updateProjectRole(id: $id, input: $input) {
-          role_id
+          project_role_id
         }
       }
     `;
@@ -166,7 +168,7 @@ describe('GraphQL API - Project Roles', () => {
     const mutation = `
       mutation UpdateProjectRole($id: ID!, $input: UpdateProjectRoleInput!) {
         updateProjectRole(id: $id, input: $input) {
-          role_id
+          project_role_id
         }
       }
     `;
@@ -174,7 +176,7 @@ describe('GraphQL API - Project Roles', () => {
       .post('/')
       .send({
         query: mutation,
-        variables: { id: created.role_id, input: { name: 'X' } },
+        variables: { id: created.project_role_id, input: { name: 'X' } },
       });
 
     // Assert
@@ -187,7 +189,7 @@ describe('GraphQL API - Project Roles', () => {
     const mutation = `
       mutation DeleteProjectRole($id: ID!) {
         deleteProjectRole(id: $id) {
-          role_id
+          project_role_id
         }
       }
     `;
@@ -211,21 +213,23 @@ describe('GraphQL API - Project Roles', () => {
     const mutation = `
       mutation DeleteProjectRole($id: ID!) {
         deleteProjectRole(id: $id) {
-          role_id
+          project_role_id
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query: mutation, variables: { id: created.role_id } });
+      .send({ query: mutation, variables: { id: created.project_role_id } });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.deleteProjectRole.role_id).toBe(created.role_id);
+    expect(response.body.data.deleteProjectRole.project_role_id).toBe(
+      created.project_role_id
+    );
 
     // Verify it's gone
-    const verifyQuery = `query { projectRole(id: "${created.role_id}") { role_id } }`;
+    const verifyQuery = `query { projectRole(id: "${created.project_role_id}") { project_role_id } }`;
     const verifyResponse = await request(app)
       .post('/')
       .send({ query: verifyQuery });

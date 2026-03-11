@@ -22,7 +22,7 @@ describe('REST API - /project-engagements', () => {
       });
 
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('engagement_id');
+      expect(response.body).toHaveProperty('project_engagement_id');
       expect(response.body.project_id).toBe(projectId);
     });
 
@@ -57,12 +57,12 @@ describe('REST API - /project-engagements', () => {
       const created = await request(app)
         .post('/project-engagements')
         .send({ project_id: projectId });
-      const id = created.body.engagement_id;
+      const id = created.body.project_engagement_id;
 
       const response = await request(app).get(`/project-engagements/${id}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.engagement_id).toBe(id);
+      expect(response.body.project_engagement_id).toBe(id);
     });
 
     it('should return 404 for a non-existent engagement', async () => {
@@ -80,7 +80,7 @@ describe('REST API - /project-engagements', () => {
       const created = await request(app)
         .post('/project-engagements')
         .send({ project_id: projectId, status: 'ACTIVE' });
-      const id = created.body.engagement_id;
+      const id = created.body.project_engagement_id;
 
       const response = await request(app)
         .patch(`/project-engagements/${id}`)
@@ -102,7 +102,7 @@ describe('REST API - /project-engagements', () => {
       const created = await request(app)
         .post('/project-engagements')
         .send({ project_id: projectId });
-      const id = created.body.engagement_id;
+      const id = created.body.project_engagement_id;
 
       const response = await request(app)
         .patch(`/project-engagements/${id}`)
@@ -118,7 +118,7 @@ describe('REST API - /project-engagements', () => {
       const created = await request(app)
         .post('/project-engagements')
         .send({ project_id: projectId });
-      const id = created.body.engagement_id;
+      const id = created.body.project_engagement_id;
 
       const response = await request(app).delete(`/project-engagements/${id}`);
 

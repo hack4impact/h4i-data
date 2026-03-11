@@ -1,6 +1,6 @@
 export const projectRoleSchemaString = `
   type ProjectRole {
-    role_id: ID!
+    project_role_id: ID!
     name: String!
     is_leadership: Boolean
     created_at: String

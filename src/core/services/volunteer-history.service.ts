@@ -39,7 +39,7 @@ export async function getVolunteerHistoryById(id: string) {
     logger.info('Fetching volunteer history by ID', { historyId: id });
 
     const history = await prisma.volunteer_history.findUnique({
-      where: { history_id: id },
+      where: { volunteer_history_id: id },
     });
 
     if (!history) {
@@ -70,7 +70,7 @@ export async function createVolunteerHistory(
     const history = await prisma.volunteer_history.create({ data });
 
     logger.info('Successfully created volunteer history', {
-      historyId: history.history_id,
+      historyId: history.volunteer_history_id,
     });
 
     return history;
@@ -93,7 +93,7 @@ export async function updateVolunteerHistory(
     });
 
     const history = await prisma.volunteer_history.update({
-      where: { history_id: id },
+      where: { volunteer_history_id: id },
       data,
     });
 
@@ -122,7 +122,7 @@ export async function deleteVolunteerHistory(id: string) {
     logger.info('Deleting volunteer history', { historyId: id });
 
     const history = await prisma.volunteer_history.delete({
-      where: { history_id: id },
+      where: { volunteer_history_id: id },
     });
 
     logger.info('Successfully deleted volunteer history', { historyId: id });

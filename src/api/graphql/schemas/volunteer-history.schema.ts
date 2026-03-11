@@ -20,7 +20,7 @@ export const volunteerHistorySchemaString = `
   }
 
   type VolunteerHistory {
-    history_id: ID!
+    volunteer_history_id: ID!
     volunteer_id: ID!
     action_type: ActionType!
     related_entity_id: ID

@@ -29,7 +29,7 @@ describe('Project Engagement Service', () => {
     it('should return an array of project engagements', async () => {
       const mockEngagements = [
         {
-          engagement_id: '1',
+          project_engagement_id: '1',
           project_id: 'proj-1',
           partner_id: 'partner-1',
           chapter_id: 'chapter-1',
@@ -70,7 +70,7 @@ describe('Project Engagement Service', () => {
     it('should return a single project engagement when a valid ID is provided', async () => {
       const engagementId = '1';
       const mockEngagement = {
-        engagement_id: engagementId,
+        project_engagement_id: engagementId,
         project_id: 'proj-1',
         partner_id: 'partner-1',
         chapter_id: 'chapter-1',
@@ -121,7 +121,7 @@ describe('Project Engagement Service', () => {
         domain: 'DESIGN_ONLY' as const,
       };
       const createdEngagement = {
-        engagement_id: 'new-id-123',
+        project_engagement_id: 'new-id-123',
         academic_term_id: null,
         client_contact_id: null,
         created_at: new Date(),
@@ -158,7 +158,7 @@ describe('Project Engagement Service', () => {
       const engagementId = '1';
       const updateData = { status: 'COMPLETED' as const };
       const updatedEngagement = {
-        engagement_id: engagementId,
+        project_engagement_id: engagementId,
         project_id: 'proj-1',
         partner_id: 'partner-1',
         chapter_id: 'chapter-1',
@@ -208,7 +208,7 @@ describe('Project Engagement Service', () => {
     it('should call delete with the correct ID and return the deleted engagement', async () => {
       const engagementId = '1';
       const deletedEngagement = {
-        engagement_id: engagementId,
+        project_engagement_id: engagementId,
         project_id: 'proj-1',
         partner_id: 'partner-1',
         chapter_id: 'chapter-1',

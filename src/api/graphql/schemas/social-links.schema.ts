@@ -1,19 +1,18 @@
 export const socialLinkSchemaString = `
-  enum SocialPlatformType {
+  enum LinkType {
+    SOCIAL_MEDIA
     GITHUB
+    FIGMA
     LINKEDIN
-    PORTFOLIO
-    TWITTER
-    DRIBBBLE
+    WEBSITE
     OTHER
   }
 
   type SocialLink {
-    link_id: ID!
+    constituent_link_id: ID!
     constituent_id: ID!
-    platform: SocialPlatformType
+    platform: LinkType
     url: String!
-    is_featured: Boolean
     created_at: String
     updated_at: String
   }
@@ -25,16 +24,14 @@ export const socialLinkSchemaString = `
 
   input CreateSocialLinkInput {
     constituent_id: ID!
-    platform: SocialPlatformType
+    platform: LinkType
     url: String!
-    is_featured: Boolean
   }
 
   input UpdateSocialLinkInput {
     constituent_id: ID
-    platform: SocialPlatformType
+    platform: LinkType
     url: String
-    is_featured: Boolean
   }
 
   type Mutation {

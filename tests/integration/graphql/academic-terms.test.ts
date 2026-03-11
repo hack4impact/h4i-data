@@ -7,7 +7,7 @@ const createTestAcademicTerm = async (name: string) => {
   const mutation = `
     mutation CreateAcademicTerm($input: CreateAcademicTermInput!) {
       createAcademicTerm(input: $input) {
-        term_id
+        academic_term_id
         name
         type
       }
@@ -28,7 +28,7 @@ describe('GraphQL API - Academic Terms', () => {
     const mutation = `
       mutation CreateAcademicTerm($input: CreateAcademicTermInput!) {
         createAcademicTerm(input: $input) {
-          term_id
+          academic_term_id
           name
           type
         }
@@ -43,7 +43,7 @@ describe('GraphQL API - Academic Terms', () => {
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const term = response.body.data.createAcademicTerm;
-    expect(term).toHaveProperty('term_id');
+    expect(term).toHaveProperty('academic_term_id');
     expect(term.name).toBe('Fall 2025');
     expect(term.type).toBe('SEMESTER');
   });
@@ -58,19 +58,21 @@ describe('GraphQL API - Academic Terms', () => {
     const query = `
       query AcademicTerm($id: ID!) {
         academicTerm(id: $id) {
-          term_id
+          academic_term_id
           name
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query, variables: { id: created.term_id } });
+      .send({ query, variables: { id: created.academic_term_id } });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.academicTerm.term_id).toBe(created.term_id);
+    expect(response.body.data.academicTerm.academic_term_id).toBe(
+      created.academic_term_id
+    );
   });
 
   it('should return null for a non-existent academic term ID', async () => {
@@ -78,7 +80,7 @@ describe('GraphQL API - Academic Terms', () => {
     const query = `
       query {
         academicTerm(id: "00000000-0000-0000-0000-000000000000") {
-          term_id
+          academic_term_id
         }
       }
     `;
@@ -94,7 +96,7 @@ describe('GraphQL API - Academic Terms', () => {
     await createTestAcademicTerm(`Term ${Date.now()}.${Math.random()}`);
 
     // Act
-    const query = `query { academicTerms { term_id name } }`;
+    const query = `query { academicTerms { academic_term_id name } }`;
     const response = await request(app).post('/').send({ query });
 
     // Assert
@@ -114,14 +116,14 @@ describe('GraphQL API - Academic Terms', () => {
     const mutation = `
       mutation UpdateAcademicTerm($id: ID!, $input: UpdateAcademicTermInput!) {
         updateAcademicTerm(id: $id, input: $input) {
-          term_id
+          academic_term_id
           name
           type
         }
       }
     `;
     const variables = {
-      id: created.term_id,
+      id: created.academic_term_id,
       input: { name: 'Spring 2026', type: 'QUARTER' },
     };
     const response = await request(app)
@@ -140,7 +142,7 @@ describe('GraphQL API - Academic Terms', () => {
     const mutation = `
       mutation UpdateAcademicTerm($id: ID!, $input: UpdateAcademicTermInput!) {
         updateAcademicTerm(id: $id, input: $input) {
-          term_id
+          academic_term_id
           name
           type
         }
@@ -169,14 +171,14 @@ describe('GraphQL API - Academic Terms', () => {
     const mutation = `
       mutation UpdateAcademicTerm($id: ID!, $input: UpdateAcademicTermInput!) {
         updateAcademicTerm(id: $id, input: $input) {
-          term_id
+          academic_term_id
           name
           type
         }
       }
     `;
     const variables = {
-      id: created.term_id,
+      id: created.academic_term_id,
       input: { type: 'INVALID_ENUM_VALUE' },
     };
     const response = await request(app)
@@ -193,7 +195,7 @@ describe('GraphQL API - Academic Terms', () => {
     const mutation = `
       mutation DeleteAcademicTerm($id: ID!) {
         deleteAcademicTerm(id: $id) {
-          term_id
+          academic_term_id
         }
       }
     `;
@@ -219,21 +221,23 @@ describe('GraphQL API - Academic Terms', () => {
     const mutation = `
       mutation DeleteAcademicTerm($id: ID!) {
         deleteAcademicTerm(id: $id) {
-          term_id
+          academic_term_id
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query: mutation, variables: { id: created.term_id } });
+      .send({ query: mutation, variables: { id: created.academic_term_id } });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.deleteAcademicTerm.term_id).toBe(created.term_id);
+    expect(response.body.data.deleteAcademicTerm.academic_term_id).toBe(
+      created.academic_term_id
+    );
 
     // Verify it's gone
-    const verifyQuery = `query { academicTerm(id: "${created.term_id}") { term_id } }`;
+    const verifyQuery = `query { academicTerm(id: "${created.academic_term_id}") { academic_term_id } }`;
     const verifyResponse = await request(app)
       .post('/')
       .send({ query: verifyQuery });

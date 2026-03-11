@@ -43,7 +43,7 @@ export async function getProjectEngagementById(id: string) {
     logger.info('Fetching project engagement by ID', { engagementId: id });
 
     const engagement = await prisma.project_engagements.findUnique({
-      where: { engagement_id: id },
+      where: { project_engagement_id: id },
     });
 
     if (!engagement) {
@@ -76,7 +76,7 @@ export async function createProjectEngagement(
     const engagement = await prisma.project_engagements.create({ data });
 
     logger.info('Successfully created project engagement', {
-      engagementId: engagement.engagement_id,
+      engagementId: engagement.project_engagement_id,
     });
 
     return engagement;
@@ -99,7 +99,7 @@ export async function updateProjectEngagement(
     });
 
     const engagement = await prisma.project_engagements.update({
-      where: { engagement_id: id },
+      where: { project_engagement_id: id },
       data,
     });
 
@@ -130,7 +130,7 @@ export async function deleteProjectEngagement(id: string) {
     logger.info('Deleting project engagement', { engagementId: id });
 
     const engagement = await prisma.project_engagements.delete({
-      where: { engagement_id: id },
+      where: { project_engagement_id: id },
     });
 
     logger.info('Successfully deleted project engagement', {

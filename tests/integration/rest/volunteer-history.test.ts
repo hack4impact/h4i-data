@@ -32,7 +32,7 @@ describe('REST API - /volunteer-history', () => {
       });
 
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('history_id');
+      expect(response.body).toHaveProperty('volunteer_history_id');
       expect(response.body.volunteer_id).toBe(volunteerId);
       expect(response.body.action_type).toBe('ENROLLED');
     });
@@ -72,12 +72,12 @@ describe('REST API - /volunteer-history', () => {
         action_type: 'ENROLLED',
         effective_date: '2025-01-01T00:00:00.000Z',
       });
-      const id = created.body.history_id;
+      const id = created.body.volunteer_history_id;
 
       const response = await request(app).get(`/volunteer-history/${id}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.history_id).toBe(id);
+      expect(response.body.volunteer_history_id).toBe(id);
     });
 
     it('should return 404 for a non-existent record', async () => {
@@ -97,7 +97,7 @@ describe('REST API - /volunteer-history', () => {
         action_type: 'ENROLLED',
         effective_date: '2025-01-01T00:00:00.000Z',
       });
-      const id = created.body.history_id;
+      const id = created.body.volunteer_history_id;
 
       const response = await request(app)
         .patch(`/volunteer-history/${id}`)
@@ -121,7 +121,7 @@ describe('REST API - /volunteer-history', () => {
         action_type: 'ENROLLED',
         effective_date: '2025-01-01T00:00:00.000Z',
       });
-      const id = created.body.history_id;
+      const id = created.body.volunteer_history_id;
 
       const response = await request(app)
         .patch(`/volunteer-history/${id}`)
@@ -139,7 +139,7 @@ describe('REST API - /volunteer-history', () => {
         action_type: 'ENROLLED',
         effective_date: '2025-01-01T00:00:00.000Z',
       });
-      const id = created.body.history_id;
+      const id = created.body.volunteer_history_id;
 
       const response = await request(app).delete(`/volunteer-history/${id}`);
 

@@ -8,7 +8,7 @@ export const projectDeliverableSchemaString = `
   }
 
   type ProjectDeliverable {
-    deliverable_id: ID!
+    resource_id: ID!
     project_id: ID!
     label: String
     url: String

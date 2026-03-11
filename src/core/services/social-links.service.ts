@@ -14,8 +14,8 @@ type UpdateSocialLinkInput = z.infer<typeof updateSocialLinkSchema>;
 export async function getAllSocialLinks() {
   try {
     logger.info('Fetching all social links');
-    const links = await prisma.social_links.findMany({
-      orderBy: { link_id: 'asc' },
+    const links = await prisma.constituent_links.findMany({
+      orderBy: { constituent_link_id: 'asc' },
     });
 
     logger.info('Successfully retrieved social links', {
@@ -35,8 +35,8 @@ export async function getSocialLinkById(id: string) {
   try {
     logger.info('Fetching social link by ID', { linkId: id });
 
-    const link = await prisma.social_links.findUnique({
-      where: { link_id: id },
+    const link = await prisma.constituent_links.findUnique({
+      where: { constituent_link_id: id },
     });
 
     if (!link) {
@@ -62,10 +62,10 @@ export async function createSocialLink(data: CreateSocialLinkInput) {
   try {
     logger.info('Creating new social link');
 
-    const link = await prisma.social_links.create({ data });
+    const link = await prisma.constituent_links.create({ data });
 
     logger.info('Successfully created social link', {
-      linkId: link.link_id,
+      linkId: link.constituent_link_id,
     });
 
     return link;
@@ -84,8 +84,8 @@ export async function updateSocialLink(
   try {
     logger.info('Updating social link', { linkId: id, updateData: data });
 
-    const link = await prisma.social_links.update({
-      where: { link_id: id },
+    const link = await prisma.constituent_links.update({
+      where: { constituent_link_id: id },
       data,
     });
 
@@ -113,8 +113,8 @@ export async function deleteSocialLink(id: string) {
   try {
     logger.info('Deleting social link', { linkId: id });
 
-    const link = await prisma.social_links.delete({
-      where: { link_id: id },
+    const link = await prisma.constituent_links.delete({
+      where: { constituent_link_id: id },
     });
 
     logger.info('Successfully deleted social link', { linkId: id });

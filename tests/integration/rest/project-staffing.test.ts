@@ -27,7 +27,7 @@ const createTestEngagement = async () => {
   const engagementRes = await request(app)
     .post('/project-engagements')
     .send({ project_id: projectId, status: 'ACTIVE' });
-  return engagementRes.body.engagement_id;
+  return engagementRes.body.project_engagement_id;
 };
 
 describe('REST API - /project-staffing', () => {
@@ -38,20 +38,17 @@ describe('REST API - /project-staffing', () => {
 
       const response = await request(app).post('/project-staffing').send({
         volunteer_id: volunteerId,
-        engagement_id: engagementId,
-        is_lead_contact: true,
+        project_engagement_id: engagementId,
       });
 
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('staffing_id');
+      expect(response.body).toHaveProperty('project_staffing_id');
       expect(response.body.volunteer_id).toBe(volunteerId);
-      expect(response.body.engagement_id).toBe(engagementId);
+      expect(response.body.project_engagement_id).toBe(engagementId);
     });
 
     it('should return 400 for invalid data', async () => {
-      const response = await request(app)
-        .post('/project-staffing')
-        .send({ is_lead_contact: true }); // missing required volunteer_id and engagement_id
+      const response = await request(app).post('/project-staffing').send({}); // missing required volunteer_id and project_engagement_id
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error');
@@ -64,7 +61,7 @@ describe('REST API - /project-staffing', () => {
       const engagementId = await createTestEngagement();
       await request(app).post('/project-staffing').send({
         volunteer_id: volunteerId,
-        engagement_id: engagementId,
+        project_engagement_id: engagementId,
       });
 
       const response = await request(app).get('/project-staffing');
@@ -81,14 +78,14 @@ describe('REST API - /project-staffing', () => {
       const engagementId = await createTestEngagement();
       const created = await request(app).post('/project-staffing').send({
         volunteer_id: volunteerId,
-        engagement_id: engagementId,
+        project_engagement_id: engagementId,
       });
-      const id = created.body.staffing_id;
+      const id = created.body.project_staffing_id;
 
       const response = await request(app).get(`/project-staffing/${id}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.staffing_id).toBe(id);
+      expect(response.body.project_staffing_id).toBe(id);
     });
 
     it('should return 404 for a non-existent staffing record', async () => {
@@ -106,23 +103,22 @@ describe('REST API - /project-staffing', () => {
       const engagementId = await createTestEngagement();
       const created = await request(app).post('/project-staffing').send({
         volunteer_id: volunteerId,
-        engagement_id: engagementId,
-        is_lead_contact: false,
+        project_engagement_id: engagementId,
       });
-      const id = created.body.staffing_id;
+      const id = created.body.project_staffing_id;
 
       const response = await request(app)
         .patch(`/project-staffing/${id}`)
-        .send({ is_lead_contact: true });
+        .send({ end_date: '2025-12-31T00:00:00.000Z' });
 
       expect(response.status).toBe(200);
-      expect(response.body.is_lead_contact).toBe(true);
+      expect(response.body.project_staffing_id).toBe(id);
     });
 
     it('should return 404 for a non-existent project staffing record', async () => {
       const response = await request(app)
         .patch('/project-staffing/00000000-0000-0000-0000-000000000000')
-        .send({ is_lead_contact: true });
+        .send({ end_date: '2025-12-31T00:00:00.000Z' });
       expect(response.status).toBe(404);
     });
 
@@ -131,13 +127,13 @@ describe('REST API - /project-staffing', () => {
       const engagementId = await createTestEngagement();
       const created = await request(app).post('/project-staffing').send({
         volunteer_id: volunteerId,
-        engagement_id: engagementId,
+        project_engagement_id: engagementId,
       });
-      const id = created.body.staffing_id;
+      const id = created.body.project_staffing_id;
 
       const response = await request(app)
         .patch(`/project-staffing/${id}`)
-        .send({ is_lead_contact: 'not-a-boolean' });
+        .send({ end_date: 'not-a-date' });
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error');
     });
@@ -149,9 +145,9 @@ describe('REST API - /project-staffing', () => {
       const engagementId = await createTestEngagement();
       const created = await request(app).post('/project-staffing').send({
         volunteer_id: volunteerId,
-        engagement_id: engagementId,
+        project_engagement_id: engagementId,
       });
-      const id = created.body.staffing_id;
+      const id = created.body.project_staffing_id;
 
       const response = await request(app).delete(`/project-staffing/${id}`);
 

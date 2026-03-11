@@ -1,10 +1,9 @@
 export const projectStaffingSchemaString = `
   type ProjectStaffing {
-    staffing_id: ID!
+    project_staffing_id: ID!
     volunteer_id: ID!
-    engagement_id: ID!
-    role_id: ID
-    is_lead_contact: Boolean
+    project_engagement_id: ID!
+    project_role_id: ID
     start_date: String
     end_date: String
     created_at: String
@@ -18,18 +17,16 @@ export const projectStaffingSchemaString = `
 
   input CreateProjectStaffingInput {
     volunteer_id: ID!
-    engagement_id: ID!
-    role_id: ID
-    is_lead_contact: Boolean
+    project_engagement_id: ID!
+    project_role_id: ID
     start_date: String
     end_date: String
   }
 
   input UpdateProjectStaffingInput {
     volunteer_id: ID
-    engagement_id: ID
-    role_id: ID
-    is_lead_contact: Boolean
+    project_engagement_id: ID
+    project_role_id: ID
     start_date: String
     end_date: String
   }

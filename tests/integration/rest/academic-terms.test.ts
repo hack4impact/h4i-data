@@ -11,7 +11,7 @@ describe('REST API - /academic-terms', () => {
         .send({ name: 'Fall 2025', type: 'SEMESTER' });
 
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('term_id');
+      expect(response.body).toHaveProperty('academic_term_id');
       expect(response.body.name).toBe('Fall 2025');
     });
 
@@ -44,12 +44,12 @@ describe('REST API - /academic-terms', () => {
       const created = await request(app)
         .post('/academic-terms')
         .send({ name: `Term ${Date.now()}.${Math.random()}` });
-      const id = created.body.term_id;
+      const id = created.body.academic_term_id;
 
       const response = await request(app).get(`/academic-terms/${id}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.term_id).toBe(id);
+      expect(response.body.academic_term_id).toBe(id);
     });
 
     it('should return 404 for a non-existent academic term', async () => {
@@ -66,7 +66,7 @@ describe('REST API - /academic-terms', () => {
       const created = await request(app)
         .post('/academic-terms')
         .send({ name: `Term ${Date.now()}.${Math.random()}` });
-      const id = created.body.term_id;
+      const id = created.body.academic_term_id;
 
       const response = await request(app)
         .patch(`/academic-terms/${id}`)
@@ -88,7 +88,7 @@ describe('REST API - /academic-terms', () => {
       const created = await request(app)
         .post('/academic-terms')
         .send({ name: `Term ${Date.now()}.${Math.random()}` });
-      const id = created.body.term_id;
+      const id = created.body.academic_term_id;
 
       const response = await request(app)
         .patch(`/academic-terms/${id}`)
@@ -103,7 +103,7 @@ describe('REST API - /academic-terms', () => {
       const created = await request(app)
         .post('/academic-terms')
         .send({ name: `Term ${Date.now()}.${Math.random()}` });
-      const id = created.body.term_id;
+      const id = created.body.academic_term_id;
 
       const response = await request(app).delete(`/academic-terms/${id}`);
 

@@ -11,7 +11,7 @@ describe('REST API - /officer-roles', () => {
         .send({ name: 'Chapter President', scope: 'CHAPTER', rank_level: 1 });
 
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('role_id');
+      expect(response.body).toHaveProperty('officer_role_id');
       expect(response.body.name).toBe('Chapter President');
     });
 
@@ -44,12 +44,12 @@ describe('REST API - /officer-roles', () => {
       const created = await request(app)
         .post('/officer-roles')
         .send({ name: `Role ${Date.now()}.${Math.random()}` });
-      const id = created.body.role_id;
+      const id = created.body.officer_role_id;
 
       const response = await request(app).get(`/officer-roles/${id}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.role_id).toBe(id);
+      expect(response.body.officer_role_id).toBe(id);
     });
 
     it('should return 404 for a non-existent officer role', async () => {
@@ -66,7 +66,7 @@ describe('REST API - /officer-roles', () => {
       const created = await request(app)
         .post('/officer-roles')
         .send({ name: `Role ${Date.now()}.${Math.random()}` });
-      const id = created.body.role_id;
+      const id = created.body.officer_role_id;
 
       const response = await request(app)
         .patch(`/officer-roles/${id}`)
@@ -87,7 +87,7 @@ describe('REST API - /officer-roles', () => {
       const created = await request(app)
         .post('/officer-roles')
         .send({ name: `Role ${Date.now()}.${Math.random()}` });
-      const id = created.body.role_id;
+      const id = created.body.officer_role_id;
 
       const response = await request(app)
         .patch(`/officer-roles/${id}`)
@@ -102,7 +102,7 @@ describe('REST API - /officer-roles', () => {
       const created = await request(app)
         .post('/officer-roles')
         .send({ name: `Role ${Date.now()}.${Math.random()}` });
-      const id = created.body.role_id;
+      const id = created.body.officer_role_id;
 
       const response = await request(app).delete(`/officer-roles/${id}`);
 

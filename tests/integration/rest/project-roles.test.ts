@@ -11,7 +11,7 @@ describe('REST API - /project-roles', () => {
         .send({ name: 'Tech Lead', is_leadership: true });
 
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('role_id');
+      expect(response.body).toHaveProperty('project_role_id');
       expect(response.body.name).toBe('Tech Lead');
       expect(response.body.is_leadership).toBe(true);
     });
@@ -45,12 +45,12 @@ describe('REST API - /project-roles', () => {
       const created = await request(app)
         .post('/project-roles')
         .send({ name: `Role ${Date.now()}.${Math.random()}` });
-      const id = created.body.role_id;
+      const id = created.body.project_role_id;
 
       const response = await request(app).get(`/project-roles/${id}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.role_id).toBe(id);
+      expect(response.body.project_role_id).toBe(id);
     });
 
     it('should return 404 for a non-existent project role', async () => {
@@ -67,7 +67,7 @@ describe('REST API - /project-roles', () => {
       const created = await request(app)
         .post('/project-roles')
         .send({ name: `Role ${Date.now()}.${Math.random()}` });
-      const id = created.body.role_id;
+      const id = created.body.project_role_id;
 
       const response = await request(app)
         .patch(`/project-roles/${id}`)
@@ -88,7 +88,7 @@ describe('REST API - /project-roles', () => {
       const created = await request(app)
         .post('/project-roles')
         .send({ name: `Role ${Date.now()}.${Math.random()}` });
-      const id = created.body.role_id;
+      const id = created.body.project_role_id;
 
       const response = await request(app)
         .patch(`/project-roles/${id}`)
@@ -103,7 +103,7 @@ describe('REST API - /project-roles', () => {
       const created = await request(app)
         .post('/project-roles')
         .send({ name: `Role ${Date.now()}.${Math.random()}` });
-      const id = created.body.role_id;
+      const id = created.body.project_role_id;
 
       const response = await request(app).delete(`/project-roles/${id}`);
 

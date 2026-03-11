@@ -1,8 +1,8 @@
 export const officerAssignmentSchemaString = `
   type OfficerAssignment {
-    assignment_id: ID!
+    officer_assignment_id: ID!
     volunteer_id: ID!
-    role_id: ID!
+    officer_role_id: ID!
     chapter_id: ID!
     start_date: String
     end_date: String
@@ -17,7 +17,7 @@ export const officerAssignmentSchemaString = `
 
   input CreateOfficerAssignmentInput {
     volunteer_id: ID!
-    role_id: ID!
+    officer_role_id: ID!
     chapter_id: ID!
     start_date: String
     end_date: String
@@ -25,7 +25,7 @@ export const officerAssignmentSchemaString = `
 
   input UpdateOfficerAssignmentInput {
     volunteer_id: ID
-    role_id: ID
+    officer_role_id: ID
     chapter_id: ID
     start_date: String
     end_date: String

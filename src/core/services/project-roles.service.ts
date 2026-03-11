@@ -39,7 +39,7 @@ export async function getProjectRoleById(id: string) {
     logger.info('Fetching project role by ID', { roleId: id });
 
     const role = await prisma.project_roles.findUnique({
-      where: { role_id: id },
+      where: { project_role_id: id },
     });
 
     if (!role) {
@@ -68,7 +68,7 @@ export async function createProjectRole(data: CreateProjectRoleInput) {
     const role = await prisma.project_roles.create({ data });
 
     logger.info('Successfully created project role', {
-      roleId: role.role_id,
+      roleId: role.project_role_id,
     });
 
     return role;
@@ -88,7 +88,7 @@ export async function updateProjectRole(
     logger.info('Updating project role', { roleId: id, updateData: data });
 
     const role = await prisma.project_roles.update({
-      where: { role_id: id },
+      where: { project_role_id: id },
       data,
     });
 
@@ -117,7 +117,7 @@ export async function deleteProjectRole(id: string) {
     logger.info('Deleting project role', { roleId: id });
 
     const role = await prisma.project_roles.delete({
-      where: { role_id: id },
+      where: { project_role_id: id },
     });
 
     logger.info('Successfully deleted project role', { roleId: id });

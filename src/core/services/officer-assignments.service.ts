@@ -43,7 +43,7 @@ export async function getOfficerAssignmentById(id: string) {
     logger.info('Fetching officer assignment by ID', { assignmentId: id });
 
     const assignment = await prisma.officer_assignments.findUnique({
-      where: { assignment_id: id },
+      where: { officer_assignment_id: id },
     });
 
     if (!assignment) {
@@ -76,7 +76,7 @@ export async function createOfficerAssignment(
     const assignment = await prisma.officer_assignments.create({ data });
 
     logger.info('Successfully created officer assignment', {
-      assignmentId: assignment.assignment_id,
+      assignmentId: assignment.officer_assignment_id,
     });
 
     return assignment;
@@ -99,7 +99,7 @@ export async function updateOfficerAssignment(
     });
 
     const assignment = await prisma.officer_assignments.update({
-      where: { assignment_id: id },
+      where: { officer_assignment_id: id },
       data,
     });
 
@@ -130,7 +130,7 @@ export async function deleteOfficerAssignment(id: string) {
     logger.info('Deleting officer assignment', { assignmentId: id });
 
     const assignment = await prisma.officer_assignments.delete({
-      where: { assignment_id: id },
+      where: { officer_assignment_id: id },
     });
 
     logger.info('Successfully deleted officer assignment', {

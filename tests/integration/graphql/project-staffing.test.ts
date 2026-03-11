@@ -28,7 +28,7 @@ const createTestEngagement = async () => {
   const engagementRes = await request(restApp)
     .post('/project-engagements')
     .send({ project_id: projectId, status: 'ACTIVE' });
-  return engagementRes.body.engagement_id;
+  return engagementRes.body.project_engagement_id;
 };
 
 const createTestStaffing = async (
@@ -38,9 +38,9 @@ const createTestStaffing = async (
   const mutation = `
     mutation CreateProjectStaffing($input: CreateProjectStaffingInput!) {
       createProjectStaffing(input: $input) {
-        staffing_id
+        project_staffing_id
         volunteer_id
-        engagement_id
+        project_engagement_id
       }
     }
   `;
@@ -49,7 +49,10 @@ const createTestStaffing = async (
     .send({
       query: mutation,
       variables: {
-        input: { volunteer_id: volunteerId, engagement_id: engagementId },
+        input: {
+          volunteer_id: volunteerId,
+          project_engagement_id: engagementId,
+        },
       },
     });
   return response.body.data.createProjectStaffing;
@@ -65,18 +68,16 @@ describe('GraphQL API - Project Staffing', () => {
     const mutation = `
       mutation CreateProjectStaffing($input: CreateProjectStaffingInput!) {
         createProjectStaffing(input: $input) {
-          staffing_id
+          project_staffing_id
           volunteer_id
-          engagement_id
-          is_lead_contact
+          project_engagement_id
         }
       }
     `;
     const variables = {
       input: {
         volunteer_id: volunteerId,
-        engagement_id: engagementId,
-        is_lead_contact: true,
+        project_engagement_id: engagementId,
       },
     };
     const response = await request(app)
@@ -87,10 +88,9 @@ describe('GraphQL API - Project Staffing', () => {
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const staffing = response.body.data.createProjectStaffing;
-    expect(staffing).toHaveProperty('staffing_id');
+    expect(staffing).toHaveProperty('project_staffing_id');
     expect(staffing.volunteer_id).toBe(volunteerId);
-    expect(staffing.engagement_id).toBe(engagementId);
-    expect(staffing.is_lead_contact).toBe(true);
+    expect(staffing.project_engagement_id).toBe(engagementId);
   });
 
   it('should fetch a project staffing record by ID via query', async () => {
@@ -103,20 +103,20 @@ describe('GraphQL API - Project Staffing', () => {
     const query = `
       query ProjectStaffing($id: ID!) {
         projectStaffing(id: $id) {
-          staffing_id
+          project_staffing_id
           volunteer_id
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query, variables: { id: created.staffing_id } });
+      .send({ query, variables: { id: created.project_staffing_id } });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.projectStaffing.staffing_id).toBe(
-      created.staffing_id
+    expect(response.body.data.projectStaffing.project_staffing_id).toBe(
+      created.project_staffing_id
     );
   });
 
@@ -125,7 +125,7 @@ describe('GraphQL API - Project Staffing', () => {
     const query = `
       query {
         projectStaffing(id: "00000000-0000-0000-0000-000000000000") {
-          staffing_id
+          project_staffing_id
         }
       }
     `;
@@ -143,7 +143,7 @@ describe('GraphQL API - Project Staffing', () => {
     await createTestStaffing(volunteerId, engagementId);
 
     // Act
-    const query = `query { projectStaffings { staffing_id } }`;
+    const query = `query { projectStaffings { project_staffing_id } }`;
     const response = await request(app).post('/').send({ query });
 
     // Assert
@@ -163,14 +163,14 @@ describe('GraphQL API - Project Staffing', () => {
     const mutation = `
       mutation UpdateProjectStaffing($id: ID!, $input: UpdateProjectStaffingInput!) {
         updateProjectStaffing(id: $id, input: $input) {
-          staffing_id
-          is_lead_contact
+          project_staffing_id
+          end_date
         }
       }
     `;
     const variables = {
-      id: created.staffing_id,
-      input: { is_lead_contact: true },
+      id: created.project_staffing_id,
+      input: { end_date: '2025-12-31' },
     };
     const response = await request(app)
       .post('/')
@@ -179,7 +179,7 @@ describe('GraphQL API - Project Staffing', () => {
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.updateProjectStaffing.is_lead_contact).toBe(true);
+    expect(response.body.data.updateProjectStaffing.end_date).toBeDefined();
   });
 
   it('should return errors when updating a non-existent project staffing record', async () => {
@@ -187,7 +187,7 @@ describe('GraphQL API - Project Staffing', () => {
     const mutation = `
       mutation UpdateProjectStaffing($id: ID!, $input: UpdateProjectStaffingInput!) {
         updateProjectStaffing(id: $id, input: $input) {
-          staffing_id
+          project_staffing_id
         }
       }
     `;
@@ -197,7 +197,7 @@ describe('GraphQL API - Project Staffing', () => {
         query: mutation,
         variables: {
           id: '00000000-0000-0000-0000-000000000000',
-          input: { is_lead_contact: true },
+          input: { end_date: '2025-12-31' },
         },
       });
 
@@ -216,7 +216,7 @@ describe('GraphQL API - Project Staffing', () => {
     const mutation = `
       mutation UpdateProjectStaffing($id: ID!, $input: UpdateProjectStaffingInput!) {
         updateProjectStaffing(id: $id, input: $input) {
-          staffing_id
+          project_staffing_id
         }
       }
     `;
@@ -225,8 +225,8 @@ describe('GraphQL API - Project Staffing', () => {
       .send({
         query: mutation,
         variables: {
-          id: created.staffing_id,
-          input: { is_lead_contact: 'not-a-boolean' },
+          id: created.project_staffing_id,
+          input: { end_date: 'not-a-date' },
         },
       });
 
@@ -240,7 +240,7 @@ describe('GraphQL API - Project Staffing', () => {
     const mutation = `
       mutation DeleteProjectStaffing($id: ID!) {
         deleteProjectStaffing(id: $id) {
-          staffing_id
+          project_staffing_id
         }
       }
     `;
@@ -266,23 +266,26 @@ describe('GraphQL API - Project Staffing', () => {
     const mutation = `
       mutation DeleteProjectStaffing($id: ID!) {
         deleteProjectStaffing(id: $id) {
-          staffing_id
+          project_staffing_id
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query: mutation, variables: { id: created.staffing_id } });
+      .send({
+        query: mutation,
+        variables: { id: created.project_staffing_id },
+      });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.deleteProjectStaffing.staffing_id).toBe(
-      created.staffing_id
+    expect(response.body.data.deleteProjectStaffing.project_staffing_id).toBe(
+      created.project_staffing_id
     );
 
     // Verify it's gone
-    const verifyQuery = `query { projectStaffing(id: "${created.staffing_id}") { staffing_id } }`;
+    const verifyQuery = `query { projectStaffing(id: "${created.project_staffing_id}") { project_staffing_id } }`;
     const verifyResponse = await request(app)
       .post('/')
       .send({ query: verifyQuery });

@@ -39,7 +39,7 @@ export async function getProjectStaffingById(id: string) {
     logger.info('Fetching project staffing by ID', { staffingId: id });
 
     const staffing = await prisma.project_staffing.findUnique({
-      where: { staffing_id: id },
+      where: { project_staffing_id: id },
     });
 
     if (!staffing) {
@@ -70,7 +70,7 @@ export async function createProjectStaffing(data: CreateProjectStaffingInput) {
     const staffing = await prisma.project_staffing.create({ data });
 
     logger.info('Successfully created project staffing', {
-      staffingId: staffing.staffing_id,
+      staffingId: staffing.project_staffing_id,
     });
 
     return staffing;
@@ -93,7 +93,7 @@ export async function updateProjectStaffing(
     });
 
     const staffing = await prisma.project_staffing.update({
-      where: { staffing_id: id },
+      where: { project_staffing_id: id },
       data,
     });
 
@@ -122,7 +122,7 @@ export async function deleteProjectStaffing(id: string) {
     logger.info('Deleting project staffing', { staffingId: id });
 
     const staffing = await prisma.project_staffing.delete({
-      where: { staffing_id: id },
+      where: { project_staffing_id: id },
     });
 
     logger.info('Successfully deleted project staffing', { staffingId: id });

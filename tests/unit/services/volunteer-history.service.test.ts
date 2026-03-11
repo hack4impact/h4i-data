@@ -29,7 +29,7 @@ describe('Volunteer History Service', () => {
     it('should return an array of volunteer history records', async () => {
       const mockHistory = [
         {
-          history_id: '1',
+          volunteer_history_id: '1',
           volunteer_id: 'vol-1',
           action_type: 'ENROLLED',
           related_entity_id: 'chapter-1',
@@ -70,7 +70,7 @@ describe('Volunteer History Service', () => {
     it('should return a single volunteer history record when a valid ID is provided', async () => {
       const historyId = '1';
       const mockHistory = {
-        history_id: historyId,
+        volunteer_history_id: historyId,
         volunteer_id: 'vol-1',
         action_type: 'ENROLLED',
         related_entity_id: 'chapter-1',
@@ -120,7 +120,7 @@ describe('Volunteer History Service', () => {
         effective_date: new Date('2024-06-01'),
       };
       const createdHistory = {
-        history_id: 'new-id-123',
+        volunteer_history_id: 'new-id-123',
         related_entity_id: null,
         related_entity_type: null,
         previous_value_label: null,
@@ -157,7 +157,7 @@ describe('Volunteer History Service', () => {
       const historyId = '1';
       const updateData = { new_value_label: 'Updated Label' };
       const updatedHistory = {
-        history_id: historyId,
+        volunteer_history_id: historyId,
         volunteer_id: 'vol-1',
         action_type: 'ENROLLED',
         related_entity_id: 'chapter-1',
@@ -205,7 +205,7 @@ describe('Volunteer History Service', () => {
     it('should call delete with the correct ID and return the deleted record', async () => {
       const historyId = '1';
       const deletedHistory = {
-        history_id: historyId,
+        volunteer_history_id: historyId,
         volunteer_id: 'vol-1',
         action_type: 'ENROLLED',
         related_entity_id: 'chapter-1',

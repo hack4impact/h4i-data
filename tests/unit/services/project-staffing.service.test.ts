@@ -29,11 +29,10 @@ describe('Project Staffing Service', () => {
     it('should return an array of project staffing records', async () => {
       const mockStaffing = [
         {
-          staffing_id: '1',
+          project_staffing_id: '1',
           volunteer_id: 'vol-1',
-          engagement_id: 'eng-1',
-          role_id: 'role-1',
-          is_lead_contact: true,
+          project_engagement_id: 'eng-1',
+          project_role_id: 'role-1',
           start_date: new Date('2024-01-15'),
           end_date: null,
           created_at: new Date(),
@@ -69,11 +68,10 @@ describe('Project Staffing Service', () => {
     it('should return a single project staffing record when a valid ID is provided', async () => {
       const staffingId = '1';
       const mockStaffing = {
-        staffing_id: staffingId,
+        project_staffing_id: staffingId,
         volunteer_id: 'vol-1',
-        engagement_id: 'eng-1',
-        role_id: 'role-1',
-        is_lead_contact: true,
+        project_engagement_id: 'eng-1',
+        project_role_id: 'role-1',
         start_date: new Date('2024-01-15'),
         end_date: null,
         created_at: new Date(),
@@ -111,13 +109,12 @@ describe('Project Staffing Service', () => {
     it('should create and return a new project staffing record', async () => {
       const inputData = {
         volunteer_id: 'vol-1',
-        engagement_id: 'eng-1',
-        role_id: 'role-1',
-        is_lead_contact: false,
+        project_engagement_id: 'eng-1',
+        project_role_id: 'role-1',
         start_date: new Date('2024-02-01'),
       };
       const createdStaffing = {
-        staffing_id: 'new-id-123',
+        project_staffing_id: 'new-id-123',
         end_date: null,
         created_at: new Date(),
         updated_at: new Date(),
@@ -139,9 +136,8 @@ describe('Project Staffing Service', () => {
       await expect(
         createProjectStaffing({
           volunteer_id: 'vol-1',
-          engagement_id: 'eng-1',
-          role_id: 'role-1',
-          is_lead_contact: false,
+          project_engagement_id: 'eng-1',
+          project_role_id: 'role-1',
           start_date: new Date(),
         })
       ).rejects.toThrow('Failed to create project staffing');
@@ -151,15 +147,14 @@ describe('Project Staffing Service', () => {
   describe('updateProjectStaffing', () => {
     it('should update and return the project staffing record', async () => {
       const staffingId = '1';
-      const updateData = { is_lead_contact: false };
+      const updateData = { end_date: new Date('2024-12-31') };
       const updatedStaffing = {
-        staffing_id: staffingId,
+        project_staffing_id: staffingId,
         volunteer_id: 'vol-1',
-        engagement_id: 'eng-1',
-        role_id: 'role-1',
-        is_lead_contact: false,
+        project_engagement_id: 'eng-1',
+        project_role_id: 'role-1',
         start_date: new Date('2024-01-15'),
-        end_date: null,
+        end_date: new Date('2024-12-31'),
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -180,7 +175,7 @@ describe('Project Staffing Service', () => {
         })
       );
       await expect(
-        updateProjectStaffing('non-existent-id', { is_lead_contact: false })
+        updateProjectStaffing('non-existent-id', { end_date: new Date() })
       ).rejects.toThrow("ProjectStaffing with id 'non-existent-id' not found");
     });
 
@@ -189,7 +184,7 @@ describe('Project Staffing Service', () => {
         new Error('Connection refused')
       );
       await expect(
-        updateProjectStaffing('1', { is_lead_contact: false })
+        updateProjectStaffing('1', { end_date: new Date() })
       ).rejects.toThrow('Failed to update project staffing');
     });
   });
@@ -198,11 +193,10 @@ describe('Project Staffing Service', () => {
     it('should call delete with the correct ID and return the deleted record', async () => {
       const staffingId = '1';
       const deletedStaffing = {
-        staffing_id: staffingId,
+        project_staffing_id: staffingId,
         volunteer_id: 'vol-1',
-        engagement_id: 'eng-1',
-        role_id: 'role-1',
-        is_lead_contact: true,
+        project_engagement_id: 'eng-1',
+        project_role_id: 'role-1',
         start_date: new Date('2024-01-15'),
         end_date: null,
         created_at: new Date(),

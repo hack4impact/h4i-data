@@ -29,9 +29,9 @@ describe('Officer Assignment Service', () => {
     it('should return an array of officer assignments', async () => {
       const mockAssignments = [
         {
-          assignment_id: '1',
+          officer_assignment_id: '1',
           volunteer_id: 'vol-1',
-          role_id: 'role-1',
+          officer_role_id: 'role-1',
           chapter_id: 'chapter-1',
           start_date: new Date('2024-01-15'),
           end_date: null,
@@ -68,9 +68,9 @@ describe('Officer Assignment Service', () => {
     it('should return a single officer assignment when a valid ID is provided', async () => {
       const assignmentId = '1';
       const mockAssignment = {
-        assignment_id: assignmentId,
+        officer_assignment_id: assignmentId,
         volunteer_id: 'vol-1',
-        role_id: 'role-1',
+        officer_role_id: 'role-1',
         chapter_id: 'chapter-1',
         start_date: new Date('2024-01-15'),
         end_date: null,
@@ -111,12 +111,12 @@ describe('Officer Assignment Service', () => {
     it('should create and return a new officer assignment', async () => {
       const inputData = {
         volunteer_id: 'vol-1',
-        role_id: 'role-1',
+        officer_role_id: 'role-1',
         chapter_id: 'chapter-1',
         start_date: new Date('2024-01-15'),
       };
       const createdAssignment = {
-        assignment_id: 'new-id-123',
+        officer_assignment_id: 'new-id-123',
         end_date: null,
         created_at: new Date(),
         updated_at: new Date(),
@@ -138,7 +138,7 @@ describe('Officer Assignment Service', () => {
       await expect(
         createOfficerAssignment({
           volunteer_id: 'vol-1',
-          role_id: 'role-1',
+          officer_role_id: 'role-1',
           chapter_id: 'chapter-1',
           start_date: new Date(),
         })
@@ -151,9 +151,9 @@ describe('Officer Assignment Service', () => {
       const assignmentId = '1';
       const updateData = { end_date: new Date('2024-12-31') };
       const updatedAssignment = {
-        assignment_id: assignmentId,
+        officer_assignment_id: assignmentId,
         volunteer_id: 'vol-1',
-        role_id: 'role-1',
+        officer_role_id: 'role-1',
         chapter_id: 'chapter-1',
         start_date: new Date('2024-01-15'),
         end_date: new Date('2024-12-31'),
@@ -197,9 +197,9 @@ describe('Officer Assignment Service', () => {
     it('should call delete with the correct ID and return the deleted assignment', async () => {
       const assignmentId = '1';
       const deletedAssignment = {
-        assignment_id: assignmentId,
+        officer_assignment_id: assignmentId,
         volunteer_id: 'vol-1',
-        role_id: 'role-1',
+        officer_role_id: 'role-1',
         chapter_id: 'chapter-1',
         start_date: new Date('2024-01-15'),
         end_date: null,

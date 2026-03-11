@@ -24,7 +24,7 @@ const createTestHistoryRecord = async (volunteerId: string) => {
   const mutation = `
     mutation CreateVolunteerHistory($input: CreateVolunteerHistoryInput!) {
       createVolunteerHistory(input: $input) {
-        history_id
+        volunteer_history_id
         volunteer_id
         action_type
       }
@@ -54,7 +54,7 @@ describe('GraphQL API - Volunteer History', () => {
     const mutation = `
       mutation CreateVolunteerHistory($input: CreateVolunteerHistoryInput!) {
         createVolunteerHistory(input: $input) {
-          history_id
+          volunteer_history_id
           volunteer_id
           action_type
           effective_date
@@ -76,7 +76,7 @@ describe('GraphQL API - Volunteer History', () => {
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const record = response.body.data.createVolunteerHistory;
-    expect(record).toHaveProperty('history_id');
+    expect(record).toHaveProperty('volunteer_history_id');
     expect(record.volunteer_id).toBe(volunteerId);
     expect(record.action_type).toBe('ENROLLED');
   });
@@ -90,20 +90,20 @@ describe('GraphQL API - Volunteer History', () => {
     const query = `
       query VolunteerHistory($id: ID!) {
         volunteerHistory(id: $id) {
-          history_id
+          volunteer_history_id
           action_type
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query, variables: { id: created.history_id } });
+      .send({ query, variables: { id: created.volunteer_history_id } });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.volunteerHistory.history_id).toBe(
-      created.history_id
+    expect(response.body.data.volunteerHistory.volunteer_history_id).toBe(
+      created.volunteer_history_id
     );
   });
 
@@ -112,7 +112,7 @@ describe('GraphQL API - Volunteer History', () => {
     const query = `
       query {
         volunteerHistory(id: "00000000-0000-0000-0000-000000000000") {
-          history_id
+          volunteer_history_id
         }
       }
     `;
@@ -129,7 +129,7 @@ describe('GraphQL API - Volunteer History', () => {
     await createTestHistoryRecord(volunteerId);
 
     // Act
-    const query = `query { volunteerHistories { history_id action_type } }`;
+    const query = `query { volunteerHistories { volunteer_history_id action_type } }`;
     const response = await request(app).post('/').send({ query });
 
     // Assert
@@ -148,13 +148,13 @@ describe('GraphQL API - Volunteer History', () => {
     const mutation = `
       mutation UpdateVolunteerHistory($id: ID!, $input: UpdateVolunteerHistoryInput!) {
         updateVolunteerHistory(id: $id, input: $input) {
-          history_id
+          volunteer_history_id
           new_value_label
         }
       }
     `;
     const variables = {
-      id: created.history_id,
+      id: created.volunteer_history_id,
       input: { new_value_label: 'Updated label' },
     };
     const response = await request(app)
@@ -174,7 +174,7 @@ describe('GraphQL API - Volunteer History', () => {
     const mutation = `
       mutation UpdateVolunteerHistory($id: ID!, $input: UpdateVolunteerHistoryInput!) {
         updateVolunteerHistory(id: $id, input: $input) {
-          history_id
+          volunteer_history_id
         }
       }
     `;
@@ -202,7 +202,7 @@ describe('GraphQL API - Volunteer History', () => {
     const mutation = `
       mutation UpdateVolunteerHistory($id: ID!, $input: UpdateVolunteerHistoryInput!) {
         updateVolunteerHistory(id: $id, input: $input) {
-          history_id
+          volunteer_history_id
         }
       }
     `;
@@ -211,7 +211,7 @@ describe('GraphQL API - Volunteer History', () => {
       .send({
         query: mutation,
         variables: {
-          id: created.history_id,
+          id: created.volunteer_history_id,
           input: { action_type: 'INVALID' },
         },
       });
@@ -226,7 +226,7 @@ describe('GraphQL API - Volunteer History', () => {
     const mutation = `
       mutation DeleteVolunteerHistory($id: ID!) {
         deleteVolunteerHistory(id: $id) {
-          history_id
+          volunteer_history_id
         }
       }
     `;
@@ -251,23 +251,26 @@ describe('GraphQL API - Volunteer History', () => {
     const mutation = `
       mutation DeleteVolunteerHistory($id: ID!) {
         deleteVolunteerHistory(id: $id) {
-          history_id
+          volunteer_history_id
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query: mutation, variables: { id: created.history_id } });
+      .send({
+        query: mutation,
+        variables: { id: created.volunteer_history_id },
+      });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.deleteVolunteerHistory.history_id).toBe(
-      created.history_id
+    expect(response.body.data.deleteVolunteerHistory.volunteer_history_id).toBe(
+      created.volunteer_history_id
     );
 
     // Verify it's gone
-    const verifyQuery = `query { volunteerHistory(id: "${created.history_id}") { history_id } }`;
+    const verifyQuery = `query { volunteerHistory(id: "${created.volunteer_history_id}") { volunteer_history_id } }`;
     const verifyResponse = await request(app)
       .post('/')
       .send({ query: verifyQuery });

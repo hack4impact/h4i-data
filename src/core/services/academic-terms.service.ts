@@ -39,7 +39,7 @@ export async function getAcademicTermById(id: string) {
     logger.info('Fetching academic term by ID', { termId: id });
 
     const term = await prisma.academic_terms.findUnique({
-      where: { term_id: id },
+      where: { academic_term_id: id },
     });
 
     if (!term) {
@@ -68,7 +68,7 @@ export async function createAcademicTerm(data: CreateAcademicTermInput) {
     const term = await prisma.academic_terms.create({ data });
 
     logger.info('Successfully created academic term', {
-      termId: term.term_id,
+      termId: term.academic_term_id,
     });
 
     return term;
@@ -88,7 +88,7 @@ export async function updateAcademicTerm(
     logger.info('Updating academic term', { termId: id, updateData: data });
 
     const term = await prisma.academic_terms.update({
-      where: { term_id: id },
+      where: { academic_term_id: id },
       data,
     });
 
@@ -117,7 +117,7 @@ export async function deleteAcademicTerm(id: string) {
     logger.info('Deleting academic term', { termId: id });
 
     const term = await prisma.academic_terms.delete({
-      where: { term_id: id },
+      where: { academic_term_id: id },
     });
 
     logger.info('Successfully deleted academic term', { termId: id });

@@ -20,7 +20,7 @@ const createTestSocialLink = async (constituentId: string, url: string) => {
   const mutation = `
     mutation CreateSocialLink($input: CreateSocialLinkInput!) {
       createSocialLink(input: $input) {
-        link_id
+        constituent_link_id
         constituent_id
         url
       }
@@ -44,7 +44,7 @@ describe('GraphQL API - Social Links', () => {
     const mutation = `
       mutation CreateSocialLink($input: CreateSocialLinkInput!) {
         createSocialLink(input: $input) {
-          link_id
+          constituent_link_id
           constituent_id
           platform
           url
@@ -66,7 +66,7 @@ describe('GraphQL API - Social Links', () => {
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const link = response.body.data.createSocialLink;
-    expect(link).toHaveProperty('link_id');
+    expect(link).toHaveProperty('constituent_link_id');
     expect(link.constituent_id).toBe(constituentId);
     expect(link.platform).toBe('GITHUB');
   });
@@ -83,19 +83,21 @@ describe('GraphQL API - Social Links', () => {
     const query = `
       query SocialLink($id: ID!) {
         socialLink(id: $id) {
-          link_id
+          constituent_link_id
           url
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query, variables: { id: created.link_id } });
+      .send({ query, variables: { id: created.constituent_link_id } });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.socialLink.link_id).toBe(created.link_id);
+    expect(response.body.data.socialLink.constituent_link_id).toBe(
+      created.constituent_link_id
+    );
   });
 
   it('should return null for a non-existent social link ID', async () => {
@@ -103,7 +105,7 @@ describe('GraphQL API - Social Links', () => {
     const query = `
       query {
         socialLink(id: "00000000-0000-0000-0000-000000000000") {
-          link_id
+          constituent_link_id
         }
       }
     `;
@@ -120,7 +122,7 @@ describe('GraphQL API - Social Links', () => {
     await createTestSocialLink(constituentId, 'https://linkedin.com/in/test');
 
     // Act
-    const query = `query { socialLinks { link_id url } }`;
+    const query = `query { socialLinks { constituent_link_id url } }`;
     const response = await request(app).post('/').send({ query });
 
     // Assert
@@ -142,15 +144,14 @@ describe('GraphQL API - Social Links', () => {
     const mutation = `
       mutation UpdateSocialLink($id: ID!, $input: UpdateSocialLinkInput!) {
         updateSocialLink(id: $id, input: $input) {
-          link_id
+          constituent_link_id
           url
-          is_featured
         }
       }
     `;
     const variables = {
-      id: created.link_id,
-      input: { url: 'https://github.com/updated', is_featured: true },
+      id: created.constituent_link_id,
+      input: { url: 'https://github.com/updated' },
     };
     const response = await request(app)
       .post('/')
@@ -162,7 +163,6 @@ describe('GraphQL API - Social Links', () => {
     expect(response.body.data.updateSocialLink.url).toBe(
       'https://github.com/updated'
     );
-    expect(response.body.data.updateSocialLink.is_featured).toBe(true);
   });
 
   it('should return errors when updating a non-existent social link', async () => {
@@ -170,7 +170,7 @@ describe('GraphQL API - Social Links', () => {
     const mutation = `
       mutation UpdateSocialLink($id: ID!, $input: UpdateSocialLinkInput!) {
         updateSocialLink(id: $id, input: $input) {
-          link_id
+          constituent_link_id
         }
       }
     `;
@@ -201,7 +201,7 @@ describe('GraphQL API - Social Links', () => {
     const mutation = `
       mutation UpdateSocialLink($id: ID!, $input: UpdateSocialLinkInput!) {
         updateSocialLink(id: $id, input: $input) {
-          link_id
+          constituent_link_id
         }
       }
     `;
@@ -209,7 +209,10 @@ describe('GraphQL API - Social Links', () => {
       .post('/')
       .send({
         query: mutation,
-        variables: { id: created.link_id, input: { url: 'not-a-url' } },
+        variables: {
+          id: created.constituent_link_id,
+          input: { url: 'not-a-url' },
+        },
       });
 
     // Assert
@@ -222,7 +225,7 @@ describe('GraphQL API - Social Links', () => {
     const mutation = `
       mutation DeleteSocialLink($id: ID!) {
         deleteSocialLink(id: $id) {
-          link_id
+          constituent_link_id
         }
       }
     `;
@@ -250,21 +253,26 @@ describe('GraphQL API - Social Links', () => {
     const mutation = `
       mutation DeleteSocialLink($id: ID!) {
         deleteSocialLink(id: $id) {
-          link_id
+          constituent_link_id
         }
       }
     `;
     const response = await request(app)
       .post('/')
-      .send({ query: mutation, variables: { id: created.link_id } });
+      .send({
+        query: mutation,
+        variables: { id: created.constituent_link_id },
+      });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.deleteSocialLink.link_id).toBe(created.link_id);
+    expect(response.body.data.deleteSocialLink.constituent_link_id).toBe(
+      created.constituent_link_id
+    );
 
     // Verify it's gone
-    const verifyQuery = `query { socialLink(id: "${created.link_id}") { link_id } }`;
+    const verifyQuery = `query { socialLink(id: "${created.constituent_link_id}") { constituent_link_id } }`;
     const verifyResponse = await request(app)
       .post('/')
       .send({ query: verifyQuery });

@@ -29,7 +29,7 @@ describe('Academic Term Service', () => {
     it('should return an array of academic terms', async () => {
       const mockTerms = [
         {
-          term_id: '1',
+          academic_term_id: '1',
           university_id: 'univ-1',
           name: 'Fall 2024',
           canonical_label: 'F24',
@@ -69,7 +69,7 @@ describe('Academic Term Service', () => {
     it('should return a single academic term when a valid ID is provided', async () => {
       const termId = '1';
       const mockTerm = {
-        term_id: termId,
+        academic_term_id: termId,
         university_id: 'univ-1',
         name: 'Fall 2024',
         canonical_label: 'F24',
@@ -117,7 +117,7 @@ describe('Academic Term Service', () => {
         end_date: new Date('2025-05-10'),
       };
       const createdTerm = {
-        term_id: 'new-id-123',
+        academic_term_id: 'new-id-123',
         university_id: null,
         created_at: new Date(),
         updated_at: new Date(),
@@ -153,7 +153,7 @@ describe('Academic Term Service', () => {
       const termId = '1';
       const updateData = { name: 'Updated Fall 2024' };
       const updatedTerm = {
-        term_id: termId,
+        academic_term_id: termId,
         university_id: 'univ-1',
         name: 'Updated Fall 2024',
         canonical_label: 'F24',
@@ -198,7 +198,7 @@ describe('Academic Term Service', () => {
     it('should call delete with the correct ID and return the deleted academic term', async () => {
       const termId = '1';
       const deletedTerm = {
-        term_id: termId,
+        academic_term_id: termId,
         university_id: 'univ-1',
         name: 'Fall 2024',
         canonical_label: 'F24',

@@ -22,7 +22,7 @@ const createTestOfficerRole = async () => {
   const res = await request(app)
     .post('/officer-roles')
     .send({ name: `Role ${Date.now()}.${Math.random()}` });
-  return res.body.role_id;
+  return res.body.officer_role_id;
 };
 
 const createTestChapter = async () => {
@@ -41,13 +41,13 @@ describe('REST API - /officer-assignments', () => {
 
       const response = await request(app).post('/officer-assignments').send({
         volunteer_id: volunteerId,
-        role_id: roleId,
+        officer_role_id: roleId,
         chapter_id: chapterId,
         start_date: '2025-01-01T00:00:00.000Z',
       });
 
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('assignment_id');
+      expect(response.body).toHaveProperty('officer_assignment_id');
       expect(response.body.volunteer_id).toBe(volunteerId);
     });
 
@@ -68,7 +68,7 @@ describe('REST API - /officer-assignments', () => {
       const chapterId = await createTestChapter();
       await request(app).post('/officer-assignments').send({
         volunteer_id: volunteerId,
-        role_id: roleId,
+        officer_role_id: roleId,
         chapter_id: chapterId,
       });
 
@@ -87,15 +87,15 @@ describe('REST API - /officer-assignments', () => {
       const chapterId = await createTestChapter();
       const created = await request(app).post('/officer-assignments').send({
         volunteer_id: volunteerId,
-        role_id: roleId,
+        officer_role_id: roleId,
         chapter_id: chapterId,
       });
-      const id = created.body.assignment_id;
+      const id = created.body.officer_assignment_id;
 
       const response = await request(app).get(`/officer-assignments/${id}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.assignment_id).toBe(id);
+      expect(response.body.officer_assignment_id).toBe(id);
     });
 
     it('should return 404 for a non-existent assignment', async () => {
@@ -114,17 +114,17 @@ describe('REST API - /officer-assignments', () => {
       const chapterId = await createTestChapter();
       const created = await request(app).post('/officer-assignments').send({
         volunteer_id: volunteerId,
-        role_id: roleId,
+        officer_role_id: roleId,
         chapter_id: chapterId,
       });
-      const id = created.body.assignment_id;
+      const id = created.body.officer_assignment_id;
 
       const response = await request(app)
         .patch(`/officer-assignments/${id}`)
         .send({ end_date: '2025-12-31T00:00:00.000Z' });
 
       expect(response.status).toBe(200);
-      expect(response.body.assignment_id).toBe(id);
+      expect(response.body.officer_assignment_id).toBe(id);
     });
 
     it('should return 404 for a non-existent officer assignment', async () => {
@@ -140,10 +140,10 @@ describe('REST API - /officer-assignments', () => {
       const chapterId = await createTestChapter();
       const created = await request(app).post('/officer-assignments').send({
         volunteer_id: volunteerId,
-        role_id: roleId,
+        officer_role_id: roleId,
         chapter_id: chapterId,
       });
-      const id = created.body.assignment_id;
+      const id = created.body.officer_assignment_id;
 
       const response = await request(app)
         .patch(`/officer-assignments/${id}`)
@@ -160,10 +160,10 @@ describe('REST API - /officer-assignments', () => {
       const chapterId = await createTestChapter();
       const created = await request(app).post('/officer-assignments').send({
         volunteer_id: volunteerId,
-        role_id: roleId,
+        officer_role_id: roleId,
         chapter_id: chapterId,
       });
-      const id = created.body.assignment_id;
+      const id = created.body.officer_assignment_id;
 
       const response = await request(app).delete(`/officer-assignments/${id}`);
 

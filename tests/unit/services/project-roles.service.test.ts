@@ -29,7 +29,7 @@ describe('Project Role Service', () => {
     it('should return an array of project roles', async () => {
       const mockRoles = [
         {
-          role_id: '1',
+          project_role_id: '1',
           name: 'Tech Lead',
           is_leadership: true,
           created_at: new Date(),
@@ -63,7 +63,7 @@ describe('Project Role Service', () => {
     it('should return a single project role when a valid ID is provided', async () => {
       const roleId = '1';
       const mockRole = {
-        role_id: roleId,
+        project_role_id: roleId,
         name: 'Tech Lead',
         is_leadership: true,
         created_at: new Date(),
@@ -104,7 +104,7 @@ describe('Project Role Service', () => {
         is_leadership: false,
       };
       const createdRole = {
-        role_id: 'new-id-123',
+        project_role_id: 'new-id-123',
         created_at: new Date(),
         updated_at: new Date(),
         ...inputData,
@@ -131,7 +131,7 @@ describe('Project Role Service', () => {
       const roleId = '1';
       const updateData = { name: 'Senior Tech Lead' };
       const updatedRole = {
-        role_id: roleId,
+        project_role_id: roleId,
         name: 'Senior Tech Lead',
         is_leadership: true,
         created_at: new Date(),
@@ -170,7 +170,7 @@ describe('Project Role Service', () => {
     it('should call delete with the correct ID and return the deleted project role', async () => {
       const roleId = '1';
       const deletedRole = {
-        role_id: roleId,
+        project_role_id: roleId,
         name: 'Tech Lead',
         is_leadership: true,
         created_at: new Date(),
