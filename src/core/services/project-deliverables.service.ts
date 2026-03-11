@@ -21,7 +21,7 @@ type UpdateProjectDeliverableInput = z.infer<
 export async function getAllProjectDeliverables() {
   try {
     logger.info('Fetching all project deliverables');
-    const deliverables = await prisma.project_deliverables.findMany({
+    const deliverables = await prisma.project_resources.findMany({
       orderBy: { deliverable_id: 'asc' },
     });
 
@@ -42,7 +42,7 @@ export async function getProjectDeliverableById(id: string) {
   try {
     logger.info('Fetching project deliverable by ID', { deliverableId: id });
 
-    const deliverable = await prisma.project_deliverables.findUnique({
+    const deliverable = await prisma.project_resources.findUnique({
       where: { deliverable_id: id },
     });
 
@@ -73,7 +73,7 @@ export async function createProjectDeliverable(
   try {
     logger.info('Creating new project deliverable');
 
-    const deliverable = await prisma.project_deliverables.create({ data });
+    const deliverable = await prisma.project_resources.create({ data });
 
     logger.info('Successfully created project deliverable', {
       deliverableId: deliverable.deliverable_id,
@@ -98,7 +98,7 @@ export async function updateProjectDeliverable(
       updateData: data,
     });
 
-    const deliverable = await prisma.project_deliverables.update({
+    const deliverable = await prisma.project_resources.update({
       where: { deliverable_id: id },
       data,
     });
@@ -129,7 +129,7 @@ export async function deleteProjectDeliverable(id: string) {
   try {
     logger.info('Deleting project deliverable', { deliverableId: id });
 
-    const deliverable = await prisma.project_deliverables.delete({
+    const deliverable = await prisma.project_resources.delete({
       where: { deliverable_id: id },
     });
 

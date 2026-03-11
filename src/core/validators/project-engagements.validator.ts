@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { engagementStatusSchema, domainTypeSchema } from './enums';
+import {
+  engagementStatusSchema,
+  financialTypeSchema,
+  projectTypeSchema,
+} from './enums';
 
 export const createProjectEngagementSchema = z.object({
   project_id: z.uuid(),
@@ -8,7 +12,8 @@ export const createProjectEngagementSchema = z.object({
   academic_term_id: z.uuid().optional(),
   client_contact_id: z.uuid().optional(),
   status: engagementStatusSchema.optional().default('ACTIVE'),
-  domain: domainTypeSchema.optional().default('FULL_STACK'),
+  domain: projectTypeSchema.optional().default('FULL_STACK'),
+  financial: financialTypeSchema.optional().default('PRO_BONO'),
 });
 
 export const updateProjectEngagementSchema =

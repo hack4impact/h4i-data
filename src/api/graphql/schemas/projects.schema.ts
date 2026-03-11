@@ -1,10 +1,4 @@
 export const projectSchemaString = `
-  enum FinancialType {
-    PRO_BONO
-    INTERNAL
-    PAID_CONSULT
-  }
-
   enum ProjectStatus {
     WORKING
     ACTIVE
@@ -16,7 +10,6 @@ export const projectSchemaString = `
     project_id: ID!
     name: String!
     github_url: String
-    financial: FinancialType
     status: ProjectStatus
     created_at: String
     updated_at: String
@@ -30,14 +23,12 @@ export const projectSchemaString = `
   input CreateProjectInput {
     name: String!
     github_url: String
-    financial: FinancialType
     status: ProjectStatus
   }
 
   input UpdateProjectInput {
     name: String
     github_url: String
-    financial: FinancialType
     status: ProjectStatus
   }
 

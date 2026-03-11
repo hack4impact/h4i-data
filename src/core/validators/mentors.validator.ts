@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { memberStatusSchema } from './enums';
+import { volunteerStatusSchema } from './enums';
 
 export const createMentorSchema = z.object({
   mentor_id: z.uuid(),
-  status: memberStatusSchema.optional().default('ACTIVE'),
+  status: volunteerStatusSchema.optional().default('ACTIVE'),
   expertise_area: z.string().optional(),
   max_mentees: z.number().int().optional(),
 });

@@ -3,14 +3,14 @@ import {
   volunteerClassSchema,
   engagementTrackSchema,
   educationLevelSchema,
-  memberStatusSchema,
+  volunteerStatusSchema,
 } from './enums';
 
 export const createVolunteerSchema = z.object({
   // volunteer_id is a FK to constituents, required for create
   volunteer_id: z.uuid(),
   org_email: z.string().email().optional(),
-  status: memberStatusSchema.optional().default('ACTIVE'),
+  status: volunteerStatusSchema.optional().default('ACTIVE'),
   volunteer_class: volunteerClassSchema.optional().default('COLLEGIATE'),
   engagement_track: engagementTrackSchema.optional().default('PROGRAMS'),
   major_id: z.uuid().optional(),

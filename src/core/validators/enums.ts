@@ -4,7 +4,6 @@ import { z } from 'zod';
 export const actionTypeSchema = z.enum([
   'JOINED',
   'LEFT',
-  'ON_HIATUS',
   'ENROLLED',
   'PROMOTED',
   'DEMOTED',
@@ -15,24 +14,25 @@ export const actionTypeSchema = z.enum([
 ]);
 export type ActionType = z.infer<typeof actionTypeSchema>;
 
-// Deliverable types for project deliverables
-export const deliverableTypeSchema = z.enum([
-  'REPO',
-  'DESIGN_SPEC',
+// Resource types for project resources
+export const projectResourceTypeSchema = z.enum([
+  'CODE',
+  'DESIGNS',
+  'REQUIREMENTS',
   'LIVE_URL',
   'DOCUMENTATION',
 ]);
-export type DeliverableType = z.infer<typeof deliverableTypeSchema>;
+export type ProjectResourceType = z.infer<typeof projectResourceTypeSchema>;
 
 // Domain types for project engagements
-export const domainTypeSchema = z.enum([
+export const projectTypeSchema = z.enum([
   'DESIGN_ONLY',
   'DEVELOP_ONLY',
   'FULL_STACK',
   'STRATEGY_CONSULT',
   'MAINTENANCE',
 ]);
-export type DomainType = z.infer<typeof domainTypeSchema>;
+export type ProjectType = z.infer<typeof projectTypeSchema>;
 
 // Education levels for volunteers
 export const educationLevelSchema = z.enum([
@@ -61,7 +61,7 @@ export const engagementTrackSchema = z.enum([
 ]);
 export type EngagementTrack = z.infer<typeof engagementTrackSchema>;
 
-// Financial types for projects
+// Financial types for project engagements
 export const financialTypeSchema = z.enum([
   'PRO_BONO',
   'INTERNAL',
@@ -97,13 +97,13 @@ export const volunteerClassSchema = z.enum([
 export type VolunteerClass = z.infer<typeof volunteerClassSchema>;
 
 // Member status for volunteers and mentors
-export const memberStatusSchema = z.enum([
+export const volunteerStatusSchema = z.enum([
   'PROSPECT',
   'ACTIVE',
   'INACTIVE',
-  'ON_HIATUS',
+  'HIATUS',
 ]);
-export type MemberStatus = z.infer<typeof memberStatusSchema>;
+export type VolunteerStatus = z.infer<typeof volunteerStatusSchema>;
 
 // Chapter status
 export const chapterStatusSchema = z.enum([

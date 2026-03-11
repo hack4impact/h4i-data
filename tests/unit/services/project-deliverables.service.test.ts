@@ -10,7 +10,7 @@ import { Prisma } from '@prisma/client';
 
 jest.mock('../../../src/config/database', () => ({
   prisma: {
-    project_deliverables: {
+    project_resources: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       create: jest.fn(),
@@ -33,12 +33,12 @@ describe('Project Deliverable Service', () => {
           project_id: 'proj-1',
           label: 'Main Repository',
           url: 'https://github.com/org/repo',
-          category: 'REPO',
+          category: 'CODE',
           created_at: new Date(),
           updated_at: new Date(),
         },
       ];
-      (prisma.project_deliverables.findMany as jest.Mock).mockResolvedValue(
+      (prisma.project_resources.findMany as jest.Mock).mockResolvedValue(
         mockDeliverables
       );
 
@@ -48,13 +48,13 @@ describe('Project Deliverable Service', () => {
     });
 
     it('should return empty array when no project deliverables exist', async () => {
-      (prisma.project_deliverables.findMany as jest.Mock).mockResolvedValue([]);
+      (prisma.project_resources.findMany as jest.Mock).mockResolvedValue([]);
       const result = await getAllProjectDeliverables();
       expect(result).toEqual([]);
     });
 
     it('should throw DatabaseError when database fails', async () => {
-      (prisma.project_deliverables.findMany as jest.Mock).mockRejectedValue(
+      (prisma.project_resources.findMany as jest.Mock).mockRejectedValue(
         new Error('Connection refused')
       );
       await expect(getAllProjectDeliverables()).rejects.toThrow(
@@ -71,11 +71,11 @@ describe('Project Deliverable Service', () => {
         project_id: 'proj-1',
         label: 'Main Repository',
         url: 'https://github.com/org/repo',
-        category: 'REPO',
+        category: 'CODE',
         created_at: new Date(),
         updated_at: new Date(),
       };
-      (prisma.project_deliverables.findUnique as jest.Mock).mockResolvedValue(
+      (prisma.project_resources.findUnique as jest.Mock).mockResolvedValue(
         mockDeliverable
       );
 
@@ -86,7 +86,7 @@ describe('Project Deliverable Service', () => {
 
     it('should throw NotFoundError if no project deliverable is found', async () => {
       const deliverableId = 'non-existent-id';
-      (prisma.project_deliverables.findUnique as jest.Mock).mockResolvedValue(
+      (prisma.project_resources.findUnique as jest.Mock).mockResolvedValue(
         null
       );
 
@@ -96,7 +96,7 @@ describe('Project Deliverable Service', () => {
     });
 
     it('should throw DatabaseError on unexpected error', async () => {
-      (prisma.project_deliverables.findUnique as jest.Mock).mockRejectedValue(
+      (prisma.project_resources.findUnique as jest.Mock).mockRejectedValue(
         new Error('Connection refused')
       );
       await expect(getProjectDeliverableById('1')).rejects.toThrow(
@@ -111,7 +111,7 @@ describe('Project Deliverable Service', () => {
         project_id: 'proj-1',
         label: 'Design Spec',
         url: 'https://figma.com/file/123',
-        category: 'DESIGN_SPEC' as const,
+        category: 'DESIGNS' as const,
       };
       const createdDeliverable = {
         deliverable_id: 'new-id-123',
@@ -119,7 +119,7 @@ describe('Project Deliverable Service', () => {
         updated_at: new Date(),
         ...inputData,
       };
-      (prisma.project_deliverables.create as jest.Mock).mockResolvedValue(
+      (prisma.project_resources.create as jest.Mock).mockResolvedValue(
         createdDeliverable
       );
 
@@ -129,7 +129,7 @@ describe('Project Deliverable Service', () => {
     });
 
     it('should throw DatabaseError when create fails', async () => {
-      (prisma.project_deliverables.create as jest.Mock).mockRejectedValue(
+      (prisma.project_resources.create as jest.Mock).mockRejectedValue(
         new Error('Connection refused')
       );
       await expect(
@@ -137,7 +137,7 @@ describe('Project Deliverable Service', () => {
           project_id: 'proj-1',
           label: 'Spec',
           url: 'https://example.com',
-          category: 'DESIGN_SPEC' as const,
+          category: 'DESIGNS' as const,
         })
       ).rejects.toThrow('Failed to create project deliverable');
     });
@@ -152,11 +152,11 @@ describe('Project Deliverable Service', () => {
         project_id: 'proj-1',
         label: 'Updated Repository',
         url: 'https://github.com/org/repo',
-        category: 'REPO',
+        category: 'CODE',
         created_at: new Date(),
         updated_at: new Date(),
       };
-      (prisma.project_deliverables.update as jest.Mock).mockResolvedValue(
+      (prisma.project_resources.update as jest.Mock).mockResolvedValue(
         updatedDeliverable
       );
 
@@ -166,7 +166,7 @@ describe('Project Deliverable Service', () => {
     });
 
     it('should throw NotFoundError when updating non-existent project deliverable', async () => {
-      (prisma.project_deliverables.update as jest.Mock).mockRejectedValue(
+      (prisma.project_resources.update as jest.Mock).mockRejectedValue(
         new Prisma.PrismaClientKnownRequestError('Record not found', {
           code: 'P2025',
           clientVersion: '5.0.0',
@@ -180,7 +180,7 @@ describe('Project Deliverable Service', () => {
     });
 
     it('should throw DatabaseError on unexpected update error', async () => {
-      (prisma.project_deliverables.update as jest.Mock).mockRejectedValue(
+      (prisma.project_resources.update as jest.Mock).mockRejectedValue(
         new Error('Connection refused')
       );
       await expect(
@@ -197,11 +197,11 @@ describe('Project Deliverable Service', () => {
         project_id: 'proj-1',
         label: 'Main Repository',
         url: 'https://github.com/org/repo',
-        category: 'REPO',
+        category: 'CODE',
         created_at: new Date(),
         updated_at: new Date(),
       };
-      (prisma.project_deliverables.delete as jest.Mock).mockResolvedValue(
+      (prisma.project_resources.delete as jest.Mock).mockResolvedValue(
         deletedDeliverable
       );
 
@@ -211,7 +211,7 @@ describe('Project Deliverable Service', () => {
     });
 
     it('should throw NotFoundError when deleting non-existent project deliverable', async () => {
-      (prisma.project_deliverables.delete as jest.Mock).mockRejectedValue(
+      (prisma.project_resources.delete as jest.Mock).mockRejectedValue(
         new Prisma.PrismaClientKnownRequestError('Record not found', {
           code: 'P2025',
           clientVersion: '5.0.0',
@@ -223,7 +223,7 @@ describe('Project Deliverable Service', () => {
     });
 
     it('should throw DatabaseError on unexpected delete error', async () => {
-      (prisma.project_deliverables.delete as jest.Mock).mockRejectedValue(
+      (prisma.project_resources.delete as jest.Mock).mockRejectedValue(
         new Error('Connection refused')
       );
       await expect(deleteProjectDeliverable('1')).rejects.toThrow(

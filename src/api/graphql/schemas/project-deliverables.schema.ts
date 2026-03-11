@@ -1,7 +1,8 @@
 export const projectDeliverableSchemaString = `
-  enum DeliverableType {
-    REPO
-    DESIGN_SPEC
+  enum ProjectResourceType {
+    CODE
+    DESIGNS
+    REQUIREMENTS
     LIVE_URL
     DOCUMENTATION
   }
@@ -11,7 +12,7 @@ export const projectDeliverableSchemaString = `
     project_id: ID!
     label: String
     url: String
-    category: DeliverableType
+    category: ProjectResourceType
     created_at: String
     updated_at: String
   }
@@ -25,14 +26,14 @@ export const projectDeliverableSchemaString = `
     project_id: ID!
     label: String
     url: String
-    category: DeliverableType
+    category: ProjectResourceType
   }
 
   input UpdateProjectDeliverableInput {
     project_id: ID
     label: String
     url: String
-    category: DeliverableType
+    category: ProjectResourceType
   }
 
   type Mutation {

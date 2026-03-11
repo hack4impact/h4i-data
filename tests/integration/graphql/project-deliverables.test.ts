@@ -52,7 +52,7 @@ describe('GraphQL API - Project Deliverables', () => {
         project_id: projectId,
         label: 'Source Code',
         url: 'https://github.com/org/repo',
-        category: 'REPO',
+        category: 'CODE',
       },
     };
     const response = await request(app)
@@ -66,7 +66,7 @@ describe('GraphQL API - Project Deliverables', () => {
     expect(deliverable).toHaveProperty('deliverable_id');
     expect(deliverable.project_id).toBe(projectId);
     expect(deliverable.label).toBe('Source Code');
-    expect(deliverable.category).toBe('REPO');
+    expect(deliverable.category).toBe('CODE');
   });
 
   it('should fetch a project deliverable by ID via query', async () => {

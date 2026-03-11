@@ -11,7 +11,6 @@ const createTestProject = async () => {
         project_id
         name
         github_url
-        financial
       }
     }
   `;
@@ -19,7 +18,6 @@ const createTestProject = async () => {
     input: {
       name: `Test Project ${Date.now()}.${Math.random()}`,
       github_url: 'https://github.com/test/project',
-      financial: 'PRO_BONO',
     },
   };
   const response = await request(app)
@@ -37,7 +35,6 @@ describe('GraphQL API - Projects', () => {
           project_id
           name
           github_url
-          financial
         }
       }
     `;
@@ -45,7 +42,6 @@ describe('GraphQL API - Projects', () => {
       input: {
         name: `Test Project ${Date.now()}.${Math.random()}`,
         github_url: 'https://github.com/test/project',
-        financial: 'PRO_BONO',
       },
     };
     const response = await request(app)
@@ -69,7 +65,6 @@ describe('GraphQL API - Projects', () => {
           project_id
           name
           github_url
-          financial
         }
       }
     `;
@@ -180,7 +175,7 @@ describe('GraphQL API - Projects', () => {
       .post('/')
       .send({
         query: mutation,
-        variables: { id: project.project_id, input: { financial: 'INVALID' } },
+        variables: { id: project.project_id, input: { status: 'INVALID' } },
       });
 
     // Assert

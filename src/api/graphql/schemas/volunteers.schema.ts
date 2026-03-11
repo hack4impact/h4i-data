@@ -2,7 +2,7 @@ export const volunteerSchemaString = `
   type Volunteer {
     volunteer_id: ID!
     org_email: String
-    status: MemberStatus
+    status: VolunteerStatus
     volunteer_class: VolunteerClass
     engagement_track: EngagementTrack
     major_id: ID
@@ -24,7 +24,7 @@ export const volunteerSchemaString = `
   input CreateVolunteerInput {
     volunteer_id: ID!
     org_email: String
-    status: MemberStatus
+    status: VolunteerStatus
     volunteer_class: VolunteerClass
     engagement_track: EngagementTrack
     major_id: ID
@@ -37,7 +37,7 @@ export const volunteerSchemaString = `
 
   input UpdateVolunteerInput {
     org_email: String
-    status: MemberStatus
+    status: VolunteerStatus
     volunteer_class: VolunteerClass
     engagement_track: EngagementTrack
     major_id: ID

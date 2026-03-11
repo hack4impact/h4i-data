@@ -1,5 +1,11 @@
 export const projectEngagementSchemaString = `
-  enum DomainType {
+  enum FinancialType {
+    PRO_BONO
+    INTERNAL
+    PAID_CONSULT
+  }
+
+  enum ProjectType {
     DESIGN_ONLY
     DEVELOP_ONLY
     FULL_STACK
@@ -15,7 +21,8 @@ export const projectEngagementSchemaString = `
     academic_term_id: ID
     client_contact_id: ID
     status: EngagementStatus
-    domain: DomainType
+    domain: ProjectType
+    financial: FinancialType
     created_at: String
     updated_at: String
   }
@@ -32,7 +39,8 @@ export const projectEngagementSchemaString = `
     academic_term_id: ID
     client_contact_id: ID
     status: EngagementStatus
-    domain: DomainType
+    domain: ProjectType
+    financial: FinancialType
   }
 
   input UpdateProjectEngagementInput {
@@ -42,7 +50,8 @@ export const projectEngagementSchemaString = `
     academic_term_id: ID
     client_contact_id: ID
     status: EngagementStatus
-    domain: DomainType
+    domain: ProjectType
+    financial: FinancialType
   }
 
   type Mutation {

@@ -55,11 +55,10 @@ Table projects {
   project_id String [pk]
   name String [not null]
   github_url String
-  financial financial_type [default: 'PRO_BONO']
   status project_status [not null, default: 'WORKING']
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
-  project_deliverables project_deliverables [not null]
+  project_resources project_resources [not null]
   project_engagements project_engagements [not null]
 }
 
@@ -80,7 +79,7 @@ Table volunteer_history {
 Table volunteers {
   volunteer_id String [pk]
   org_email String
-  status member_status [not null, default: 'ACTIVE']
+  status volunteer_status [not null, default: 'ACTIVE']
   volunteer_class volunteer_class [default: 'COLLEGIATE']
   engagement_track engagement_track [default: 'PROGRAMS']
   major_id String
@@ -134,7 +133,7 @@ Table constituents {
 
 Table mentors {
   mentor_id String [pk]
-  status member_status [not null, default: 'ACTIVE']
+  status volunteer_status [not null, default: 'ACTIVE']
   expertise_area String
   max_mentees Int
   created_at DateTime [default: `now()`, not null]
@@ -199,12 +198,12 @@ Table partners {
   project_engagements project_engagements [not null]
 }
 
-Table project_deliverables {
+Table project_resources {
   deliverable_id String [pk]
   project_id String [not null]
   label String
   url String
-  category deliverable_type
+  category project_resource_type
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   projects projects [not null]
@@ -218,7 +217,8 @@ Table project_engagements {
   academic_term_id String
   client_contact_id String
   status engagement_status [default: 'ACTIVE']
-  domain domain_type [default: 'FULL_STACK']
+  domain project_type [default: 'FULL_STACK']
+  financial financial_type [default: 'PRO_BONO']
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   academic_terms academic_terms
@@ -284,7 +284,6 @@ Table universities {
 Enum action_type {
   JOINED
   LEFT
-  ON_HIATUS
   ENROLLED
   PROMOTED
   DEMOTED
@@ -294,14 +293,15 @@ Enum action_type {
   HIATUS
 }
 
-Enum deliverable_type {
-  REPO
-  DESIGN_SPEC
+Enum project_resource_type {
+  CODE
+  DESIGNS
+  REQUIREMENTS
   LIVE_URL
   DOCUMENTATION
 }
 
-Enum domain_type {
+Enum project_type {
   DESIGN_ONLY
   DEVELOP_ONLY
   FULL_STACK
@@ -362,11 +362,11 @@ Enum volunteer_class {
   ASSOCIATE
 }
 
-Enum member_status {
+Enum volunteer_status {
   PROSPECT
   ACTIVE
   INACTIVE
-  ON_HIATUS
+  HIATUS
 }
 
 Enum chapter_status {
@@ -427,7 +427,7 @@ Ref: officer_assignments.role_id > officer_roles.role_id [delete: No Action]
 
 Ref: officer_assignments.volunteer_id > volunteers.volunteer_id [delete: No Action]
 
-Ref: project_deliverables.project_id > projects.project_id [delete: Cascade]
+Ref: project_resources.project_id > projects.project_id [delete: Cascade]
 
 Ref: project_engagements.academic_term_id > academic_terms.term_id [delete: No Action]
 

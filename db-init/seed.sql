@@ -6,9 +6,9 @@ CREATE SCHEMA public;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Create Enums
-CREATE TYPE public.action_type AS ENUM ('JOINED', 'LEFT', 'ON HIATUS', 'ENROLLED', 'PROMOTED', 'DEMOTED', 'ROLE_CHANGE', 'GRADUATED', 'RESIGNED', 'HIATUS');
-CREATE TYPE public.deliverable_type AS ENUM ('REPO', 'DESIGN_SPEC', 'LIVE_URL', 'DOCUMENTATION');
-CREATE TYPE public.domain_type AS ENUM ('DESIGN_ONLY', 'DEVELOP_ONLY', 'FULL_STACK', 'STRATEGY_CONSULT', 'MAINTENANCE');
+CREATE TYPE public.action_type AS ENUM ('JOINED', 'LEFT', 'HIATUS', 'ENROLLED', 'PROMOTED', 'DEMOTED', 'ROLE_CHANGE', 'GRADUATED', 'RESIGNED');
+CREATE TYPE public.project_resource_type AS ENUM ('CODE', 'DESIGNS', 'REQUIREMENTS', 'LIVE_URL', 'DOCUMENTATION');
+CREATE TYPE public.project_type AS ENUM ('DESIGN_ONLY', 'DEVELOP_ONLY', 'FULL_STACK', 'STRATEGY_CONSULT', 'MAINTENANCE');
 CREATE TYPE public.education_level AS ENUM ('UNDERGRADUATE', 'GRADUATE', 'BOOTCAMP', 'SELF_TAUGHT', 'OTHER');
 CREATE TYPE public.engagement_status AS ENUM ('PROSPECT', 'ACTIVE', 'COMPLETED', 'ON_HOLD');
 CREATE TYPE public.engagement_track AS ENUM ('PROGRAMS', 'CENTRAL', 'ADVISORY');
@@ -17,7 +17,7 @@ CREATE TYPE public.role_scope AS ENUM ('CHAPTER', 'CENTRAL');
 CREATE TYPE public.social_platform_type AS ENUM ('GITHUB', 'LINKEDIN', 'PORTFOLIO', 'TWITTER', 'DRIBBBLE', 'OTHER');
 CREATE TYPE public.term_type AS ENUM ('SEMESTER', 'QUARTER', 'TRIMESTER');
 CREATE TYPE public.volunteer_class AS ENUM ('COLLEGIATE', 'ALUMNI', 'ASSOCIATE');
-CREATE TYPE public.member_status AS ENUM ('PROSPECT', 'ACTIVE', 'INACTIVE', 'ON_HIATUS');
+CREATE TYPE public.volunteer_status AS ENUM ('PROSPECT', 'ACTIVE', 'INACTIVE', 'HIATUS');
 CREATE TYPE public.chapter_status AS ENUM ('PROSPECT', 'ACTIVE', 'INACTIVE', 'SUSPENDED');
 CREATE TYPE public.project_status AS ENUM ('WORKING', 'ACTIVE', 'INACTIVE', 'ARCHIVED');
 CREATE TYPE public.entity_type AS ENUM ('CHAPTER', 'OFFICER_ROLE', 'PROJECT', 'PROJECT_ROLE', 'ENGAGEMENT', 'UNIVERSITY', 'COMPANY');
@@ -54,7 +54,6 @@ CREATE TABLE public.projects (
     project_id uuid NOT NULL DEFAULT gen_random_uuid(),
     name text NOT NULL,
     github_url text NULL,
-    financial financial_type NULL DEFAULT 'PRO_BONO',
     status project_status NOT NULL DEFAULT 'WORKING',
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
@@ -174,7 +173,7 @@ CREATE INDEX idx_social_links_constituent_id ON public.social_links(constituent_
 
 CREATE TABLE public.mentors (
     mentor_id uuid NOT NULL,
-    status member_status NOT NULL DEFAULT 'ACTIVE',
+    status volunteer_status NOT NULL DEFAULT 'ACTIVE',
     expertise_area text NULL,
     max_mentees int NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
@@ -186,7 +185,7 @@ CREATE TABLE public.mentors (
 CREATE TABLE public.volunteers (
     volunteer_id uuid NOT NULL,
     org_email text NULL,
-    status member_status NOT NULL DEFAULT 'ACTIVE',
+    status volunteer_status NOT NULL DEFAULT 'ACTIVE',
     volunteer_class volunteer_class NULL DEFAULT 'COLLEGIATE',
     engagement_track engagement_track NULL DEFAULT 'PROGRAMS',
     major_id uuid NULL,
@@ -229,18 +228,18 @@ CREATE TABLE public.mentorships (
 CREATE INDEX idx_mentorships_mentor_id ON public.mentorships(mentor_id);
 CREATE INDEX idx_mentorships_mentee_id ON public.mentorships(mentee_id);
 
-CREATE TABLE public.project_deliverables (
+CREATE TABLE public.project_resources (
     deliverable_id uuid NOT NULL DEFAULT gen_random_uuid(),
     project_id uuid NOT NULL,
     label text NULL,
     url text NULL,
-    category deliverable_type NULL,
+    category project_resource_type NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
     PRIMARY KEY (deliverable_id),
     FOREIGN KEY (project_id) REFERENCES public.projects(project_id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
-CREATE INDEX idx_project_deliverables_project_id ON public.project_deliverables(project_id);
+CREATE INDEX idx_project_resources_project_id ON public.project_resources(project_id);
 
 CREATE TABLE public.project_engagements (
     engagement_id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -250,7 +249,8 @@ CREATE TABLE public.project_engagements (
     academic_term_id uuid NULL,
     client_contact_id uuid NULL,
     status engagement_status NULL DEFAULT 'ACTIVE',
-    domain domain_type NULL DEFAULT 'FULL_STACK',
+    domain project_type NULL DEFAULT 'FULL_STACK',
+    financial financial_type NULL DEFAULT 'PRO_BONO',
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
     PRIMARY KEY (engagement_id),

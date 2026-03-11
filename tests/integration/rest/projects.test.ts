@@ -10,7 +10,6 @@ const createTestProject = async () => {
     .send({
       name: `Test Project ${Date.now()}.${Math.random()}`,
       github_url: 'https://github.com/test/project',
-      financial: 'PRO_BONO',
     });
   return response.body;
 };
@@ -24,7 +23,6 @@ describe('REST API - /projects', () => {
         .send({
           name: `Test Project ${Date.now()}.${Math.random()}`,
           github_url: 'https://github.com/test/project',
-          financial: 'PRO_BONO',
         });
 
       // Assert
@@ -36,7 +34,6 @@ describe('REST API - /projects', () => {
       // Act - missing required 'name' field
       const response = await request(app).post('/projects').send({
         github_url: 'https://github.com/test/project',
-        financial: 'PRO_BONO',
       });
 
       // Assert
@@ -112,7 +109,7 @@ describe('REST API - /projects', () => {
       const project = await createTestProject();
       const response = await request(app)
         .patch(`/projects/${project.project_id}`)
-        .send({ financial: 'INVALID' });
+        .send({ status: 'INVALID' });
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error');
     });

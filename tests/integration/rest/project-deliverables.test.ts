@@ -19,7 +19,7 @@ describe('REST API - /project-deliverables', () => {
         project_id: projectId,
         label: 'Source Code',
         url: 'https://github.com/org/repo',
-        category: 'REPO',
+        category: 'CODE',
       });
 
       expect(response.status).toBe(201);

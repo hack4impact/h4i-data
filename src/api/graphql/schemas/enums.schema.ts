@@ -1,9 +1,9 @@
 export const enumsSchemaString = `
-  enum MemberStatus {
+  enum VolunteerStatus {
     PROSPECT
     ACTIVE
     INACTIVE
-    ON_HIATUS
+    HIATUS
   }
 
   enum VolunteerClass {

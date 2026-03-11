@@ -44,7 +44,7 @@ beforeEach(async () => {
     if (!isUnitTest) {
       // Delete in order respecting foreign key constraints
       await prisma.project_staffing.deleteMany({});
-      await prisma.project_deliverables.deleteMany({});
+      await prisma.project_resources.deleteMany({});
       await prisma.project_engagements.deleteMany({});
       await prisma.officer_assignments.deleteMany({});
       await prisma.volunteer_history.deleteMany({});

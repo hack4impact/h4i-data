@@ -1,7 +1,7 @@
 export const mentorSchemaString = `
   type Mentor {
     mentor_id: ID!
-    status: MemberStatus
+    status: VolunteerStatus
     expertise_area: String
     max_mentees: Int
     created_at: String
@@ -16,13 +16,13 @@ export const mentorSchemaString = `
 
   input CreateMentorInput {
     mentor_id: ID!
-    status: MemberStatus
+    status: VolunteerStatus
     expertise_area: String
     max_mentees: Int
   }
 
   input UpdateMentorInput {
-    status: MemberStatus
+    status: VolunteerStatus
     expertise_area: String
     max_mentees: Int
   }
