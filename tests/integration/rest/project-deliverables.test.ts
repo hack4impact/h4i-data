@@ -23,7 +23,7 @@ describe('REST API - /project-deliverables', () => {
       });
 
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('resource_id');
+      expect(response.body).toHaveProperty('project_resource_id');
       expect(response.body.project_id).toBe(projectId);
     });
 
@@ -60,12 +60,12 @@ describe('REST API - /project-deliverables', () => {
         project_id: projectId,
         label: 'Design Spec',
       });
-      const id = created.body.resource_id;
+      const id = created.body.project_resource_id;
 
       const response = await request(app).get(`/project-deliverables/${id}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.resource_id).toBe(id);
+      expect(response.body.project_resource_id).toBe(id);
     });
 
     it('should return 404 for a non-existent deliverable', async () => {
@@ -84,7 +84,7 @@ describe('REST API - /project-deliverables', () => {
         project_id: projectId,
         label: 'Original Label',
       });
-      const id = created.body.resource_id;
+      const id = created.body.project_resource_id;
 
       const response = await request(app)
         .patch(`/project-deliverables/${id}`)
@@ -107,7 +107,7 @@ describe('REST API - /project-deliverables', () => {
         project_id: projectId,
         label: 'Original Label',
       });
-      const id = created.body.resource_id;
+      const id = created.body.project_resource_id;
 
       const response = await request(app)
         .patch(`/project-deliverables/${id}`)
@@ -124,7 +124,7 @@ describe('REST API - /project-deliverables', () => {
         project_id: projectId,
         label: 'To Delete',
       });
-      const id = created.body.resource_id;
+      const id = created.body.project_resource_id;
 
       const response = await request(app).delete(`/project-deliverables/${id}`);
 

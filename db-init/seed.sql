@@ -228,14 +228,14 @@ CREATE INDEX idx_mentorships_mentor_id ON public.mentorships(mentor_id);
 CREATE INDEX idx_mentorships_mentee_id ON public.mentorships(mentee_id);
 
 CREATE TABLE public.project_resources (
-    resource_id uuid NOT NULL DEFAULT gen_random_uuid(),
+    project_resource_id uuid NOT NULL DEFAULT gen_random_uuid(),
     project_id uuid NOT NULL,
     label text NULL,
     url text NULL,
     category project_resource_type NULL,
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
-    PRIMARY KEY (resource_id),
+    PRIMARY KEY (project_resource_id),
     FOREIGN KEY (project_id) REFERENCES public.projects(project_id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 CREATE INDEX idx_project_resources_project_id ON public.project_resources(project_id);

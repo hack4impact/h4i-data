@@ -124,7 +124,7 @@ Table constituents {
   phone_number String
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
-  mentorships_mentee mentorships [not null]
+  mentorships_as_mentee mentorships [not null]
   mentors mentors
   project_engagements project_engagements [not null]
   constituent_links constituent_links [not null]
@@ -153,7 +153,7 @@ Table mentorships {
   notes String
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
-  constituents_mentorships_mentee_idToconstituents constituents [not null]
+  mentee constituents [not null]
   mentors mentors [not null]
 }
 
@@ -195,7 +195,7 @@ Table partners {
 }
 
 Table project_resources {
-  resource_id String [pk]
+  project_resource_id String [pk]
   project_id String [not null]
   label String
   url String

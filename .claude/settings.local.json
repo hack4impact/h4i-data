@@ -13,7 +13,11 @@
       "mcp__paper__write_html",
       "mcp__paper__finish_working_on_nodes",
       "Bash(pnpm exec:*)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(pnpm prisma:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker exec:*)",
+      "Bash(pnpm test:*)"
     ]
   }
 }

@@ -147,7 +147,7 @@ model constituents {
   phone_number        String?
   created_at          DateTime              @default(now()) @db.Timestamptz(6)
   updated_at          DateTime              @updatedAt @db.Timestamptz(6)
-  mentorships_mentee  mentorships[]         @relation("mentorships_mentee_idToconstituents")
+  mentorships_as_mentee mentorships[]         @relation("MentorshipMentee")
   mentors             mentors?
   project_engagements project_engagements[]
   constituent_links   constituent_links[]
@@ -176,7 +176,7 @@ model mentorships {
   notes                                            String?
   created_at                                       DateTime           @default(now()) @db.Timestamptz(6)
   updated_at                                       DateTime           @updatedAt @db.Timestamptz(6)
-  constituents_mentorships_mentee_idToconstituents constituents       @relation("mentorships_mentee_idToconstituents", fields: [mentee_id], references: [constituent_id], onDelete: NoAction, onUpdate: NoAction)
+  mentee                                           constituents       @relation("MentorshipMentee", fields: [mentee_id], references: [constituent_id], onDelete: NoAction, onUpdate: NoAction)
   mentors                                          mentors            @relation(fields: [mentor_id], references: [mentor_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([mentor_id])
@@ -225,14 +225,14 @@ model partners {
 }
 
 model project_resources {
-  resource_id    String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  project_id     String                @db.Uuid
-  label          String?
-  url            String?
-  category       project_resource_type?
-  created_at     DateTime              @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime              @updatedAt @db.Timestamptz(6)
-  projects       projects              @relation(fields: [project_id], references: [project_id], onDelete: Cascade, onUpdate: NoAction)
+  project_resource_id String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id          String                @db.Uuid
+  label               String?
+  url                 String?
+  category            project_resource_type?
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime              @updatedAt @db.Timestamptz(6)
+  projects            projects              @relation(fields: [project_id], references: [project_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([project_id])
 }

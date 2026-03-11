@@ -22,7 +22,7 @@ export async function getAllProjectDeliverables() {
   try {
     logger.info('Fetching all project deliverables');
     const deliverables = await prisma.project_resources.findMany({
-      orderBy: { resource_id: 'asc' },
+      orderBy: { project_resource_id: 'asc' },
     });
 
     logger.info('Successfully retrieved project deliverables', {
@@ -43,7 +43,7 @@ export async function getProjectDeliverableById(id: string) {
     logger.info('Fetching project deliverable by ID', { deliverableId: id });
 
     const deliverable = await prisma.project_resources.findUnique({
-      where: { resource_id: id },
+      where: { project_resource_id: id },
     });
 
     if (!deliverable) {
@@ -76,7 +76,7 @@ export async function createProjectDeliverable(
     const deliverable = await prisma.project_resources.create({ data });
 
     logger.info('Successfully created project deliverable', {
-      deliverableId: deliverable.resource_id,
+      deliverableId: deliverable.project_resource_id,
     });
 
     return deliverable;
@@ -99,7 +99,7 @@ export async function updateProjectDeliverable(
     });
 
     const deliverable = await prisma.project_resources.update({
-      where: { resource_id: id },
+      where: { project_resource_id: id },
       data,
     });
 
@@ -130,7 +130,7 @@ export async function deleteProjectDeliverable(id: string) {
     logger.info('Deleting project deliverable', { deliverableId: id });
 
     const deliverable = await prisma.project_resources.delete({
-      where: { resource_id: id },
+      where: { project_resource_id: id },
     });
 
     logger.info('Successfully deleted project deliverable', {
