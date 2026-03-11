@@ -1,6 +1,7 @@
 export const chapterSchemaString = `
   enum ChapterStatus {
     PROSPECT
+    FORMING
     ACTIVE
     INACTIVE
     SUSPENDED

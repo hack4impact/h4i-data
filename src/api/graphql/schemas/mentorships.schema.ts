@@ -4,6 +4,7 @@ export const mentorshipSchemaString = `
     ACTIVE
     COMPLETED
     ON_HOLD
+    REVIEW
   }
 
   type Mentorship {

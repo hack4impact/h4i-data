@@ -9,17 +9,17 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TYPE public.action_type AS ENUM ('JOINED', 'LEFT', 'HIATUS', 'ENROLLED', 'PROMOTED', 'DEMOTED', 'ROLE_CHANGE', 'GRADUATED', 'RESIGNED');
 CREATE TYPE public.project_resource_type AS ENUM ('CODE', 'DESIGNS', 'REQUIREMENTS', 'LIVE_URL', 'DOCUMENTATION');
 CREATE TYPE public.project_type AS ENUM ('DESIGN_ONLY', 'DEVELOP_ONLY', 'FULL_STACK', 'STRATEGY_CONSULT', 'MAINTENANCE');
-CREATE TYPE public.education_level AS ENUM ('UNDERGRADUATE', 'GRADUATE', 'BOOTCAMP', 'SELF_TAUGHT', 'OTHER');
-CREATE TYPE public.engagement_status AS ENUM ('PROSPECT', 'ACTIVE', 'COMPLETED', 'ON_HOLD');
-CREATE TYPE public.engagement_track AS ENUM ('PROGRAMS', 'CENTRAL', 'ADVISORY');
-CREATE TYPE public.financial_type AS ENUM ('PRO_BONO', 'INTERNAL', 'PAID_CONSULT');
+CREATE TYPE public.education_level AS ENUM ('UNDERGRADUATE', 'GRADUATE', 'OTHER');
+CREATE TYPE public.engagement_status AS ENUM ('PROSPECT', 'ACTIVE', 'COMPLETED', 'ON_HOLD', 'REVIEW');
+CREATE TYPE public.engagement_track AS ENUM ('CHAPTER', 'CENTRAL', 'ADVISORY');
+CREATE TYPE public.financial_type AS ENUM ('PRO_BONO', 'INTERNAL', 'PAID');
 CREATE TYPE public.role_scope AS ENUM ('CHAPTER', 'CENTRAL');
 CREATE TYPE public.link_type AS ENUM ('SOCIAL_MEDIA', 'GITHUB', 'FIGMA', 'LINKEDIN', 'WEBSITE', 'OTHER');
 CREATE TYPE public.term_type AS ENUM ('SEMESTER', 'QUARTER', 'TRIMESTER');
 CREATE TYPE public.volunteer_class AS ENUM ('COLLEGIATE', 'ALUMNI', 'ASSOCIATE');
-CREATE TYPE public.volunteer_status AS ENUM ('PROSPECT', 'ACTIVE', 'INACTIVE', 'HIATUS');
-CREATE TYPE public.chapter_status AS ENUM ('PROSPECT', 'ACTIVE', 'INACTIVE', 'SUSPENDED');
-CREATE TYPE public.project_status AS ENUM ('WORKING', 'ACTIVE', 'INACTIVE', 'ARCHIVED');
+CREATE TYPE public.volunteer_status AS ENUM ('PROSPECT', 'ACTIVE', 'INACTIVE', 'HIATUS', 'REVIEW');
+CREATE TYPE public.chapter_status AS ENUM ('PROSPECT', 'FORMING', 'ACTIVE', 'INACTIVE', 'SUSPENDED');
+CREATE TYPE public.project_status AS ENUM ('SCOPING', 'ACTIVE', 'INACTIVE', 'ARCHIVED');
 CREATE TYPE public.entity_type AS ENUM ('CHAPTER', 'OFFICER_ROLE', 'PROJECT', 'PROJECT_ROLE', 'ENGAGEMENT', 'UNIVERSITY', 'COMPANY');
 
 -- Create Tables (in an order that respects foreign keys)
@@ -54,7 +54,7 @@ CREATE TABLE public.projects (
     project_id uuid NOT NULL DEFAULT gen_random_uuid(),
     name text NOT NULL,
     github_url text NULL,
-    status project_status NOT NULL DEFAULT 'WORKING',
+    status project_status NOT NULL DEFAULT 'SCOPING',
     created_at timestamptz(6) NOT NULL DEFAULT now(),
     updated_at timestamptz(6) NOT NULL DEFAULT now(),
     PRIMARY KEY (project_id)
@@ -186,7 +186,7 @@ CREATE TABLE public.volunteers (
     org_email text NULL,
     status volunteer_status NOT NULL DEFAULT 'ACTIVE',
     volunteer_class volunteer_class NOT NULL DEFAULT 'COLLEGIATE',
-    engagement_track engagement_track NOT NULL DEFAULT 'PROGRAMS',
+    engagement_track engagement_track NOT NULL DEFAULT 'CHAPTER',
     major_id uuid NULL,
     education_level education_level NULL,
     graduation_term_id uuid NULL,

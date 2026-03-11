@@ -38,8 +38,6 @@ export type ProjectType = z.infer<typeof projectTypeSchema>;
 export const educationLevelSchema = z.enum([
   'UNDERGRADUATE',
   'GRADUATE',
-  'BOOTCAMP',
-  'SELF_TAUGHT',
   'OTHER',
 ]);
 export type EducationLevel = z.infer<typeof educationLevelSchema>;
@@ -50,23 +48,16 @@ export const engagementStatusSchema = z.enum([
   'ACTIVE',
   'COMPLETED',
   'ON_HOLD',
+  'REVIEW',
 ]);
 export type EngagementStatus = z.infer<typeof engagementStatusSchema>;
 
 // Engagement tracks for volunteers
-export const engagementTrackSchema = z.enum([
-  'PROGRAMS',
-  'CENTRAL',
-  'ADVISORY',
-]);
+export const engagementTrackSchema = z.enum(['CHAPTER', 'CENTRAL', 'ADVISORY']);
 export type EngagementTrack = z.infer<typeof engagementTrackSchema>;
 
 // Financial types for project engagements
-export const financialTypeSchema = z.enum([
-  'PRO_BONO',
-  'INTERNAL',
-  'PAID_CONSULT',
-]);
+export const financialTypeSchema = z.enum(['PRO_BONO', 'INTERNAL', 'PAID']);
 export type FinancialType = z.infer<typeof financialTypeSchema>;
 
 // Role scope for officer roles
@@ -102,12 +93,14 @@ export const volunteerStatusSchema = z.enum([
   'ACTIVE',
   'INACTIVE',
   'HIATUS',
+  'REVIEW',
 ]);
 export type VolunteerStatus = z.infer<typeof volunteerStatusSchema>;
 
 // Chapter status
 export const chapterStatusSchema = z.enum([
   'PROSPECT',
+  'FORMING',
   'ACTIVE',
   'INACTIVE',
   'SUSPENDED',
@@ -116,7 +109,7 @@ export type ChapterStatus = z.infer<typeof chapterStatusSchema>;
 
 // Project status
 export const projectStatusSchema = z.enum([
-  'WORKING',
+  'SCOPING',
   'ACTIVE',
   'INACTIVE',
   'ARCHIVED',

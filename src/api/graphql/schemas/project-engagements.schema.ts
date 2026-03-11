@@ -2,7 +2,7 @@ export const projectEngagementSchemaString = `
   enum FinancialType {
     PRO_BONO
     INTERNAL
-    PAID_CONSULT
+    PAID
   }
 
   enum ProjectType {

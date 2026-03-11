@@ -47,7 +47,7 @@ describe('REST API - /volunteers', () => {
         org_email: 'john@org.edu',
         status: 'ACTIVE',
         volunteer_class: 'COLLEGIATE',
-        engagement_track: 'PROGRAMS',
+        engagement_track: 'CHAPTER',
         major_id: majorId,
         education_level: 'UNDERGRADUATE',
       };

@@ -4,6 +4,7 @@ export const enumsSchemaString = `
     ACTIVE
     INACTIVE
     HIATUS
+    REVIEW
   }
 
   enum VolunteerClass {
@@ -13,7 +14,7 @@ export const enumsSchemaString = `
   }
 
   enum EngagementTrack {
-    PROGRAMS
+    CHAPTER
     CENTRAL
     ADVISORY
   }
@@ -21,8 +22,6 @@ export const enumsSchemaString = `
   enum EducationLevel {
     UNDERGRADUATE
     GRADUATE
-    BOOTCAMP
-    SELF_TAUGHT
     OTHER
   }
 `;

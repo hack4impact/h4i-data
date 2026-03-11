@@ -11,16 +11,16 @@ CREATE TYPE "deliverable_type" AS ENUM ('REPO', 'DESIGN_SPEC', 'LIVE_URL', 'DOCU
 CREATE TYPE "domain_type" AS ENUM ('DESIGN_ONLY', 'DEVELOP_ONLY', 'FULL_STACK', 'STRATEGY_CONSULT', 'MAINTENANCE');
 
 -- CreateEnum
-CREATE TYPE "education_level" AS ENUM ('UNDERGRADUATE', 'GRADUATE', 'BOOTCAMP', 'SELF_TAUGHT', 'OTHER');
+CREATE TYPE "education_level" AS ENUM ('UNDERGRADUATE', 'GRADUATE', 'OTHER');
 
 -- CreateEnum
-CREATE TYPE "engagement_status" AS ENUM ('PROSPECT', 'ACTIVE', 'COMPLETED', 'ON_HOLD');
+CREATE TYPE "engagement_status" AS ENUM ('PROSPECT', 'ACTIVE', 'COMPLETED', 'ON_HOLD', 'REVIEW');
 
 -- CreateEnum
-CREATE TYPE "engagement_track" AS ENUM ('PROGRAMS', 'CENTRAL', 'ADVISORY');
+CREATE TYPE "engagement_track" AS ENUM ('CHAPTER', 'CENTRAL', 'ADVISORY');
 
 -- CreateEnum
-CREATE TYPE "financial_type" AS ENUM ('PRO_BONO', 'INTERNAL', 'PAID_CONSULT');
+CREATE TYPE "financial_type" AS ENUM ('PRO_BONO', 'INTERNAL', 'PAID');
 
 -- CreateEnum
 CREATE TYPE "role_scope" AS ENUM ('CHAPTER', 'CENTRAL');
@@ -38,10 +38,10 @@ CREATE TYPE "volunteer_class" AS ENUM ('COLLEGIATE', 'ALUMNI', 'ASSOCIATE');
 CREATE TYPE "member_status" AS ENUM ('PROSPECT', 'ACTIVE', 'INACTIVE', 'ON_HIATUS');
 
 -- CreateEnum
-CREATE TYPE "chapter_status" AS ENUM ('PROSPECT', 'ACTIVE', 'INACTIVE', 'SUSPENDED');
+CREATE TYPE "chapter_status" AS ENUM ('PROSPECT', 'FORMING', 'ACTIVE', 'INACTIVE', 'SUSPENDED');
 
 -- CreateEnum
-CREATE TYPE "project_status" AS ENUM ('WORKING', 'ACTIVE', 'INACTIVE', 'ARCHIVED');
+CREATE TYPE "project_status" AS ENUM ('SCOPING', 'ACTIVE', 'INACTIVE', 'ARCHIVED');
 
 -- CreateEnum
 CREATE TYPE "entity_type" AS ENUM ('CHAPTER', 'OFFICER_ROLE', 'PROJECT', 'PROJECT_ROLE', 'ENGAGEMENT', 'UNIVERSITY', 'COMPANY');
@@ -91,7 +91,7 @@ CREATE TABLE "projects" (
     "name" VARCHAR NOT NULL,
     "github_url" VARCHAR,
     "financial" "financial_type" DEFAULT 'PRO_BONO',
-    "status" "project_status" NOT NULL DEFAULT 'WORKING',
+    "status" "project_status" NOT NULL DEFAULT 'SCOPING',
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
 
@@ -120,7 +120,7 @@ CREATE TABLE "volunteers" (
     "org_email" VARCHAR,
     "status" "member_status" NOT NULL DEFAULT 'ACTIVE',
     "volunteer_class" "volunteer_class" DEFAULT 'COLLEGIATE',
-    "engagement_track" "engagement_track" DEFAULT 'PROGRAMS',
+    "engagement_track" "engagement_track" DEFAULT 'CHAPTER',
     "major" VARCHAR,
     "education_level" "education_level",
     "graduation_term_id" UUID,

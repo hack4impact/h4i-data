@@ -1,6 +1,6 @@
 export const projectSchemaString = `
   enum ProjectStatus {
-    WORKING
+    SCOPING
     ACTIVE
     INACTIVE
     ARCHIVED

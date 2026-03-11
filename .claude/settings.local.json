@@ -17,7 +17,8 @@
       "Bash(pnpm prisma:*)",
       "Bash(docker compose:*)",
       "Bash(docker exec:*)",
-      "Bash(pnpm test:*)"
+      "Bash(pnpm test:*)",
+      "Bash(cd C:/Users/khoam/Desktop/operations-api && npx prisma generate 2>&1)"
     ]
   }
 }

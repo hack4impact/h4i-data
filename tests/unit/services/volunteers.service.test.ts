@@ -36,7 +36,7 @@ describe('Volunteer Service', () => {
           org_email: 'john@org.edu',
           status: 'ACTIVE',
           volunteer_class: 'COLLEGIATE',
-          engagement_track: 'PROGRAMS',
+          engagement_track: 'CHAPTER',
           major_id: 'major-1',
           education_level: 'UNDERGRADUATE',
           graduation_term_id: 'term-1',
@@ -89,7 +89,7 @@ describe('Volunteer Service', () => {
         org_email: 'john@org.edu',
         status: 'ACTIVE',
         volunteer_class: 'COLLEGIATE',
-        engagement_track: 'PROGRAMS',
+        engagement_track: 'CHAPTER',
         major_id: 'major-1',
         education_level: 'UNDERGRADUATE',
         graduation_term_id: 'term-1',
@@ -144,7 +144,7 @@ describe('Volunteer Service', () => {
         org_email: 'jane@org.edu',
         status: 'ACTIVE' as const,
         volunteer_class: 'COLLEGIATE' as const,
-        engagement_track: 'PROGRAMS' as const,
+        engagement_track: 'CHAPTER' as const,
         major_id: 'major-2',
         education_level: 'UNDERGRADUATE' as const,
         university_id: 'univ-1',
@@ -190,7 +190,7 @@ describe('Volunteer Service', () => {
         org_email: 'test@org.edu',
         status: 'ACTIVE' as const,
         volunteer_class: 'COLLEGIATE' as const,
-        engagement_track: 'PROGRAMS' as const,
+        engagement_track: 'CHAPTER' as const,
       };
 
       (prisma.constituents.findUnique as jest.Mock).mockResolvedValue(null);
@@ -213,7 +213,7 @@ describe('Volunteer Service', () => {
           org_email: 'test@org.edu',
           status: 'ACTIVE' as const,
           volunteer_class: 'COLLEGIATE' as const,
-          engagement_track: 'PROGRAMS' as const,
+          engagement_track: 'CHAPTER' as const,
         })
       ).rejects.toThrow('Failed to create volunteer');
     });
@@ -228,7 +228,7 @@ describe('Volunteer Service', () => {
         org_email: 'john@org.edu',
         status: 'INACTIVE',
         volunteer_class: 'COLLEGIATE',
-        engagement_track: 'PROGRAMS',
+        engagement_track: 'CHAPTER',
         major_id: 'major-1',
         education_level: 'UNDERGRADUATE',
         graduation_term_id: 'term-1',
@@ -286,7 +286,7 @@ describe('Volunteer Service', () => {
         org_email: 'john@org.edu',
         status: 'ACTIVE',
         volunteer_class: 'COLLEGIATE',
-        engagement_track: 'PROGRAMS',
+        engagement_track: 'CHAPTER',
         major_id: 'major-1',
         education_level: 'UNDERGRADUATE',
         graduation_term_id: 'term-1',

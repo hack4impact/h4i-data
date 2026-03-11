@@ -55,7 +55,7 @@ Table projects {
   project_id String [pk]
   name String [not null]
   github_url String
-  status project_status [not null, default: 'WORKING']
+  status project_status [not null, default: 'SCOPING']
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   project_resources project_resources [not null]
@@ -81,7 +81,7 @@ Table volunteers {
   org_email String
   status volunteer_status [not null, default: 'ACTIVE']
   volunteer_class volunteer_class [not null, default: 'COLLEGIATE']
-  engagement_track engagement_track [not null, default: 'PROGRAMS']
+  engagement_track engagement_track [not null, default: 'CHAPTER']
   major_id String
   education_level education_level
   graduation_term_id String
@@ -306,8 +306,6 @@ Enum project_type {
 Enum education_level {
   UNDERGRADUATE
   GRADUATE
-  BOOTCAMP
-  SELF_TAUGHT
   OTHER
 }
 
@@ -316,10 +314,11 @@ Enum engagement_status {
   ACTIVE
   COMPLETED
   ON_HOLD
+  REVIEW
 }
 
 Enum engagement_track {
-  PROGRAMS
+  CHAPTER
   CENTRAL
   ADVISORY
 }
@@ -327,7 +326,7 @@ Enum engagement_track {
 Enum financial_type {
   PRO_BONO
   INTERNAL
-  PAID_CONSULT
+  PAID
 }
 
 Enum role_scope {
@@ -361,17 +360,19 @@ Enum volunteer_status {
   ACTIVE
   INACTIVE
   HIATUS
+  REVIEW
 }
 
 Enum chapter_status {
   PROSPECT
+  FORMING
   ACTIVE
   INACTIVE
   SUSPENDED
 }
 
 Enum project_status {
-  WORKING
+  SCOPING
   ACTIVE
   INACTIVE
   ARCHIVED

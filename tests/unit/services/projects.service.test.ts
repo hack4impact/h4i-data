@@ -32,7 +32,7 @@ describe('Project Service', () => {
           project_id: '1',
           name: 'Test Project 1',
           github_url: 'https://github.com/org/repo',
-          status: 'WORKING',
+          status: 'SCOPING',
           created_at: new Date(),
           updated_at: new Date(),
         },
@@ -67,7 +67,7 @@ describe('Project Service', () => {
         project_id: projectId,
         name: 'Test Project 1',
         github_url: 'https://github.com/org/repo',
-        status: 'WORKING',
+        status: 'SCOPING',
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -107,7 +107,7 @@ describe('Project Service', () => {
         project_id: 'new-id-123',
         name: 'New Project',
         github_url: 'https://github.com/org/new-repo',
-        status: 'WORKING',
+        status: 'SCOPING',
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -136,7 +136,7 @@ describe('Project Service', () => {
         project_id: projectId,
         name: 'Updated Project Name',
         github_url: 'https://github.com/org/repo',
-        status: 'WORKING',
+        status: 'SCOPING',
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -176,7 +176,7 @@ describe('Project Service', () => {
         project_id: projectId,
         name: 'Deleted Project',
         github_url: 'https://github.com/org/repo',
-        status: 'WORKING',
+        status: 'SCOPING',
         created_at: new Date(),
         updated_at: new Date(),
       };

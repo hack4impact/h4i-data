@@ -68,7 +68,7 @@ model projects {
   project_id          String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                String
   github_url          String?
-  status              project_status        @default(WORKING)
+  status              project_status        @default(SCOPING)
   created_at          DateTime              @default(now()) @db.Timestamptz(6)
   updated_at          DateTime              @updatedAt @db.Timestamptz(6)
   project_resources   project_resources[]
@@ -96,7 +96,7 @@ model volunteers {
   org_email           String?
   status              volunteer_status      @default(ACTIVE)
   volunteer_class     volunteer_class       @default(COLLEGIATE)
-  engagement_track    engagement_track      @default(PROGRAMS)
+  engagement_track    engagement_track      @default(CHAPTER)
   major_id            String?               @db.Uuid
   education_level     education_level?
   graduation_term_id  String?               @db.Uuid
@@ -349,8 +349,6 @@ enum project_type {
 enum education_level {
   UNDERGRADUATE
   GRADUATE
-  BOOTCAMP
-  SELF_TAUGHT
   OTHER
 }
 
@@ -359,10 +357,11 @@ enum engagement_status {
   ACTIVE
   COMPLETED
   ON_HOLD
+  REVIEW
 }
 
 enum engagement_track {
-  PROGRAMS
+  CHAPTER
   CENTRAL
   ADVISORY
 }
@@ -370,7 +369,7 @@ enum engagement_track {
 enum financial_type {
   PRO_BONO
   INTERNAL
-  PAID_CONSULT
+  PAID
 }
 
 enum role_scope {
@@ -404,17 +403,19 @@ enum volunteer_status {
   ACTIVE
   INACTIVE
   HIATUS
+  REVIEW
 }
 
 enum chapter_status {
   PROSPECT
+  FORMING
   ACTIVE
   INACTIVE
   SUSPENDED
 }
 
 enum project_status {
-  WORKING
+  SCOPING
   ACTIVE
   INACTIVE
   ARCHIVED
