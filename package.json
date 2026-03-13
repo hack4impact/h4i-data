@@ -5,7 +5,7 @@
   "description": "Backend API for H4I operations with GraphQL and REST endpoints",
   "main": "src/app.ts",
   "scripts": {
-    "build": "tsc && prisma generate",
+    "build": "prisma generate && tsc",
     "dev": "docker compose up dev-db -d --wait && pnpm exec prisma migrate deploy && ts-node src/app.ts",
     "dev:both": "concurrently \"pnpm run dev:graphql\" \"pnpm run dev:rest\"",
     "dev:graphql": "ts-node src/api/graphql/server.ts",

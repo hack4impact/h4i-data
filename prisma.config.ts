@@ -5,6 +5,6 @@ export default defineConfig({
   earlyAccess: true,
   schema: './prisma/schema.prisma',
   datasource: {
-    url: env('DIRECT_URL'),
+    url: env('DATABASE_URL'),
   },
 });
