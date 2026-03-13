@@ -1,10 +1,11 @@
 import { z } from 'zod';
 import { linkTypeSchema } from './enums';
 
-export const createSocialLinkSchema = z.object({
+export const createConstituentLinkSchema = z.object({
   constituent_id: z.uuid(),
   platform: linkTypeSchema.optional(),
   url: z.string().url(),
 });
 
-export const updateSocialLinkSchema = createSocialLinkSchema.partial();
+export const updateConstituentLinkSchema =
+  createConstituentLinkSchema.partial();

@@ -14,7 +14,7 @@ export * from './majors.routes';
 export * from './universities.routes';
 export * from './academic-terms.routes';
 export * from './project-roles.routes';
-export * from './social-links.routes';
+export * from './constituent-links.routes';
 
 // Relation Entity Routes
 export * from './volunteer-history.routes';

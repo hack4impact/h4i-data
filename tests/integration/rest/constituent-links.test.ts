@@ -14,14 +14,14 @@ const createTestConstituent = async () => {
   return res.body.constituent_id;
 };
 
-describe('REST API - /social-links', () => {
-  describe('POST /social-links', () => {
-    it('should create a new social link', async () => {
+describe('REST API - /constituent-links', () => {
+  describe('POST /constituent-links', () => {
+    it('should create a new constituent link', async () => {
       // Arrange
       const constituentId = await createTestConstituent();
 
       // Act
-      const response = await request(app).post('/social-links').send({
+      const response = await request(app).post('/constituent-links').send({
         constituent_id: constituentId,
         platform: 'GITHUB',
         url: 'https://github.com/testuser',
@@ -34,7 +34,7 @@ describe('REST API - /social-links', () => {
     });
 
     it('should return 400 for invalid data', async () => {
-      const response = await request(app).post('/social-links').send({
+      const response = await request(app).post('/constituent-links').send({
         url: 'not-a-url',
       });
 
@@ -43,17 +43,17 @@ describe('REST API - /social-links', () => {
     });
   });
 
-  describe('GET /social-links', () => {
-    it('should fetch all social links', async () => {
+  describe('GET /constituent-links', () => {
+    it('should fetch all constituent links', async () => {
       // Arrange
       const constituentId = await createTestConstituent();
-      await request(app).post('/social-links').send({
+      await request(app).post('/constituent-links').send({
         constituent_id: constituentId,
         url: 'https://github.com/testuser2',
       });
 
       // Act
-      const response = await request(app).get('/social-links');
+      const response = await request(app).get('/constituent-links');
 
       // Assert
       expect(response.status).toBe(200);
@@ -62,90 +62,90 @@ describe('REST API - /social-links', () => {
     });
   });
 
-  describe('GET /social-links/:id', () => {
-    it('should fetch a social link by ID', async () => {
+  describe('GET /constituent-links/:id', () => {
+    it('should fetch a constituent link by ID', async () => {
       const constituentId = await createTestConstituent();
-      const created = await request(app).post('/social-links').send({
+      const created = await request(app).post('/constituent-links').send({
         constituent_id: constituentId,
         url: 'https://linkedin.com/in/testuser',
       });
       const id = created.body.constituent_link_id;
 
-      const response = await request(app).get(`/social-links/${id}`);
+      const response = await request(app).get(`/constituent-links/${id}`);
 
       expect(response.status).toBe(200);
       expect(response.body.constituent_link_id).toBe(id);
     });
 
-    it('should return 404 for a non-existent social link', async () => {
+    it('should return 404 for a non-existent constituent link', async () => {
       const response = await request(app).get(
-        '/social-links/00000000-0000-0000-0000-000000000000'
+        '/constituent-links/00000000-0000-0000-0000-000000000000'
       );
 
       expect(response.status).toBe(404);
     });
   });
 
-  describe('PATCH /social-links/:id', () => {
-    it('should update a social link', async () => {
+  describe('PATCH /constituent-links/:id', () => {
+    it('should update a constituent link', async () => {
       const constituentId = await createTestConstituent();
-      const created = await request(app).post('/social-links').send({
+      const created = await request(app).post('/constituent-links').send({
         constituent_id: constituentId,
         url: 'https://github.com/original',
       });
       const id = created.body.constituent_link_id;
 
       const response = await request(app)
-        .patch(`/social-links/${id}`)
+        .patch(`/constituent-links/${id}`)
         .send({ url: 'https://github.com/updated' });
 
       expect(response.status).toBe(200);
       expect(response.body.url).toBe('https://github.com/updated');
     });
 
-    it('should return 404 for a non-existent social link', async () => {
+    it('should return 404 for a non-existent constituent link', async () => {
       const response = await request(app)
-        .patch('/social-links/00000000-0000-0000-0000-000000000000')
+        .patch('/constituent-links/00000000-0000-0000-0000-000000000000')
         .send({ url: 'https://github.com/updated' });
       expect(response.status).toBe(404);
     });
 
     it('should return 400 for invalid data', async () => {
       const constituentId = await createTestConstituent();
-      const created = await request(app).post('/social-links').send({
+      const created = await request(app).post('/constituent-links').send({
         constituent_id: constituentId,
         url: 'https://github.com/original',
       });
       const id = created.body.constituent_link_id;
 
       const response = await request(app)
-        .patch(`/social-links/${id}`)
+        .patch(`/constituent-links/${id}`)
         .send({ url: 'not-a-url' });
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error');
     });
   });
 
-  describe('DELETE /social-links/:id', () => {
-    it('should delete a social link', async () => {
+  describe('DELETE /constituent-links/:id', () => {
+    it('should delete a constituent link', async () => {
       const constituentId = await createTestConstituent();
-      const created = await request(app).post('/social-links').send({
+      const created = await request(app).post('/constituent-links').send({
         constituent_id: constituentId,
         url: 'https://github.com/todelete',
       });
       const id = created.body.constituent_link_id;
 
-      const response = await request(app).delete(`/social-links/${id}`);
+      const response = await request(app).delete(`/constituent-links/${id}`);
 
       expect(response.status).toBe(204);
 
-      const getResponse = await request(app).get(`/social-links/${id}`);
+      const getResponse = await request(app).get(`/constituent-links/${id}`);
       expect(getResponse.status).toBe(404);
     });
 
-    it('should return 404 for a non-existent social link', async () => {
+    it('should return 404 for a non-existent constituent link', async () => {
       const response = await request(app).delete(
-        '/social-links/00000000-0000-0000-0000-000000000000'
+        '/constituent-links/00000000-0000-0000-0000-000000000000'
       );
       expect(response.status).toBe(404);
     });

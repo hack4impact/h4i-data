@@ -19,7 +19,7 @@ router.use('/majors', featureRoutes.majorRoutes);
 router.use('/universities', featureRoutes.universityRoutes);
 router.use('/academic-terms', featureRoutes.academicTermRoutes);
 router.use('/project-roles', featureRoutes.projectRoleRoutes);
-router.use('/social-links', featureRoutes.socialLinkRoutes);
+router.use('/constituent-links', featureRoutes.constituentLinkRoutes);
 
 // Relation Entity Routes
 router.use('/volunteer-history', featureRoutes.volunteerHistoryRoutes);

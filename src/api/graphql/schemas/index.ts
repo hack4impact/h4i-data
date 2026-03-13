@@ -17,7 +17,7 @@ export * from './majors.schema';
 export * from './universities.schema';
 export * from './academic-terms.schema';
 export * from './project-roles.schema';
-export * from './social-links.schema';
+export * from './constituent-links.schema';
 
 // Relation Entity Schemas
 export * from './volunteer-history.schema';

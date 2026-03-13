@@ -14,7 +14,7 @@ import { majorResolvers } from './resolvers/majors.resolvers';
 import { universityResolvers } from './resolvers/universities.resolvers';
 import { academicTermResolvers } from './resolvers/academic-terms.resolvers';
 import { projectRoleResolvers } from './resolvers/project-roles.resolvers';
-import { socialLinkResolvers } from './resolvers/social-links.resolvers';
+import { constituentLinkResolvers } from './resolvers/constituent-links.resolvers';
 
 // Relation Entity Resolvers
 import { volunteerHistoryResolvers } from './resolvers/volunteer-history.resolvers';
@@ -43,7 +43,7 @@ export const resolvers = {
     ...universityResolvers.Query,
     ...academicTermResolvers.Query,
     ...projectRoleResolvers.Query,
-    ...socialLinkResolvers.Query,
+    ...constituentLinkResolvers.Query,
 
     // Relation Entities
     ...volunteerHistoryResolvers.Query,
@@ -70,7 +70,7 @@ export const resolvers = {
     ...universityResolvers.Mutation,
     ...academicTermResolvers.Mutation,
     ...projectRoleResolvers.Mutation,
-    ...socialLinkResolvers.Mutation,
+    ...constituentLinkResolvers.Mutation,
 
     // Relation Entities
     ...volunteerHistoryResolvers.Mutation,

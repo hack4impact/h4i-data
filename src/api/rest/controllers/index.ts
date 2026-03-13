@@ -14,7 +14,7 @@ export * from './majors.controller';
 export * from './universities.controller';
 export * from './academic-terms.controller';
 export * from './project-roles.controller';
-export * from './social-links.controller';
+export * from './constituent-links.controller';
 
 // Relation Entity Controllers
 export * from './volunteer-history.controller';

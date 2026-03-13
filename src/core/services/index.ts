@@ -14,7 +14,7 @@ export * from './majors.service';
 export * from './universities.service';
 export * from './academic-terms.service';
 export * from './project-roles.service';
-export * from './social-links.service';
+export * from './constituent-links.service';
 
 // Relation Entity Services
 export * from './volunteer-history.service';

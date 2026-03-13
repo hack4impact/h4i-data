@@ -1,9 +1,9 @@
 import {
-  getAllSocialLinks,
-  getSocialLinkById,
-  createSocialLink,
-  updateSocialLink,
-  deleteSocialLink,
+  getAllConstituentLinks,
+  getConstituentLinkById,
+  createConstituentLink,
+  updateConstituentLink,
+  deleteConstituentLink,
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
 import { Prisma } from '@prisma/client';
@@ -20,13 +20,13 @@ jest.mock('../../../src/config/database', () => ({
   },
 }));
 
-describe('Social Link Service', () => {
+describe('Constituent Link Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('getAllSocialLinks', () => {
-    it('should return an array of social links', async () => {
+  describe('getAllConstituentLinks', () => {
+    it('should return an array of constituent links', async () => {
       const mockLinks = [
         {
           constituent_link_id: '1',
@@ -41,14 +41,14 @@ describe('Social Link Service', () => {
         mockLinks
       );
 
-      const result = await getAllSocialLinks();
+      const result = await getAllConstituentLinks();
 
       expect(result).toEqual(mockLinks);
     });
 
-    it('should return empty array when no social links exist', async () => {
+    it('should return empty array when no constituent links exist', async () => {
       (prisma.constituent_links.findMany as jest.Mock).mockResolvedValue([]);
-      const result = await getAllSocialLinks();
+      const result = await getAllConstituentLinks();
       expect(result).toEqual([]);
     });
 
@@ -56,14 +56,14 @@ describe('Social Link Service', () => {
       (prisma.constituent_links.findMany as jest.Mock).mockRejectedValue(
         new Error('Connection refused')
       );
-      await expect(getAllSocialLinks()).rejects.toThrow(
-        'Failed to retrieve social links'
+      await expect(getAllConstituentLinks()).rejects.toThrow(
+        'Failed to retrieve constituent links'
       );
     });
   });
 
-  describe('getSocialLinkById', () => {
-    it('should return a single social link when a valid ID is provided', async () => {
+  describe('getConstituentLinkById', () => {
+    it('should return a single constituent link when a valid ID is provided', async () => {
       const linkId = '1';
       const mockLink = {
         constituent_link_id: linkId,
@@ -77,19 +77,19 @@ describe('Social Link Service', () => {
         mockLink
       );
 
-      const result = await getSocialLinkById(linkId);
+      const result = await getConstituentLinkById(linkId);
 
       expect(result).toEqual(mockLink);
     });
 
-    it('should throw NotFoundError if no social link is found', async () => {
+    it('should throw NotFoundError if no constituent link is found', async () => {
       const linkId = 'non-existent-id';
       (prisma.constituent_links.findUnique as jest.Mock).mockResolvedValue(
         null
       );
 
-      await expect(getSocialLinkById(linkId)).rejects.toThrow(
-        "SocialLink with id 'non-existent-id' not found"
+      await expect(getConstituentLinkById(linkId)).rejects.toThrow(
+        "ConstituentLink with id 'non-existent-id' not found"
       );
     });
 
@@ -97,14 +97,14 @@ describe('Social Link Service', () => {
       (prisma.constituent_links.findUnique as jest.Mock).mockRejectedValue(
         new Error('Connection refused')
       );
-      await expect(getSocialLinkById('1')).rejects.toThrow(
-        'Failed to retrieve social link'
+      await expect(getConstituentLinkById('1')).rejects.toThrow(
+        'Failed to retrieve constituent link'
       );
     });
   });
 
-  describe('createSocialLink', () => {
-    it('should create and return a new social link', async () => {
+  describe('createConstituentLink', () => {
+    it('should create and return a new constituent link', async () => {
       const inputData = {
         platform: 'LINKEDIN' as const,
         url: 'https://linkedin.com/in/user',
@@ -120,7 +120,7 @@ describe('Social Link Service', () => {
         createdLink
       );
 
-      const result = await createSocialLink(inputData);
+      const result = await createConstituentLink(inputData);
 
       expect(result).toEqual(createdLink);
     });
@@ -130,16 +130,16 @@ describe('Social Link Service', () => {
         new Error('Connection refused')
       );
       await expect(
-        createSocialLink({
+        createConstituentLink({
           platform: 'LINKEDIN' as const,
           url: 'https://linkedin.com/in/user',
         })
-      ).rejects.toThrow('Failed to create social link');
+      ).rejects.toThrow('Failed to create constituent link');
     });
   });
 
-  describe('updateSocialLink', () => {
-    it('should update and return the social link', async () => {
+  describe('updateConstituentLink', () => {
+    it('should update and return the constituent link', async () => {
       const linkId = '1';
       const updateData = { url: 'https://github.com/updated' };
       const updatedLink = {
@@ -154,12 +154,12 @@ describe('Social Link Service', () => {
         updatedLink
       );
 
-      const result = await updateSocialLink(linkId, updateData);
+      const result = await updateConstituentLink(linkId, updateData);
 
       expect(result).toEqual(updatedLink);
     });
 
-    it('should throw NotFoundError when updating non-existent social link', async () => {
+    it('should throw NotFoundError when updating non-existent constituent link', async () => {
       (prisma.constituent_links.update as jest.Mock).mockRejectedValue(
         new Prisma.PrismaClientKnownRequestError('Record not found', {
           code: 'P2025',
@@ -167,10 +167,10 @@ describe('Social Link Service', () => {
         })
       );
       await expect(
-        updateSocialLink('non-existent-id', {
+        updateConstituentLink('non-existent-id', {
           url: 'https://github.com/updated',
         })
-      ).rejects.toThrow("SocialLink with id 'non-existent-id' not found");
+      ).rejects.toThrow("ConstituentLink with id 'non-existent-id' not found");
     });
 
     it('should throw DatabaseError on unexpected update error', async () => {
@@ -178,13 +178,13 @@ describe('Social Link Service', () => {
         new Error('Connection refused')
       );
       await expect(
-        updateSocialLink('1', { url: 'https://github.com/updated' })
-      ).rejects.toThrow('Failed to update social link');
+        updateConstituentLink('1', { url: 'https://github.com/updated' })
+      ).rejects.toThrow('Failed to update constituent link');
     });
   });
 
-  describe('deleteSocialLink', () => {
-    it('should call delete with the correct ID and return the deleted social link', async () => {
+  describe('deleteConstituentLink', () => {
+    it('should call delete with the correct ID and return the deleted constituent link', async () => {
       const linkId = '1';
       const deletedLink = {
         constituent_link_id: linkId,
@@ -198,20 +198,20 @@ describe('Social Link Service', () => {
         deletedLink
       );
 
-      const result = await deleteSocialLink(linkId);
+      const result = await deleteConstituentLink(linkId);
 
       expect(result).toEqual(deletedLink);
     });
 
-    it('should throw NotFoundError when deleting non-existent social link', async () => {
+    it('should throw NotFoundError when deleting non-existent constituent link', async () => {
       (prisma.constituent_links.delete as jest.Mock).mockRejectedValue(
         new Prisma.PrismaClientKnownRequestError('Record not found', {
           code: 'P2025',
           clientVersion: '5.0.0',
         })
       );
-      await expect(deleteSocialLink('non-existent-id')).rejects.toThrow(
-        "SocialLink with id 'non-existent-id' not found"
+      await expect(deleteConstituentLink('non-existent-id')).rejects.toThrow(
+        "ConstituentLink with id 'non-existent-id' not found"
       );
     });
 
@@ -219,8 +219,8 @@ describe('Social Link Service', () => {
       (prisma.constituent_links.delete as jest.Mock).mockRejectedValue(
         new Error('Connection refused')
       );
-      await expect(deleteSocialLink('1')).rejects.toThrow(
-        'Failed to delete social link'
+      await expect(deleteConstituentLink('1')).rejects.toThrow(
+        'Failed to delete constituent link'
       );
     });
   });

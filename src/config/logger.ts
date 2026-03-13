@@ -35,6 +35,7 @@ const consoleFormat = winston.format.combine(
 );
 
 const isDevelopment = env.NODE_ENV === 'development';
+const isTest = env.NODE_ENV === 'test';
 
 // Create the logger
 export const logger = winston.createLogger({
@@ -44,13 +45,16 @@ export const logger = winston.createLogger({
     service: 'operations-api',
     environment: env.NODE_ENV,
   },
-  transports: [
-    new winston.transports.Console({
-      format: isDevelopment ? consoleFormat : customFormat,
-      handleExceptions: true,
-      handleRejections: true,
-    }),
-  ],
+  transports: isTest
+    ? []
+    : [
+        new winston.transports.Console({
+          format: isDevelopment ? consoleFormat : customFormat,
+          handleExceptions: true,
+          handleRejections: true,
+        }),
+      ],
+  silent: isTest,
 });
 
 if (isDevelopment) {

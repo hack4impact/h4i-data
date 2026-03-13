@@ -17,7 +17,7 @@ export * from './majors.validator';
 export * from './universities.validator';
 export * from './academic-terms.validator';
 export * from './project-roles.validator';
-export * from './social-links.validator';
+export * from './constituent-links.validator';
 
 // Relation Entity Validators
 export * from './volunteer-history.validator';

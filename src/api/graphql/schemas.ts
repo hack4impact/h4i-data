@@ -17,7 +17,7 @@ import { majorSchemaString } from './schemas/majors.schema';
 import { universitySchemaString } from './schemas/universities.schema';
 import { academicTermSchemaString } from './schemas/academic-terms.schema';
 import { projectRoleSchemaString } from './schemas/project-roles.schema';
-import { socialLinkSchemaString } from './schemas/social-links.schema';
+import { constituentLinkSchemaString } from './schemas/constituent-links.schema';
 
 // Relation Entity Schemas
 import { volunteerHistorySchemaString } from './schemas/volunteer-history.schema';
@@ -48,7 +48,7 @@ export const typeDefs = [
   universitySchemaString,
   academicTermSchemaString,
   projectRoleSchemaString,
-  socialLinkSchemaString,
+  constituentLinkSchemaString,
 
   // Relation Entities
   volunteerHistorySchemaString,

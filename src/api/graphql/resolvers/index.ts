@@ -14,7 +14,7 @@ export * from './majors.resolvers';
 export * from './universities.resolvers';
 export * from './academic-terms.resolvers';
 export * from './project-roles.resolvers';
-export * from './social-links.resolvers';
+export * from './constituent-links.resolvers';
 
 // Relation Entity Resolvers
 export * from './volunteer-history.resolvers';
