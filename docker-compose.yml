@@ -1,4 +1,23 @@
 services:
+  dev-db:
+    image: postgres:16-alpine
+    container_name: h4i-dev-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: dev_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dev_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dev-network
+
   test-db:
     image: postgres:16-alpine
     container_name: h4i-test-db
@@ -7,10 +26,10 @@ services:
       POSTGRES_PASSWORD: test_password
       POSTGRES_DB: test_db
     ports:
-      - "5433:5432"  # Map to port 5433 to avoid conflicts with local PostgreSQL
+      - "5433:5432"
     volumes:
       - test-db-data:/var/lib/postgresql/data
-      - ./db-init:/docker-entrypoint-initdb.d  # Initialization scripts
+      - ./db-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d test_db"]
       interval: 5s
@@ -20,9 +39,13 @@ services:
       - test-network
 
 volumes:
+  dev-db-data:
+    driver: local
   test-db-data:
     driver: local
 
 networks:
+  dev-network:
+    driver: bridge
   test-network:
     driver: bridge

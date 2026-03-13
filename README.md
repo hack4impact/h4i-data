@@ -65,13 +65,7 @@ GRAPHQL_PORT=3003
 NODE_ENV=development
 ```
 
-### 3. Database Setup
-
-```bash
-pnpm exec prisma migrate dev    # Apply migrations and generate Prisma client
-```
-
-### 4. Start Development Server
+### 3. Start Development Server
 
 ```bash
 # Start integrated server (both REST & GraphQL)

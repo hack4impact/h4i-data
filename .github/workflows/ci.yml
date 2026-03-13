@@ -33,7 +33,6 @@ jobs:
         run: pnpm exec prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run ESLint
         run: pnpm exec eslint "src/**/*.ts" "tests/**/*.ts" --max-warnings=0
@@ -65,7 +64,6 @@ jobs:
         run: pnpm exec prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run unit tests
         run: pnpm run test:unit
@@ -98,14 +96,12 @@ jobs:
         run: pnpm exec prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Run integration tests
         run: pnpm run test:integration
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://postgres:test_password@localhost:5433/test_db
-          DIRECT_URL: postgresql://postgres:test_password@localhost:5433/test_db
 
       - name: Stop test database
         if: always()

@@ -6,14 +6,16 @@
   "main": "src/app.ts",
   "scripts": {
     "build": "tsc && prisma generate",
-    "dev": "ts-node src/app.ts",
+    "dev": "docker compose up dev-db -d --wait && pnpm exec prisma migrate deploy && ts-node src/app.ts",
     "dev:both": "concurrently \"pnpm run dev:graphql\" \"pnpm run dev:rest\"",
     "dev:graphql": "ts-node src/api/graphql/server.ts",
     "dev:rest": "ts-node src/api/rest/server.ts",
     "format": "prettier --write src/",
     "lint": "eslint src/ --ext .ts",
     "prepare": "husky",
-    "docker:up": "docker compose up -d --wait",
+    "docker:dev:up": "docker compose up dev-db -d --wait",
+    "docker:dev:down": "docker compose stop dev-db",
+    "docker:up": "docker compose up test-db -d --wait",
     "docker:down": "docker compose down -v",
     "seed:test": "docker compose exec -T test-db psql -U postgres -d test_db -f /docker-entrypoint-initdb.d/seed.sql",
     "start": "node dist/app.js",
@@ -39,8 +41,7 @@
     "rest-api",
     "volunteers",
     "typescript",
-    "prisma",
-    "supabase"
+    "prisma"
   ],
   "author": "Hack4Impact",
   "license": "ISC",

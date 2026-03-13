@@ -35,13 +35,7 @@ GRAPHQL_PORT=3003
 NODE_ENV=development
 ```
 
-### 4. Database Setup
-
-```bash
-pnpm exec prisma migrate dev    # Apply migrations and generate Prisma client
-```
-
-### 5. Start Development Server
+### 4. Start Development Server
 
 ```bash
 # Start integrated server (both REST & GraphQL)
@@ -136,8 +130,9 @@ _See Style Guide: [STYLE_GUIDE.md](https://github.com/hack4impact/operations-api
 ### Database Management
 
 - Edit `schema.prisma` directly to make schema changes
-- After changing `schema.prisma`, run `pnpm exec prisma migrate dev --name <description>` to create a migration and regenerate the Prisma client
-- Migrations are applied automatically on production deploy via `prisma migrate deploy`
+- After changing `schema.prisma`, run `pnpm exec prisma migrate dev --name <description>` to create a migration file and regenerate the Prisma client
+- `pnpm run dev` automatically applies pending migrations on startup via `prisma migrate deploy`
+- Migrations are also applied automatically on production deploy
 
 ### Branch Naming Convention
 
