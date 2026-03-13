@@ -10,6 +10,10 @@ async function startServer() {
 
   const app = express();
 
+  app.get('/health', (_req, res) => {
+    res.json({ status: 'ok' });
+  });
+
   // Mount the REST API
   const restApp = createRestApp();
   app.use('/api/rest', restApp);

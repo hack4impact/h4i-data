@@ -28,23 +28,17 @@ cp .env.example .env
 ```
 
 ```env
-# Connect to Supabase via connection pooling
-DATABASE_URL="postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true"
-
-# Direct connection to the database. Used for migrations
-DIRECT_URL="postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres"
-
-# Server Configuration
+DATABASE_URL="postgresql://user:password@host:5432/dbname"
 PORT=3001
 REST_PORT=3002
 GRAPHQL_PORT=3003
+NODE_ENV=development
 ```
 
 ### 4. Database Setup
 
 ```bash
-pnpm exec prisma db pull     # Sync schema with database
-pnpm exec prisma generate    # Generate Prisma client
+pnpm exec prisma migrate dev    # Apply migrations and generate Prisma client
 ```
 
 ### 5. Start Development Server
@@ -141,9 +135,9 @@ _See Style Guide: [STYLE_GUIDE.md](https://github.com/hack4impact/operations-api
 
 ### Database Management
 
-- **Do not** edit `schema.prisma` directly — schema is managed through Supabase
-- Use the Supabase Table Editor for schema changes in production
-- After any database change, always run `pnpm exec prisma db pull` then `pnpm exec prisma generate` to keep the client in sync
+- Edit `schema.prisma` directly to make schema changes
+- After changing `schema.prisma`, run `pnpm exec prisma migrate dev --name <description>` to create a migration and regenerate the Prisma client
+- Migrations are applied automatically on production deploy via `prisma migrate deploy`
 
 ### Branch Naming Convention
 

@@ -8,7 +8,7 @@ A comprehensive backend API for managing H4I operations data — volunteers, cha
 
 - **Language** - TypeScript
 - **Framework** - Express.js
-- **Database** - PostgreSQL (Supabase in production, Docker locally)
+- **Database** - PostgreSQL (Railway in production, Docker locally)
 - **ORM** - Prisma 7+ (with `@prisma/adapter-pg`)
 - **API Types** - REST & GraphQL
 - **Testing** - Jest & Supertest
@@ -58,23 +58,17 @@ cp .env.example .env
 ```
 
 ```env
-# Connect to Supabase via connection pooling
-DATABASE_URL="postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true"
-
-# Direct connection to the database. Used for migrations
-DIRECT_URL="postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres"
-
-# Server Configuration
+DATABASE_URL="postgresql://user:password@host:5432/dbname"
 PORT=3001
 REST_PORT=3002
 GRAPHQL_PORT=3003
+NODE_ENV=development
 ```
 
 ### 3. Database Setup
 
 ```bash
-pnpm exec prisma db pull     # Sync schema with database
-pnpm exec prisma generate    # Generate Prisma client
+pnpm exec prisma migrate dev    # Apply migrations and generate Prisma client
 ```
 
 ### 4. Start Development Server
@@ -164,6 +158,31 @@ REST endpoints available at:
 Available REST routes: `/academic-terms`, `/chapters`, `/companies`, `/constituents`, `/locations`, `/mentors`, `/mentorships`, `/officer-assignments`, `/officer-roles`, `/partners`, `/project-deliverables`, `/project-engagements`, `/project-roles`, `/project-staffing`, `/projects`, `/social-links`, `/universities`, `/volunteer-history`, `/volunteers`
 
 See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md`](docs/api/graphql-api.md) for complete API documentation.
+
+---
+
+## Deployment
+
+The API is hosted on [Railway](https://railway.app) with a Railway-managed PostgreSQL database.
+
+### How it works
+
+- Pushes to `main` trigger the CI pipeline (lint → unit tests → integration tests → deploy)
+- Railway builds with `pnpm build`, runs `prisma migrate deploy` as a pre-deploy step, then starts with `node dist/app.js`
+- Railway automatically injects `DATABASE_URL` from the Postgres plugin
+
+### Environment variables
+
+Set the following in the Railway project dashboard:
+
+| Variable | Value |
+|---|---|
+| `NODE_ENV` | `production` |
+| `DATABASE_URL` | auto-injected by Railway Postgres plugin |
+
+### Health check
+
+The API exposes `GET /health` which Railway uses to verify the service is running after each deploy.
 
 ---
 

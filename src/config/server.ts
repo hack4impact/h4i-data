@@ -18,7 +18,9 @@ const envSchema = z.object({
   REST_PORT: z.coerce.number().default(3002),
   // Port for the standalone GraphQL server (pnpm run dev:graphql)
   GRAPHQL_PORT: z.coerce.number().default(3003),
-  NODE_ENV: z.enum(['development', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'test', 'production'])
+    .default('development'),
   DATABASE_URL: z.string().min(1, { message: 'DATABASE_URL must be defined' }),
   // Database connection pool settings (optional)
   DB_CONNECTION_LIMIT: z.coerce.number().default(10),

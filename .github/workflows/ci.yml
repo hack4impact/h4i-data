@@ -110,3 +110,20 @@ jobs:
       - name: Stop test database
         if: always()
         run: pnpm run docker:down
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [test-integration]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
