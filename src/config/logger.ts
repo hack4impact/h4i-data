@@ -34,63 +34,68 @@ const consoleFormat = winston.format.combine(
   })
 );
 
+const isDevelopment = env.NODE_ENV === 'development';
+
 // Create the logger
 export const logger = winston.createLogger({
-  level: env.NODE_ENV === 'development' ? 'debug' : 'info',
+  level: isDevelopment ? 'debug' : 'info',
   format: customFormat,
   defaultMeta: {
     service: 'operations-api',
     environment: env.NODE_ENV,
   },
   transports: [
-    // Error log - only errors
-    new winston.transports.File({
-      filename: path.join(logsDir, 'error.log'),
-      level: 'error',
-      maxsize: 10485760, // 10MB
-      maxFiles: 5,
-      tailable: true,
-    }),
-
-    // Combined log - all levels
-    new winston.transports.File({
-      filename: path.join(logsDir, 'combined.log'),
-      maxsize: 10485760, // 10MB
-      maxFiles: 5,
-      tailable: true,
-    }),
-
-    // Request log - for HTTP requests
-    new winston.transports.File({
-      filename: path.join(logsDir, 'requests.log'),
-      level: 'http',
-      maxsize: 10485760, // 10MB
-      maxFiles: 3,
-      tailable: true,
-    }),
-  ],
-
-  // Handle uncaught exceptions and unhandled rejections
-  exceptionHandlers: [
-    new winston.transports.File({
-      filename: path.join(logsDir, 'exceptions.log'),
-    }),
-  ],
-
-  rejectionHandlers: [
-    new winston.transports.File({
-      filename: path.join(logsDir, 'rejections.log'),
+    new winston.transports.Console({
+      format: isDevelopment ? consoleFormat : customFormat,
+      handleExceptions: true,
+      handleRejections: true,
     }),
   ],
 });
 
-// Add console transport for development
-if (env.NODE_ENV === 'development') {
+if (isDevelopment) {
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+
   logger.add(
-    new winston.transports.Console({
-      format: consoleFormat,
-      handleExceptions: true,
-      handleRejections: true,
+    new winston.transports.File({
+      filename: path.join(logsDir, 'error.log'),
+      level: 'error',
+      maxsize: 10485760,
+      maxFiles: 5,
+      tailable: true,
+    })
+  );
+
+  logger.add(
+    new winston.transports.File({
+      filename: path.join(logsDir, 'combined.log'),
+      maxsize: 10485760,
+      maxFiles: 5,
+      tailable: true,
+    })
+  );
+
+  logger.add(
+    new winston.transports.File({
+      filename: path.join(logsDir, 'requests.log'),
+      level: 'http',
+      maxsize: 10485760,
+      maxFiles: 3,
+      tailable: true,
+    })
+  );
+
+  logger.exceptions.handle(
+    new winston.transports.File({
+      filename: path.join(logsDir, 'exceptions.log'),
+    })
+  );
+
+  logger.rejections.handle(
+    new winston.transports.File({
+      filename: path.join(logsDir, 'rejections.log'),
     })
   );
 }
@@ -103,10 +108,5 @@ winston.addColors({
   http: 'magenta',
   debug: 'white',
 });
-
-// Create logs directory if it doesn't exist
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
-}
 
 export default logger;
