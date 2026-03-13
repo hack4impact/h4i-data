@@ -16,6 +16,8 @@ import { logger } from '../../config/logger';
 export function createRestApp() {
   const app = express();
 
+  app.set('trust proxy', 1);
+
   // Security middleware (apply first)
   app.use(helmetConfig);
   app.use(rateLimiter);

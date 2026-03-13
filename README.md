@@ -130,7 +130,7 @@ Example mutation:
 ```graphql
 mutation {
   createChapter(input: {
-    name: "UC Berkeley"
+    name: "University of Pennsylvania"
     founded_date: "2020-09-01"
   }) {
     chapter_id

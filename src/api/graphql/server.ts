@@ -23,6 +23,8 @@ export const graphqlSchema = makeExecutableSchema({ typeDefs, resolvers });
 export function createGraphqlApp() {
   const app = express();
 
+  app.set('trust proxy', 1);
+
   // Security middleware (apply first)
   app.use(helmetConfig);
   app.use(rateLimiter);
