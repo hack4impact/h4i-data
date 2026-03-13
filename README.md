@@ -103,7 +103,7 @@ Supporting entities:
 
 - **universities** - Universities linked to chapters and volunteers
 - **academic_terms** - Semesters/quarters at universities
-- **social_links** - Social media links for constituents
+- **constituent_links** - Social media links for constituents
 
 Relationship/tracking entities:
 
@@ -149,7 +149,7 @@ REST endpoints available at:
 - **Integrated server** (`pnpm run dev`): `http://localhost:3001/api/rest/{entity}`
 - **Standalone** (`pnpm run dev:rest`): `http://localhost:3002/{entity}`
 
-Available REST routes: `/academic-terms`, `/chapters`, `/companies`, `/constituents`, `/locations`, `/mentors`, `/mentorships`, `/officer-assignments`, `/officer-roles`, `/partners`, `/project-deliverables`, `/project-engagements`, `/project-roles`, `/project-staffing`, `/projects`, `/social-links`, `/universities`, `/volunteer-history`, `/volunteers`
+Available REST routes: `/academic-terms`, `/chapters`, `/companies`, `/constituents`, `/locations`, `/mentors`, `/mentorships`, `/officer-assignments`, `/officer-roles`, `/partners`, `/project-deliverables`, `/project-engagements`, `/project-roles`, `/project-staffing`, `/projects`, `/constituent-links`, `/universities`, `/volunteer-history`, `/volunteers`
 
 See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md`](docs/api/graphql-api.md) for complete API documentation.
 
