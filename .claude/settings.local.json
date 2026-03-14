@@ -19,7 +19,8 @@
       "Bash(docker exec:*)",
       "Bash(pnpm test:*)",
       "Bash(cd C:/Users/khoam/Desktop/operations-api && npx prisma generate 2>&1)",
-      "WebFetch(domain:docs.railway.com)"
+      "WebFetch(domain:docs.railway.com)",
+      "Bash(pnpm run:*)"
     ]
   }
 }

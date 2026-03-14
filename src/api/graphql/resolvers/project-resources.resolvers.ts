@@ -19,8 +19,8 @@ type UpdateProjectDeliverableInput = z.infer<
 
 export const projectDeliverableResolvers = {
   Query: {
-    projectDeliverables: () => getAllProjectDeliverables(),
-    projectDeliverable: async (_parent: unknown, { id }: { id: string }) => {
+    projectResources: () => getAllProjectDeliverables(),
+    projectResource: async (_parent: unknown, { id }: { id: string }) => {
       try {
         return await getProjectDeliverableById(id);
       } catch (error) {
@@ -30,21 +30,21 @@ export const projectDeliverableResolvers = {
     },
   },
   Mutation: {
-    createProjectDeliverable: (
+    createProjectResource: (
       _parent: unknown,
       { input }: { input: CreateProjectDeliverableInput }
     ) => {
       const validatedInput = createProjectDeliverableSchema.parse(input);
       return createProjectDeliverable(validatedInput);
     },
-    updateProjectDeliverable: (
+    updateProjectResource: (
       _parent: unknown,
       { id, input }: { id: string; input: UpdateProjectDeliverableInput }
     ) => {
       const validatedInput = updateProjectDeliverableSchema.parse(input);
       return updateProjectDeliverable(id, validatedInput);
     },
-    deleteProjectDeliverable: (_parent: unknown, { id }: { id: string }) => {
+    deleteProjectResource: (_parent: unknown, { id }: { id: string }) => {
       return deleteProjectDeliverable(id);
     },
   },

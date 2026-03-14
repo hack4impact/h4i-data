@@ -20,7 +20,7 @@ import { constituentLinkResolvers } from './resolvers/constituent-links.resolver
 import { volunteerHistoryResolvers } from './resolvers/volunteer-history.resolvers';
 import { officerAssignmentResolvers } from './resolvers/officer-assignments.resolvers';
 import { mentorshipResolvers } from './resolvers/mentorships.resolvers';
-import { projectDeliverableResolvers } from './resolvers/project-deliverables.resolvers';
+import { projectDeliverableResolvers } from './resolvers/project-resources.resolvers';
 import { projectEngagementResolvers } from './resolvers/project-engagements.resolvers';
 import { projectStaffingResolvers } from './resolvers/project-staffing.resolvers';
 

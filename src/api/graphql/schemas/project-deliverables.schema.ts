@@ -7,7 +7,7 @@ export const projectDeliverableSchemaString = `
     DOCUMENTATION
   }
 
-  type ProjectDeliverable {
+  type ProjectResource {
     project_resource_id: ID!
     project_id: ID!
     label: String
@@ -18,18 +18,18 @@ export const projectDeliverableSchemaString = `
   }
 
   type Query {
-    projectDeliverables: [ProjectDeliverable!]!
-    projectDeliverable(id: ID!): ProjectDeliverable
+    projectResources: [ProjectResource!]!
+    projectResource(id: ID!): ProjectResource
   }
 
-  input CreateProjectDeliverableInput {
+  input CreateProjectResourceInput {
     project_id: ID!
     label: String
     url: String
     category: ProjectResourceType
   }
 
-  input UpdateProjectDeliverableInput {
+  input UpdateProjectResourceInput {
     project_id: ID
     label: String
     url: String
@@ -37,8 +37,8 @@ export const projectDeliverableSchemaString = `
   }
 
   type Mutation {
-    createProjectDeliverable(input: CreateProjectDeliverableInput!): ProjectDeliverable!
-    updateProjectDeliverable(id: ID!, input: UpdateProjectDeliverableInput!): ProjectDeliverable!
-    deleteProjectDeliverable(id: ID!): ProjectDeliverable
+    createProjectResource(input: CreateProjectResourceInput!): ProjectResource!
+    updateProjectResource(id: ID!, input: UpdateProjectResourceInput!): ProjectResource!
+    deleteProjectResource(id: ID!): ProjectResource
   }
 `;

@@ -20,6 +20,6 @@ export * from './constituent-links.resolvers';
 export * from './volunteer-history.resolvers';
 export * from './officer-assignments.resolvers';
 export * from './mentorships.resolvers';
-export * from './project-deliverables.resolvers';
+export * from './project-resources.resolvers';
 export * from './project-engagements.resolvers';
 export * from './project-staffing.resolvers';
