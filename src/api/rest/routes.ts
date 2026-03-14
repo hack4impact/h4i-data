@@ -25,7 +25,7 @@ router.use('/constituent-links', featureRoutes.constituentLinkRoutes);
 router.use('/volunteer-history', featureRoutes.volunteerHistoryRoutes);
 router.use('/officer-assignments', featureRoutes.officerAssignmentRoutes);
 router.use('/mentorships', featureRoutes.mentorshipRoutes);
-router.use('/project-deliverables', featureRoutes.projectDeliverableRoutes);
+router.use('/project-resources', featureRoutes.projectDeliverableRoutes);
 router.use('/project-engagements', featureRoutes.projectEngagementRoutes);
 router.use('/project-staffing', featureRoutes.projectStaffingRoutes);
 

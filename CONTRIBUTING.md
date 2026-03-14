@@ -38,14 +38,12 @@ NODE_ENV=development
 ### 4. Start Development Server
 
 ```bash
-# Start integrated server (both REST & GraphQL)
 pnpm run dev
-
-# Or start servers separately
-pnpm run dev:rest       # REST API only
-pnpm run dev:graphql    # GraphQL API only
-pnpm run dev:both       # Both servers concurrently
 ```
+
+This starts the Docker dev database, runs any pending migrations, and starts the server. Run this after pulling changes that include schema updates — migrations are applied automatically on startup.
+
+`dev:both` does the same but runs REST and GraphQL as separate processes via `concurrently`. The standalone `dev:rest` and `dev:graphql` scripts skip database setup and assume the DB is already running — use them only if you've already started the database manually with `pnpm run docker:dev:up`.
 
 The servers will be available at:
 
@@ -76,21 +74,21 @@ Integration tests run against a real local PostgreSQL database in Docker. **Dock
 A PostgreSQL 16 container runs on port **5433**, separate from any local Postgres you may have on 5432. It is seeded automatically from `db-init/seed.sql` on startup.
 
 ```bash
-pnpm run docker:up          # Start the test database container
-pnpm run docker:down        # Stop and remove the container (with volumes)
+pnpm run docker:test:up     # Start the test database container
+pnpm run docker:test:down   # Stop and remove the container (with volumes)
 pnpm run seed:test          # Re-run seed.sql against the running container
 ```
 
 #### Running Integration Tests
 
 ```bash
-pnpm run test:integration   # Starts Docker, runs tests, stops Docker
+pnpm run test:integration   # Starts the test DB if not running, then runs tests
 ```
 
-The test script handles starting and stopping the container automatically. If you want to keep the container running between runs (faster for development), start it manually first:
+The test script starts the container automatically if it isn't already up. To keep the container running between runs for faster iteration:
 
 ```bash
-pnpm run docker:up
+pnpm run docker:test:up
 pnpm exec cross-env NODE_ENV=test jest tests/integration --runInBand
 ```
 
