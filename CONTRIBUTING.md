@@ -41,7 +41,7 @@ NODE_ENV=development
 pnpm run dev
 ```
 
-This starts the Docker dev database, runs any pending migrations, and starts the server. Run this after pulling changes that include schema updates — migrations are applied automatically on startup.
+This starts the Docker dev database, runs any pending migrations, and starts the server. Run this after pulling changes that include schema updates. Migrations are applied automatically on startup.
 
 `dev:both` does the same but runs REST and GraphQL as separate processes via `concurrently`. The standalone `dev:rest` and `dev:graphql` scripts skip database setup and assume the DB is already running — use them only if you've already started the database manually with `pnpm run docker:dev:up`.
 

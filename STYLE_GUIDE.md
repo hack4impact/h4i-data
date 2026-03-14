@@ -12,11 +12,13 @@ Let's follow Conventional Commits when writing our commit messages: <https://www
 
 Structure:
 
+```
 <type>[optional scope]: <description>
 
 [optional body]
 
 [optional footer(s)]
+```
 
 Example: `feat(volunteers): add GET endpoint for volunteer by ID`
 
