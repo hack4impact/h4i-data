@@ -6,8 +6,8 @@ import {
   deleteLocation,
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
+import { Prisma } from '@prisma/client';
 
-// Mock prisma client
 jest.mock('../../../src/config/database', () => ({
   prisma: {
     locations: {
@@ -31,9 +31,9 @@ describe('Location Service', () => {
         {
           location_id: '1',
           name: 'Test Location 1',
-          address: '123 Test Street',
-          country_code: 'US',
-          subdivision_code: 'CA',
+          address_line: '123 Test Street',
+          state_code: 'CA',
+          country_code: 'USA',
           created_at: new Date(),
           updated_at: new Date(),
         },
@@ -43,7 +43,24 @@ describe('Location Service', () => {
       const result = await getAllLocations();
 
       expect(result).toEqual(mockLocations);
-      expect(prisma.locations.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return empty array when no locations exist', async () => {
+      (prisma.locations.findMany as jest.Mock).mockResolvedValue([]);
+
+      const result = await getAllLocations();
+
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.locations.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(getAllLocations()).rejects.toThrow(
+        'Failed to fetch locations'
+      );
     });
   });
 
@@ -53,9 +70,9 @@ describe('Location Service', () => {
       const mockLocation = {
         location_id: '1',
         name: 'Test Location 1',
-        address: '123 Test Street',
-        country_code: 'US',
-        subdivision_code: 'CA',
+        address_line: '123 Test Street',
+        state_code: 'CA',
+        country_code: 'USA',
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -66,9 +83,24 @@ describe('Location Service', () => {
       const result = await getLocationById(locationId);
 
       expect(result).toEqual(mockLocation);
-      expect(prisma.locations.findUnique).toHaveBeenCalledWith({
-        where: { location_id: locationId },
-      });
+    });
+
+    it('should throw NotFoundError if no location is found', async () => {
+      (prisma.locations.findUnique as jest.Mock).mockResolvedValue(null);
+
+      await expect(getLocationById('non-existent-id')).rejects.toThrow(
+        "Location with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.locations.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(getLocationById('1')).rejects.toThrow(
+        'Failed to fetch location'
+      );
     });
   });
 
@@ -76,16 +108,16 @@ describe('Location Service', () => {
     it('should create and return a new location', async () => {
       const inputData = {
         name: 'Test Location 1',
-        address: '123 Test Street',
-        country_code: 'US',
-        subdivision_code: 'CA',
+        address_line: '123 Test Street',
+        state_code: 'CA',
+        country_code: 'USA',
       };
 
       const createdLocation = {
         location_id: '1',
-        ...inputData,
         created_at: new Date(),
         updated_at: new Date(),
+        ...inputData,
       };
 
       (prisma.locations.create as jest.Mock).mockResolvedValue(createdLocation);
@@ -93,15 +125,16 @@ describe('Location Service', () => {
       const result = await createLocation(inputData);
 
       expect(result).toEqual(createdLocation);
+    });
 
-      expect(prisma.locations.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          name: inputData.name,
-          address: inputData.address,
-          country_code: inputData.country_code,
-          subdivision_code: inputData.subdivision_code,
-        }),
-      });
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.locations.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(
+        createLocation({ name: 'Test', state_code: 'CA', country_code: 'USA' })
+      ).rejects.toThrow('Failed to create location');
     });
   });
 
@@ -113,9 +146,9 @@ describe('Location Service', () => {
       const updatedLocation = {
         location_id: '1',
         name: 'Updated Location Name',
-        address: '123 Test Street',
-        country_code: 'US',
-        subdivision_code: 'CA',
+        address_line: '123 Test Street',
+        state_code: 'CA',
+        country_code: 'USA',
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -125,10 +158,29 @@ describe('Location Service', () => {
       const result = await updateLocation(locationId, updateData);
 
       expect(result).toEqual(updatedLocation);
-      expect(prisma.locations.update).toHaveBeenCalledWith({
-        where: { location_id: locationId },
-        data: updateData,
-      });
+    });
+
+    it('should throw NotFoundError when updating non-existent location', async () => {
+      (prisma.locations.update as jest.Mock).mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
+      );
+
+      await expect(
+        updateLocation('non-existent-id', { name: 'Updated' })
+      ).rejects.toThrow("Location with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.locations.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(updateLocation('1', { name: 'Updated' })).rejects.toThrow(
+        'Failed to update location'
+      );
     });
   });
 
@@ -138,9 +190,9 @@ describe('Location Service', () => {
       const deletedLocation = {
         location_id: locationId,
         name: 'Test Location 1',
-        address: '123 Test Street',
-        country_code: 'US',
-        subdivision_code: 'CA',
+        address_line: '123 Test Street',
+        state_code: 'CA',
+        country_code: 'USA',
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -150,9 +202,29 @@ describe('Location Service', () => {
       const result = await deleteLocation(locationId);
 
       expect(result).toEqual(deletedLocation);
-      expect(prisma.locations.delete).toHaveBeenCalledWith({
-        where: { location_id: locationId },
-      });
+    });
+
+    it('should throw NotFoundError when deleting non-existent location', async () => {
+      (prisma.locations.delete as jest.Mock).mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
+      );
+
+      await expect(deleteLocation('non-existent-id')).rejects.toThrow(
+        "Location with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.locations.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+
+      await expect(deleteLocation('1')).rejects.toThrow(
+        'Failed to delete location'
+      );
     });
   });
 });

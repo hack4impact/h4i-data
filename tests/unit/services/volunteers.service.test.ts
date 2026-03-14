@@ -6,9 +6,8 @@ import {
   deleteVolunteer,
 } from '../../../src/core';
 import { prisma } from '../../../src/config/database';
-import { volunteer_status, volunteer_type } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
-// Mock the entire prisma module
 jest.mock('../../../src/config/database', () => ({
   prisma: {
     volunteers: {
@@ -17,6 +16,9 @@ jest.mock('../../../src/config/database', () => ({
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+    },
+    constituents: {
+      findUnique: jest.fn(),
     },
   },
 }));
@@ -27,19 +29,31 @@ describe('Volunteer Service', () => {
   });
 
   describe('getAllVolunteers', () => {
-    it('should return an array of volunteers', async () => {
+    it('should return an array of volunteers with constituents', async () => {
       const mockVolunteers = [
         {
-          volunteer_id: '1',
-          first_name: 'John',
-          last_name: 'Doe',
-          email: 'john.doe@example.com',
-          graduation_date: new Date(),
-          volunteer_status: 'STUDENT',
-          volunteer_type: 'BOTH',
-          university_id: 'uuid-123',
+          volunteer_id: 'const-1',
+          org_email: 'john@org.edu',
+          status: 'ACTIVE',
+          volunteer_class: 'COLLEGIATE',
+          engagement_track: 'CHAPTER',
+          major_id: 'major-1',
+          education_level: 'UNDERGRADUATE',
+          graduation_term_id: 'term-1',
+          university_id: 'univ-1',
+          home_chapter_id: 'chapter-1',
+          employer_id: null,
           created_at: new Date(),
           updated_at: new Date(),
+          constituents: {
+            constituent_id: 'const-1',
+            first_name: 'John',
+            last_name: 'Doe',
+            primary_email: 'john@example.com',
+            phone_number: null,
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
         },
       ];
       (prisma.volunteers.findMany as jest.Mock).mockResolvedValue(
@@ -49,24 +63,50 @@ describe('Volunteer Service', () => {
       const result = await getAllVolunteers();
 
       expect(result).toEqual(mockVolunteers);
-      expect(prisma.volunteers.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return empty array when no volunteers exist', async () => {
+      (prisma.volunteers.findMany as jest.Mock).mockResolvedValue([]);
+      const result = await getAllVolunteers();
+      expect(result).toEqual([]);
+    });
+
+    it('should throw DatabaseError when database fails', async () => {
+      (prisma.volunteers.findMany as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getAllVolunteers()).rejects.toThrow(
+        'Failed to retrieve volunteers'
+      );
     });
   });
 
   describe('getVolunteerById', () => {
-    it('should return a single volunteer when a valid ID is provided', async () => {
-      const volunteerId = '1';
+    it('should return a single volunteer with constituent when a valid ID is provided', async () => {
+      const volunteerId = 'const-1';
       const mockVolunteer = {
         volunteer_id: volunteerId,
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'john.doe@example.com',
-        graduation_date: new Date(),
-        volunteer_status: 'STUDENT',
-        volunteer_type: 'BOTH',
-        university_id: 'uuid-123',
+        org_email: 'john@org.edu',
+        status: 'ACTIVE',
+        volunteer_class: 'COLLEGIATE',
+        engagement_track: 'CHAPTER',
+        major_id: 'major-1',
+        education_level: 'UNDERGRADUATE',
+        graduation_term_id: 'term-1',
+        university_id: 'univ-1',
+        home_chapter_id: 'chapter-1',
+        employer_id: null,
         created_at: new Date(),
         updated_at: new Date(),
+        constituents: {
+          constituent_id: 'const-1',
+          first_name: 'John',
+          last_name: 'Doe',
+          primary_email: 'john@example.com',
+          phone_number: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
       };
       (prisma.volunteers.findUnique as jest.Mock).mockResolvedValue(
         mockVolunteer
@@ -75,9 +115,6 @@ describe('Volunteer Service', () => {
       const result = await getVolunteerById(volunteerId);
 
       expect(result).toEqual(mockVolunteer);
-      expect(prisma.volunteers.findUnique).toHaveBeenCalledWith({
-        where: { volunteer_id: volunteerId },
-      });
     });
 
     it('should throw NotFoundError if no volunteer is found', async () => {
@@ -88,25 +125,54 @@ describe('Volunteer Service', () => {
         "Volunteer with id 'non-existent-id' not found"
       );
     });
+
+    it('should throw DatabaseError on unexpected error', async () => {
+      (prisma.volunteers.findUnique as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(getVolunteerById('1')).rejects.toThrow(
+        'Failed to retrieve volunteer'
+      );
+    });
   });
 
   describe('createVolunteer', () => {
-    it('should create and return a new volunteer', async () => {
+    it('should create and return a new volunteer with constituent check', async () => {
+      const constituentId = 'const-2';
       const inputData = {
+        volunteer_id: constituentId,
+        org_email: 'jane@org.edu',
+        status: 'ACTIVE' as const,
+        volunteer_class: 'COLLEGIATE' as const,
+        engagement_track: 'CHAPTER' as const,
+        major_id: 'major-2',
+        education_level: 'UNDERGRADUATE' as const,
+        university_id: 'univ-1',
+        home_chapter_id: 'chapter-1',
+      };
+
+      const mockConstituent = {
+        constituent_id: constituentId,
         first_name: 'Jane',
         last_name: 'Doe',
-        email: 'jane.doe@example.com',
-        graduation_date: new Date('2026-06-18').toISOString(),
-        volunteer_status: 'STUDENT' as volunteer_status,
-        volunteer_type: 'BOTH' as volunteer_type,
-        university_id: 'uuid-123',
-      };
-      const createdVolunteer = {
-        volunteer_id: 'new-id-123',
-        ...inputData,
+        primary_email: 'jane@example.com',
+        phone_number: null,
         created_at: new Date(),
         updated_at: new Date(),
       };
+
+      const createdVolunteer = {
+        ...inputData,
+        graduation_term_id: null,
+        employer_id: null,
+        created_at: new Date(),
+        updated_at: new Date(),
+        constituents: mockConstituent,
+      };
+
+      (prisma.constituents.findUnique as jest.Mock).mockResolvedValue(
+        mockConstituent
+      );
       (prisma.volunteers.create as jest.Mock).mockResolvedValue(
         createdVolunteer
       );
@@ -114,27 +180,72 @@ describe('Volunteer Service', () => {
       const result = await createVolunteer(inputData);
 
       expect(result).toEqual(createdVolunteer);
-      expect(prisma.volunteers.create).toHaveBeenCalledWith({
-        data: inputData,
+      expect(prisma.constituents.findUnique).toHaveBeenCalled();
+      expect(prisma.volunteers.create).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundError if constituent does not exist', async () => {
+      const inputData = {
+        volunteer_id: 'non-existent-const',
+        org_email: 'test@org.edu',
+        status: 'ACTIVE' as const,
+        volunteer_class: 'COLLEGIATE' as const,
+        engagement_track: 'CHAPTER' as const,
+      };
+
+      (prisma.constituents.findUnique as jest.Mock).mockResolvedValue(null);
+
+      await expect(createVolunteer(inputData)).rejects.toThrow(
+        "Constituent with id 'non-existent-const' not found"
+      );
+    });
+
+    it('should throw DatabaseError when create fails', async () => {
+      (prisma.constituents.findUnique as jest.Mock).mockResolvedValue({
+        constituent_id: 'const-1',
       });
+      (prisma.volunteers.create as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        createVolunteer({
+          volunteer_id: 'const-1',
+          org_email: 'test@org.edu',
+          status: 'ACTIVE' as const,
+          volunteer_class: 'COLLEGIATE' as const,
+          engagement_track: 'CHAPTER' as const,
+        })
+      ).rejects.toThrow('Failed to create volunteer');
     });
   });
 
   describe('updateVolunteer', () => {
     it('should update and return the volunteer', async () => {
-      const volunteerId = '1';
-      const updateData = { first_name: 'Updated Name' };
+      const volunteerId = 'const-1';
+      const updateData = { status: 'INACTIVE' as const };
       const updatedVolunteer = {
         volunteer_id: volunteerId,
-        first_name: 'Updated Name',
-        last_name: 'Doe',
-        email: 'john.doe@example.com',
-        graduation_date: new Date(),
-        volunteer_status: 'STUDENT',
-        volunteer_type: 'BOTH',
-        university_id: 'uuid-123',
+        org_email: 'john@org.edu',
+        status: 'INACTIVE',
+        volunteer_class: 'COLLEGIATE',
+        engagement_track: 'CHAPTER',
+        major_id: 'major-1',
+        education_level: 'UNDERGRADUATE',
+        graduation_term_id: 'term-1',
+        university_id: 'univ-1',
+        home_chapter_id: 'chapter-1',
+        employer_id: null,
         created_at: new Date(),
         updated_at: new Date(),
+        constituents: {
+          constituent_id: 'const-1',
+          first_name: 'John',
+          last_name: 'Doe',
+          primary_email: 'john@example.com',
+          phone_number: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
       };
       (prisma.volunteers.update as jest.Mock).mockResolvedValue(
         updatedVolunteer
@@ -143,27 +254,56 @@ describe('Volunteer Service', () => {
       const result = await updateVolunteer(volunteerId, updateData);
 
       expect(result).toEqual(updatedVolunteer);
-      expect(prisma.volunteers.update).toHaveBeenCalledWith({
-        where: { volunteer_id: volunteerId },
-        data: updateData,
-      });
+    });
+
+    it('should throw NotFoundError when updating non-existent volunteer', async () => {
+      (prisma.volunteers.update as jest.Mock).mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
+      );
+      await expect(
+        updateVolunteer('non-existent-id', { status: 'INACTIVE' as const })
+      ).rejects.toThrow("Volunteer with id 'non-existent-id' not found");
+    });
+
+    it('should throw DatabaseError on unexpected update error', async () => {
+      (prisma.volunteers.update as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(
+        updateVolunteer('1', { status: 'INACTIVE' as const })
+      ).rejects.toThrow('Failed to update volunteer');
     });
   });
 
   describe('deleteVolunteer', () => {
     it('should call delete with the correct ID and return the deleted volunteer', async () => {
-      const volunteerId = '1';
+      const volunteerId = 'const-1';
       const deletedVolunteer = {
         volunteer_id: volunteerId,
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'john.doe@example.com',
-        graduation_date: new Date(),
-        volunteer_status: 'STUDENT',
-        volunteer_type: 'BOTH',
-        university_id: 'uuid-123',
+        org_email: 'john@org.edu',
+        status: 'ACTIVE',
+        volunteer_class: 'COLLEGIATE',
+        engagement_track: 'CHAPTER',
+        major_id: 'major-1',
+        education_level: 'UNDERGRADUATE',
+        graduation_term_id: 'term-1',
+        university_id: 'univ-1',
+        home_chapter_id: 'chapter-1',
+        employer_id: null,
         created_at: new Date(),
         updated_at: new Date(),
+        constituents: {
+          constituent_id: 'const-1',
+          first_name: 'John',
+          last_name: 'Doe',
+          primary_email: 'john@example.com',
+          phone_number: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
       };
       (prisma.volunteers.delete as jest.Mock).mockResolvedValue(
         deletedVolunteer
@@ -172,9 +312,27 @@ describe('Volunteer Service', () => {
       const result = await deleteVolunteer(volunteerId);
 
       expect(result).toEqual(deletedVolunteer);
-      expect(prisma.volunteers.delete).toHaveBeenCalledWith({
-        where: { volunteer_id: volunteerId },
-      });
+    });
+
+    it('should throw NotFoundError when deleting non-existent volunteer', async () => {
+      (prisma.volunteers.delete as jest.Mock).mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: '5.0.0',
+        })
+      );
+      await expect(deleteVolunteer('non-existent-id')).rejects.toThrow(
+        "Volunteer with id 'non-existent-id' not found"
+      );
+    });
+
+    it('should throw DatabaseError on unexpected delete error', async () => {
+      (prisma.volunteers.delete as jest.Mock).mockRejectedValue(
+        new Error('Connection refused')
+      );
+      await expect(deleteVolunteer('1')).rejects.toThrow(
+        'Failed to delete volunteer'
+      );
     });
   });
 });

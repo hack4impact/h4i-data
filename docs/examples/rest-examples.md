@@ -2,7 +2,7 @@
 
 This guide demonstrates how to create REST endpoints using Test-Driven Development (TDD) in this project.
 
-Note that the ports here are 3001, meaning you should run `npm run dev` and not `npm run dev:rest` in order for easy copy-paste of the code! Otherwise, just replace 3001 with 3002 if you prefer running REST API server specifically.
+Note that the ports here are 3001, meaning you should run `pnpm run dev` and not `pnpm run dev:rest` in order for easy copy-paste of the code! Otherwise, just replace 3001 with 3002 if you prefer running REST API server specifically.
 
 ---
 
@@ -65,7 +65,7 @@ describe('POST /volunteers', () => {
 ### Step 2: Run tests (they will fail) (RED)
 
 ```bash
-npm run test:integration
+pnpm run test:integration
 ```
 
 ### Step 3: Create Validator (GREEN)
@@ -198,7 +198,7 @@ router.use('/volunteers', volunteerRoutes);
 ### Step 8: Run All Tests (GREEN)
 
 ```bash
-npm run test
+pnpm run test
 ```
 
 ### Step 10: Refactor & Add Improvements (REFACTOR)
@@ -303,55 +303,4 @@ Hit Send and you should get a 201 response. Click on "Body" and change it to "Te
 
 ### Integration with GitHub Actions
 
-**File**: `.github/workflows/test.yml`
-
-```yaml
-name: Test API
-
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    environment: test
-
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: test_db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run unit tests
-        run: npm run test:unit
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.DIRECT_URL }}
-
-      - name: Run integration tests
-        run: npm run test:integration
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.DIRECT_URL }}
-```
+The CI pipeline is defined in `.github/workflows/ci.yml`. It uses pnpm, Node 24, and runs both unit and integration tests. Integration tests auto-start a Docker PostgreSQL container via the `test:integration` script. See the actual workflow file for the current configuration.

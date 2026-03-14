@@ -1,91 +1,193 @@
 import request from 'supertest';
-import express from 'express';
-import { Server } from 'http';
 import { createGraphqlApp } from '../../../src/api/graphql/server';
-import { env } from '../../../src/config/server';
 
-let server: Server;
-let app: express.Application;
-let locationId: string;
+const app = createGraphqlApp();
 
-beforeAll(() => {
-  app = createGraphqlApp();
-  server = app.listen(env.GRAPHQL_PORT);
-});
-
-afterAll(() => {
-  server.close();
-});
+// Helper to create a location for tests
+const createTestLocation = async () => {
+  const mutation = `
+    mutation CreateLocation($input: CreateLocationInput!) {
+      createLocation(input: $input) {
+        location_id
+        name
+        address_line
+      }
+    }
+  `;
+  const variables = {
+    input: {
+      name: 'Test Location',
+      address_line: '123 Test St',
+      state_code: 'NY',
+      country_code: 'USA',
+    },
+  };
+  const response = await request(app)
+    .post('/')
+    .send({ query: mutation, variables });
+  return response.body.data.createLocation;
+};
 
 describe('GraphQL API - Locations', () => {
   it('should create a new location via mutation', async () => {
+    // Act
     const mutation = `
       mutation CreateLocation($input: CreateLocationInput!) {
         createLocation(input: $input) {
           location_id
           name
-          address
-          country_code
-          subdivision_code
+          address_line
         }
       }
     `;
-
     const variables = {
       input: {
-        name: 'Test Location',
-        address: '123 Test St',
-        country_code: 'US',
-        subdivision_code: 'NY',
+        name: 'Headquarters',
+        address_line: '123 Main Street',
+        state_code: 'CA',
+        country_code: 'USA',
       },
     };
+    const response = await request(app)
+      .post('/')
+      .send({ query: mutation, variables });
 
-    const response = await request(server)
-      .post('/') // GraphQL server is at the root
-      .send({ query: mutation, variables: variables });
-
-    // 4. Assertions
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    const location = response.body.data.createLocation;
-    expect(location).toHaveProperty('location_id');
-    expect(location.name).toBe(variables.input.name);
-    expect(location.address).toBe('123 Test St');
-    expect(location.country_code).toBe('US');
-    expect(location.subdivision_code).toBe('NY');
-
-    locationId = location.location_id;
+    expect(response.body.data.createLocation).toHaveProperty('location_id');
   });
 
   it('should fetch a location by its ID via query', async () => {
-    // Now fetch it using the ID
+    // Arrange
+    const location = await createTestLocation();
+
+    // Act
     const query = `
       query Location($id: ID!) {
         location(id: $id) {
           location_id
           name
-          address
         }
       }
     `;
-    const variables = { id: locationId };
+    const variables = { id: location.location_id };
+    const response = await request(app).post('/').send({ query, variables });
 
-    const response = await request(server)
-      .post('/')
-      .send({ query: query, variables: variables });
-
-    // Assertions
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    const location = response.body.data.location;
-
-    // Verify the fetched data matches the created data
-    expect(location.location_id).toBe(locationId);
-    expect(location.name).toBe('Test Location');
-    expect(location.address).toBe('123 Test St');
+    expect(response.body.data.location.location_id).toBe(location.location_id);
   });
 
-  it('should delete a location by its ID via mutation', async () => {
+  it('should return null for a non-existent location ID', async () => {
+    // Act
+    const query = `
+      query {
+        location(id: "00000000-0000-0000-0000-000000000000") {
+          location_id
+        }
+      }
+    `;
+    const response = await request(app).post('/').send({ query });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.data.location).toBeNull();
+  });
+
+  it('should fetch all locations via query', async () => {
+    // Arrange
+    await createTestLocation();
+
+    // Act
+    const query = `query { locations { location_id name } }`;
+    const response = await request(app).post('/').send({ query });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(Array.isArray(response.body.data.locations)).toBe(true);
+    expect(response.body.data.locations.length).toBeGreaterThan(0);
+  });
+
+  it('should update a location via mutation', async () => {
+    // Arrange
+    const location = await createTestLocation();
+
+    // Act
+    const mutation = `
+      mutation UpdateLocation($id: ID!, $input: UpdateLocationInput!) {
+        updateLocation(id: $id, input: $input) {
+          location_id
+          name
+        }
+      }
+    `;
+    const variables = {
+      id: location.location_id,
+      input: { name: 'Updated Location' },
+    };
+    const response = await request(app)
+      .post('/')
+      .send({ query: mutation, variables });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.updateLocation.name).toBe('Updated Location');
+  });
+
+  it('should return errors when updating a non-existent location', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateLocation($id: ID!, $input: UpdateLocationInput!) {
+        updateLocation(id: $id, input: $input) {
+          location_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { name: 'Updated Location' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid location input', async () => {
+    // Arrange
+    const location = await createTestLocation();
+
+    // Act
+    const mutation = `
+      mutation UpdateLocation($id: ID!, $input: UpdateLocationInput!) {
+        updateLocation(id: $id, input: $input) {
+          location_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: location.location_id, input: { name: 'A' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent location', async () => {
+    // Act
     const mutation = `
       mutation DeleteLocation($id: ID!) {
         deleteLocation(id: $id) {
@@ -93,18 +195,47 @@ describe('GraphQL API - Locations', () => {
         }
       }
     `;
-    const variables = { id: locationId };
-
-    const response = await request(server)
+    const response = await request(app)
       .post('/')
-      .send({ query: mutation, variables: variables });
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
 
-    // Assertions
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should delete a location by its ID via mutation', async () => {
+    // Arrange
+    const location = await createTestLocation();
+
+    // Act
+    const mutation = `
+      mutation DeleteLocation($id: ID!) {
+        deleteLocation(id: $id) {
+          location_id
+        }
+      }
+    `;
+    const variables = { id: location.location_id };
+    const response = await request(app)
+      .post('/')
+      .send({ query: mutation, variables });
+
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.deleteLocation).toHaveProperty(
-      'location_id',
-      locationId
+    expect(response.body.data.deleteLocation.location_id).toBe(
+      location.location_id
     );
+
+    // Verify deletion
+    const verifyQuery = `query { location(id: "${location.location_id}") { location_id } }`;
+    const verifyResponse = await request(app)
+      .post('/')
+      .send({ query: verifyQuery });
+    expect(verifyResponse.body.data.location).toBeNull();
   });
 });

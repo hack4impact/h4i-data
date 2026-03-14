@@ -1,16 +1,26 @@
 import { z } from 'zod';
+import {
+  volunteerClassSchema,
+  engagementTrackSchema,
+  educationLevelSchema,
+  volunteerStatusSchema,
+} from './enums';
 
 export const createVolunteerSchema = z.object({
-  first_name: z.string().min(2, 'First name must be at least 2 characters'),
-  last_name: z.string().min(2, 'Last name must be at least 2 characters'),
-  email: z.email('Must be a valid email address'),
-  graduation_date: z.iso.datetime(),
-  volunteer_status: z.enum(['STUDENT', 'PROFESSIONAL']),
-  h4i_email: z.email('Must be a valid H4I email address').optional(),
-  volunteer_type: z.enum(['CHAPTER', 'BOTH', 'OPERATIONS']),
-  university_id: z.uuid(),
-  chapter_id: z.uuid().optional(),
-  company_id: z.uuid().optional(),
+  // volunteer_id is a FK to constituents, required for create
+  volunteer_id: z.uuid(),
+  org_email: z.string().email().optional(),
+  status: volunteerStatusSchema.optional().default('ACTIVE'),
+  volunteer_class: volunteerClassSchema.optional().default('COLLEGIATE'),
+  engagement_track: engagementTrackSchema.optional().default('CHAPTER'),
+  major_id: z.uuid().optional(),
+  education_level: educationLevelSchema.optional(),
+  graduation_term_id: z.uuid().optional(),
+  university_id: z.uuid().optional(),
+  home_chapter_id: z.uuid().optional(),
+  employer_id: z.uuid().optional(),
 });
 
-export const updateVolunteerSchema = createVolunteerSchema.partial();
+export const updateVolunteerSchema = createVolunteerSchema.partial().omit({
+  volunteer_id: true, // Cannot update the PK/FK
+});

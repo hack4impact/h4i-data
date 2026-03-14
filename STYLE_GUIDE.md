@@ -1,47 +1,53 @@
-# Styling Guidelines
+# Style Guide
 
-### Recommended IDE - Visual Studio Code
+## Tooling
 
-### Commits Messages
+### Recommended IDE
+
+Visual Studio Code
+
+### Commit Messages
 
 Let's follow Conventional Commits when writing our commit messages: <https://www.conventionalcommits.org/en/v1.0.0/>
 
 Structure:
 
+```
 <type>[optional scope]: <description>
 
 [optional body]
 
 [optional footer(s)]
+```
 
-Example: feature(core): add submit functionality in Button.tsx
+Example: `feat(volunteers): add GET endpoint for volunteer by ID`
 
 ### ESLint
 
-Run before committing:
+Husky runs ESLint automatically on commit. To run manually:
 
 ```
-npx eslint .
+pnpm exec eslint .
 ```
 
 To fix automatic errors:
 
 ```
-npx eslint --fix .
+pnpm exec eslint --fix .
 ```
 
 ### Unused Dependencies
 
-Run to check for unused dependencies
+Run to check for unused dependencies (requires `depcheck` installed globally: `npm i -g depcheck`):
 
 ```
-npx depcheck
+pnpm exec depcheck
 ```
 
 Uninstall unused dependencies with
 
 ```
-npm uninstall <dependency-name>
+pnpm remove <dependency-name>
 ```
 
 ### package.json
@@ -53,13 +59,13 @@ Make sure to order the scripts alphabetically (A - Z)
 Run to format
 
 ```
-npx prettier . --write
+pnpm exec prettier . --write
 ```
 
 Check if all files follow Prettier format
 
 ```
-npx prettier . --check
+pnpm exec prettier . --check
 ```
 
 ## Writing Code
@@ -126,22 +132,14 @@ See the test templates for writing tests in `/docs/examples/`
 
 Use the following structure for writing queries with filters and sorts. Note: you **MUST** name the variables **"filter"** and **"sort"**, nothing else.
 
-Example query using filter and sort:
+Example query using sort:
 
-```
+```graphql
 query {
-  volunteers(
-    filter: {
-      statuses: ["PROFESSIONAL", "STUDENT"],
-      roles: ["Developer"],
-      chapters: ["Cal high"]
-    },
-    sort: {
-      firstName: ascending
-    }
-  ) {
-    volunteer_id
-    first_name
+  projects(sortOrder: "ASC") {
+    project_id
+    name
+    financial
   }
 }
 ```
@@ -154,9 +152,9 @@ Our code should follow the structure below, from top to bottom:
 
 1. Imports are first at the top of the file. Only include used imports, and they should be grouped appropriately (see _Organize Imports_ for more).
 2. Constant variable declarations should follow after the imports and before any class definitions.
-3. Type declarations follow constants (e.g. `type CreateChatperInputs`).
+3. Type declarations follow constants (e.g. `type CreateChapterInput`).
 4. Enum declarations.
-5. Interface definitions should be next (e.g. `NonprofitsQueryArgs`).
+5. Interface definitions should be next.
 6. Core logic/component definition should be next (e.g. `export const className`). This includes the core class, function, component that the file primarily exports.
 7. Helper functions/methods. Define event handlers, utility functions, or methods used internally by the main logic.
 8. Export should be last. Explicitly export the primary functionality along with additional exports at the bottom.
@@ -195,7 +193,9 @@ import { UserService } from '@services/UserService';
 - Add any additional notes at the bottom in the **"Notes"** section
 - Assign at least 2 reviewers
 
-### Best Practices to Write REST API
+---
+
+## REST API Best Practices
 
 ### 1. Test Structure
 

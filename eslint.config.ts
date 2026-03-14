@@ -13,5 +13,24 @@ export default tseslint.config(
   },
   tseslint.configs.stylistic,
   tseslint.configs.strict,
-  eslintConfigPrettier
+  eslintConfigPrettier,
+  {
+    rules: {
+      '@typescript-eslint/no-unused-expressions': [
+        'error',
+        {
+          allowShortCircuit: true,
+          allowTernary: true,
+          allowTaggedTemplates: true,
+        },
+      ],
+    },
+  },
+  {
+    files: ['tests/**/*.ts', 'tests/**/*.js'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+    },
+  }
 );

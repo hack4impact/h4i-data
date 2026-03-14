@@ -33,9 +33,6 @@ coverage
 .DS_Store
 Thumbs.db
 
-# Prisma
-prisma/migrations
-
 # Documentation
 *.md
 !README.md

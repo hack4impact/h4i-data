@@ -1,5 +1,5 @@
 import express from 'express';
-import { graphqlHTTP } from 'express-graphql';
+import { createHandler } from 'graphql-http/lib/use/express';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import { typeDefs } from './schemas';
@@ -23,6 +23,8 @@ export const graphqlSchema = makeExecutableSchema({ typeDefs, resolvers });
 export function createGraphqlApp() {
   const app = express();
 
+  app.set('trust proxy', 1);
+
   // Security middleware (apply first)
   app.use(helmetConfig);
   app.use(rateLimiter);
@@ -40,17 +42,12 @@ export function createGraphqlApp() {
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      service: 'volunteer-management-backend-graphql',
+      service: 'operations-api-graphql',
     });
   });
 
-  app.use(
-    '/', // Mount at the root of this server
-    graphqlHTTP({
-      schema: graphqlSchema,
-      graphiql: env.NODE_ENV === 'development',
-    })
-  );
+  // GraphQL endpoint
+  app.all('/', createHandler({ schema: graphqlSchema }));
 
   // Error handling middleware (must be last)
   app.use(notFoundHandler);

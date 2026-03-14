@@ -7,7 +7,7 @@ import {
   updateLocation,
   updateLocationSchema,
 } from '../../../core';
-import { GraphQLError } from 'graphql';
+import { NotFoundError } from '../../../middleware/error.middleware';
 import { z } from 'zod';
 
 // Infer TypeScript types directly from your Zod schemas
@@ -18,19 +18,12 @@ export const locationResolvers = {
   Query: {
     locations: () => getAllLocations(),
     location: async (_parent: unknown, { id }: { id: string }) => {
-      const location = await getLocationById(id);
-      if (!location) {
-        throw new GraphQLError(
-          'Location not found',
-          undefined, // nodes
-          undefined, // source
-          undefined, // positions
-          undefined, // path
-          undefined, // originalError
-          { code: 'NOT_FOUND' } // extensions
-        );
+      try {
+        return await getLocationById(id);
+      } catch (error) {
+        if (error instanceof NotFoundError) return null;
+        throw error;
       }
-      return location;
     },
   },
   Mutation: {

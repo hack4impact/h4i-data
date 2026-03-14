@@ -1,9 +1,4 @@
-import { Request, Response } from 'express';
-
-// Add request ID to Express Request type
-interface RequestWithId extends Request {
-  requestId?: string;
-}
+import { Response } from 'express';
 import {
   getAllChapters,
   getChapterById,
@@ -13,7 +8,7 @@ import {
   createChapterSchema,
   updateChapterSchema,
 } from '../../../core';
-import { asyncHandler } from '../../../middleware';
+import { asyncHandler, RequestWithId } from '../../../middleware';
 import { logger } from '../../../config/logger';
 
 export const chapterController = {
@@ -23,7 +18,8 @@ export const chapterController = {
   }),
 
   getChapterById: asyncHandler(async (req: RequestWithId, res: Response) => {
-    const chapter = await getChapterById(req.params.id);
+    const id = req.params.id as string;
+    const chapter = await getChapterById(id);
     res.json(chapter);
   }),
 
@@ -41,26 +37,28 @@ export const chapterController = {
   }),
 
   updateChapter: asyncHandler(async (req: RequestWithId, res: Response) => {
+    const id = req.params.id as string;
     // Validate input data
     const validatedData = updateChapterSchema.parse(req.body);
 
     logger.info('Updating chapter via REST API', {
       requestId: req.requestId,
-      chapterId: req.params.id,
+      chapterId: id,
       updateData: validatedData,
     });
 
-    const updatedChapter = await updateChapter(req.params.id, validatedData);
+    const updatedChapter = await updateChapter(id, validatedData);
     res.json(updatedChapter);
   }),
 
   deleteChapter: asyncHandler(async (req: RequestWithId, res: Response) => {
+    const id = req.params.id as string;
     logger.info('Deleting chapter via REST API', {
       requestId: req.requestId,
-      chapterId: req.params.id,
+      chapterId: id,
     });
 
-    await deleteChapter(req.params.id);
+    await deleteChapter(id);
     res.status(204).send();
   }),
 };

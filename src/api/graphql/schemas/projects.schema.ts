@@ -1,13 +1,18 @@
 export const projectSchemaString = `
+  enum ProjectStatus {
+    SCOPING
+    ACTIVE
+    INACTIVE
+    ARCHIVED
+  }
+
   type Project {
     project_id: ID!
     name: String!
-    description: String
-    budget: Float
-    repo: String
-    created_at: String!
-    updated_at: String!
-    project_type: String
+    github_url: String
+    status: ProjectStatus
+    created_at: String
+    updated_at: String
   }
 
   type Query {
@@ -17,18 +22,14 @@ export const projectSchemaString = `
 
   input CreateProjectInput {
     name: String!
-    description: String
-    budget: Float
-    repo: String
-    project_type: String
+    github_url: String
+    status: ProjectStatus
   }
 
   input UpdateProjectInput {
-    name: String!
-    description: String
-    budget: Float
-    repo: String
-    project_type: String
+    name: String
+    github_url: String
+    status: ProjectStatus
   }
 
   type Mutation {

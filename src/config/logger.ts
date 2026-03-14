@@ -1,6 +1,7 @@
 import winston from 'winston';
 import path from 'path';
 import { env } from './server';
+import fs from 'fs';
 
 // Ensure logs directory exists
 const logsDir = 'logs';
@@ -33,63 +34,72 @@ const consoleFormat = winston.format.combine(
   })
 );
 
+const isDevelopment = env.NODE_ENV === 'development';
+const isTest = env.NODE_ENV === 'test';
+
 // Create the logger
 export const logger = winston.createLogger({
-  level: env.NODE_ENV === 'development' ? 'debug' : 'info',
+  level: isDevelopment ? 'debug' : 'info',
   format: customFormat,
   defaultMeta: {
-    service: 'volunteer-management-backend',
+    service: 'operations-api',
     environment: env.NODE_ENV,
   },
-  transports: [
-    // Error log - only errors
+  transports: isTest
+    ? []
+    : [
+        new winston.transports.Console({
+          format: isDevelopment ? consoleFormat : customFormat,
+          handleExceptions: true,
+          handleRejections: true,
+        }),
+      ],
+  silent: isTest,
+});
+
+if (isDevelopment) {
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+
+  logger.add(
     new winston.transports.File({
       filename: path.join(logsDir, 'error.log'),
       level: 'error',
-      maxsize: 10485760, // 10MB
+      maxsize: 10485760,
       maxFiles: 5,
       tailable: true,
-    }),
+    })
+  );
 
-    // Combined log - all levels
+  logger.add(
     new winston.transports.File({
       filename: path.join(logsDir, 'combined.log'),
-      maxsize: 10485760, // 10MB
+      maxsize: 10485760,
       maxFiles: 5,
       tailable: true,
-    }),
+    })
+  );
 
-    // Request log - for HTTP requests
+  logger.add(
     new winston.transports.File({
       filename: path.join(logsDir, 'requests.log'),
       level: 'http',
-      maxsize: 10485760, // 10MB
+      maxsize: 10485760,
       maxFiles: 3,
       tailable: true,
-    }),
-  ],
+    })
+  );
 
-  // Handle uncaught exceptions and unhandled rejections
-  exceptionHandlers: [
+  logger.exceptions.handle(
     new winston.transports.File({
       filename: path.join(logsDir, 'exceptions.log'),
-    }),
-  ],
+    })
+  );
 
-  rejectionHandlers: [
+  logger.rejections.handle(
     new winston.transports.File({
       filename: path.join(logsDir, 'rejections.log'),
-    }),
-  ],
-});
-
-// Add console transport for development
-if (env.NODE_ENV === 'development') {
-  logger.add(
-    new winston.transports.Console({
-      format: consoleFormat,
-      handleExceptions: true,
-      handleRejections: true,
     })
   );
 }
@@ -102,11 +112,5 @@ winston.addColors({
   http: 'magenta',
   debug: 'white',
 });
-
-// Create logs directory if it doesn't exist
-import fs from 'fs';
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
-}
 
 export default logger;

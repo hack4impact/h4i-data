@@ -1,6 +1,6 @@
-# Volunteer Management Backend!
+# Operations API
 
-A comprehensive backend API for managing volunteers, chapters, nonprofits, projects, and sponsors with both REST and GraphQL endpoints.
+A comprehensive backend API for managing H4I operations data — volunteers, chapters, projects, partners, and more — with both REST and GraphQL endpoints.
 
 ---
 
@@ -8,8 +8,8 @@ A comprehensive backend API for managing volunteers, chapters, nonprofits, proje
 
 - **Language** - TypeScript
 - **Framework** - Express.js
-- **Database** - PostgreSQL (hosted on Supabase)
-- **ORM** - Prisma
+- **Database** - PostgreSQL (Railway in production, Docker locally)
+- **ORM** - Prisma 7+ (with `@prisma/adapter-pg`)
 - **API Types** - REST & GraphQL
 - **Testing** - Jest & Supertest
 - **Code Quality** - ESLint, Prettier, Husky
@@ -19,25 +19,24 @@ A comprehensive backend API for managing volunteers, chapters, nonprofits, proje
 
 ## Project Structure
 
-```markdown
+```
 src/
 ├── api/
-│ ├── rest/ # REST API endpoints
-│ └── graphql/ # GraphQL schema and resolvers
+│   ├── rest/       # REST API endpoints
+│   └── graphql/    # GraphQL schema and resolvers
 ├── core/
-│ ├── services/ # Business logic
-│ └── validators/ # Input validation
-├── config/ # Database and server configuration
-├── middleware/ # Logging, security, and errors
-└── app.ts # Main application entry point
+│   ├── services/   # Business logic
+│   └── validators/ # Input validation
+├── config/         # Database and server configuration
+├── middleware/      # Logging, security, and errors
+└── app.ts          # Main application entry point
 
 tests/
-├── unit/ # Unit tests
-└── integration/ # Integration tests
+├── unit/           # Unit tests (no database required)
+└── integration/    # Integration tests (requires Docker)
 
 prisma/
-├── schema.prisma # Database schema
-└── migrations/ # Database migrations
+└── schema.prisma   # Database schema
 ```
 
 ---
@@ -47,41 +46,47 @@ prisma/
 ### 1. Install Dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 2. Environment Setup
 
-Create a `.env` file in the root directory and copy fields from `.env.example`:
+Copy `.env.example` to `.env` and fill in the values:
+
+```bash
+cp .env.example .env
+```
 
 ```env
-# Database Configuration
-DATABASE_URL=your_database_url_here
-DIRECT_URL=your_direct_url_here
-
-# Server Configuration
-PORT=3000
-REST_PORT=3001
-GRAPHQL_PORT=3002
+DATABASE_URL="postgresql://user:password@host:5432/dbname"
+PORT=3001
+REST_PORT=3002
+GRAPHQL_PORT=3003
+NODE_ENV=development
 ```
 
-### 3. Database Setup
+### 3. Start Development Server
 
 ```bash
-npx prisma db pull     # Sync schema with database
-npx prisma generate    # Generate Prisma client
+pnpm run dev
 ```
 
-### 4. Start Development Server
+This command starts the Docker dev database, runs any pending Prisma migrations, and starts the server. **Run this after pulling changes that include schema updates** — migrations are applied automatically on startup.
+
+If you need to regenerate the Prisma client manually (e.g. after a schema change without restarting):
 
 ```bash
-# Start integrated server (both REST & GraphQL)
-npm run dev
+pnpm exec prisma generate
+```
 
-# Or start servers separately
-npm run dev:rest       # REST API only
-npm run dev:graphql    # GraphQL API only
-npm run dev:both       # Both servers concurrently
+#### Standalone servers
+
+The following scripts start individual servers but do **not** manage the database or run migrations. Use them only after the database is already running and up to date:
+
+```bash
+pnpm run dev:rest       # REST API only
+pnpm run dev:graphql    # GraphQL API only
+pnpm run dev:both       # Both servers concurrently
 ```
 
 The servers will be available at:
@@ -92,58 +97,34 @@ The servers will be available at:
 
 ---
 
-## Testing
-
-```bash
-npm run test               # Run all tests (Unit &  Integration)
-npm run test:coverage      # Generate coverage report for Unit tests only
-npm run test:integration   # Integration tests only
-npm run test:unit          # Unit tests only
-npm run test:watch         # Watch mode for unit tests
-```
-
----
-
 ## Database Schema
 
-The database includes the following main entities:
+The database includes the following core entities:
 
+- **constituents** - People in the system (base identity table)
+- **volunteers** - Volunteer profiles (extends constituents)
 - **chapters** - Local H4I chapters
-- **companies** - Companies associated with volunteers, sponsors, & nonprofits
-- **contacts** - Contact information
+- **companies** - Employers and corporate entities
 - **locations** - Geographic locations
-- **operations_branches** - H4I Branches of the Operations Board
-- **nonprofits** - Partner nonprofit organizations
-- **roles** - All existing roles within the organization
-- **projects** - Development projects for nonprofits
-- **sponsors** - Corporate sponsors
-- **volunteers** - Student and professional volunteers
+- **partners** - Partner organizations (nonprofits, NGOs, etc.)
+- **projects** - Development projects
+- **officer_roles** - Officer/leadership roles (chapter or central scope)
+- **project_roles** - Roles within a project team
 
-The database includes the following main relationship tables:
+Supporting entities:
 
-- **nonprofit_chapter_project**
-- **sponsor_chapter**
-- **volunteer_assignment**
-- **volunteer_history**
-- **volunteer_role_project**
+- **universities** - Universities linked to chapters and volunteers
+- **academic_terms** - Semesters/quarters at universities
+- **constituent_links** - Social media links for constituents
 
----
+Relationship/tracking entities:
 
-## Development Guidelines
-
-### Database Management
-
-- **DO NOT** edit `schema.prisma` directly in production
-- Use Supabase Table Editor for schema changes in production
-- Always run `npx prisma db pull` and `npx prisma generate` after database changes
-- This ensures code stays synchronized with the database
-
-### Branch Naming Convention
-
-Follow the pattern: `feature/issue-number-description`
-
-- Example: `feature/1-add-volunteer-endpoints`
-- This automatically links branches to GitHub issues
+- **project_engagements** - Links projects to partners, chapters, and terms
+- **project_staffing** - Assigns volunteers to project engagements with roles
+- **project_resources** - Deliverables (repos, designs, docs) for projects
+- **officer_assignments** - Assigns volunteers to officer roles at chapters
+- **mentorships** - Mentor/mentee relationships between constituents
+- **volunteer_history** - Audit trail of volunteer lifecycle events
 
 ---
 
@@ -151,24 +132,23 @@ Follow the pattern: `feature/issue-number-description`
 
 ### GraphQL API
 
-GraphQL endpoint available at `/api/graphql` with interactive playground.
+GraphQL endpoint available at:
+
+- **Integrated server** (`pnpm run dev`): `http://localhost:3001/api/graphql`
+- **Standalone** (`pnpm run dev:graphql`): `http://localhost:3003/`
 
 Example mutation:
 
 ```graphql
 mutation {
-  addVolunteer(
-    volunteer: {
-      first_name: "Jane"
-      last_name: "Doe"
-      email: "janedoe@example.com"
-      graduation_date: "2026-06-18"
-      volunteer_status: STUDENT
-      H4I_email: "jane@hack4impact.org"
-      volunteer_type: CHAPTER
-      university_id: "860b69b4-a14e-41d9-a367-2632b342e549"
-    }
-  )
+  createChapter(input: {
+    name: "University of Pennsylvania"
+    founded_date: "2020-09-01"
+  }) {
+    chapter_id
+    name
+    founded_date
+  }
 }
 ```
 
@@ -176,44 +156,45 @@ More examples available in [`docs/examples/graphql-examples.md`](docs/examples/g
 
 ### REST API
 
-REST endpoints available at `/api/rest` following RESTful conventions.
+REST endpoints available at:
+
+- **Integrated server** (`pnpm run dev`): `http://localhost:3001/api/rest/{entity}`
+- **Standalone** (`pnpm run dev:rest`): `http://localhost:3002/{entity}`
+
+Available REST routes: `/academic-terms`, `/chapters`, `/companies`, `/constituents`, `/locations`, `/mentors`, `/mentorships`, `/officer-assignments`, `/officer-roles`, `/partners`, `/project-resources`, `/project-engagements`, `/project-roles`, `/project-staffing`, `/projects`, `/constituent-links`, `/universities`, `/volunteer-history`, `/volunteers`
 
 See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md`](docs/api/graphql-api.md) for complete API documentation.
 
 ---
 
-## Architecture
+## Deployment
 
-### Adding New Endpoints
+The API is hosted on [Railway](https://railway.app) with a Railway-managed PostgreSQL database.
 
-1. **Service Layer** (`src/core/services/`)
-   - Create business logic functions
-   - Use async/await pattern
-   - Implement proper error handling with try/catch
-   - Follow existing naming conventions
-   - Use function declarations and not arrow functions
+### How it works
 
-2. **GraphQL** (`src/api/graphql/`)
-   - Add schema definitions in `schemas/`
-   - Implement resolvers in `resolvers/`
-   - Export from respective index files
-   - Update `graphql/resolvers.ts` and `graphql/schemas.ts` after schema and resolver implementations
+- Pushes to `main` trigger the CI pipeline (lint → unit tests → integration tests → deploy)
+- Railway builds with `pnpm build`, runs `prisma migrate deploy` as a pre-deploy step, then starts with `node dist/app.js`
+- Railway automatically injects `DATABASE_URL` from the Postgres plugin
 
-3. **REST** (`src/api/rest/`)
-   - Add controllers in `controllers/`
-   - Define routes in `routes/`
-   - Export from respective index files
-   - Apply validation using Zod validators from `core/validators`
-   - Add route in `rest/routes.ts`
+### Environment variables
 
-### Testing Best Practices
+Set the following in the Railway project dashboard:
 
-- Mock services before importing in tests
-- Use `describe()` blocks for organizing related tests
-- Write async test functions
-- Follow AAA pattern: Arrange, Act, Assert
-- **Integration tests should be completely self-contained** - each test creates its own data and doesn't depend on other tests
-- Examples available in `tests/` directory
+| Variable | Value |
+|---|---|
+| `NODE_ENV` | `production` |
+| `DATABASE_URL` | auto-injected by Railway Postgres plugin |
+
+### Health check
+
+The API exposes `GET /health` which Railway uses to verify the service is running after each deploy.
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing, and contribution guidelines.
 
 ---
 
@@ -223,15 +204,3 @@ See [`docs/api/rest-api.md`](docs/api/rest-api.md) and [`docs/api/graphql-api.md
 - [Jest Documentation](https://jestjs.io/docs/getting-started)
 - [GraphQL Best Practices](https://graphql.org/learn/best-practices/)
 - [Express.js Guide](https://expressjs.com/en/guide/routing.html)
-
-## Docker
-
-Command to enter in terminal to access tables:
-
-- docker compose exec -T test-db psql -U postgres -d test_db
-- \dt
-- SQL commands such as (SELECT * FROM volunteers;)
-
-To pause test, insert this: await new Promise(() => {});
-
-It helps you see when data is created in the local database!

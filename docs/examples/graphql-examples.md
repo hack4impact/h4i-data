@@ -160,7 +160,7 @@ describe('GraphQL API - Volunteers', () => {
 **Run the test** (it will fail):
 
 ```bash
-npm run test:integration
+pnpm run test:integration
 ```
 
 ### Step 2: Write Unit Tests for Service Layer (RED)
@@ -723,13 +723,13 @@ export const resolvers = {
 
 ```bash
 # Run unit tests
-npm run test:unit
+pnpm run test:unit
 
 # Run integration tests
-npm run test:integration
+pnpm run test:integration
 
 # Run all tests
-npm test
+pnpm test
 ```
 
 ### Step 9: Refactor (REFACTOR)

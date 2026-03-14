@@ -1,9 +1,4 @@
-import { Request, Response } from 'express';
-
-// Add request ID to Express Request type
-interface RequestWithId extends Request {
-  requestId?: string;
-}
+import { Response } from 'express';
 import {
   getAllProjects,
   getProjectById,
@@ -13,7 +8,7 @@ import {
   createProjectSchema,
   updateProjectSchema,
 } from '../../../core';
-import { asyncHandler } from '../../../middleware';
+import { asyncHandler, RequestWithId } from '../../../middleware';
 import { logger } from '../../../config/logger';
 
 export const projectController = {
@@ -23,7 +18,8 @@ export const projectController = {
   }),
 
   getProjectById: asyncHandler(async (req: RequestWithId, res: Response) => {
-    const project = await getProjectById(req.params.id);
+    const id = req.params.id as string;
+    const project = await getProjectById(id);
     res.json(project);
   }),
 
@@ -41,26 +37,28 @@ export const projectController = {
   }),
 
   updateProject: asyncHandler(async (req: RequestWithId, res: Response) => {
+    const id = req.params.id as string;
     // Validate input data
     const validatedData = updateProjectSchema.parse(req.body);
 
     logger.info('Updating project via REST API', {
       requestId: req.requestId,
-      projectId: req.params.id,
+      projectId: id,
       updateData: validatedData,
     });
 
-    const updatedProject = await updateProject(req.params.id, validatedData);
+    const updatedProject = await updateProject(id, validatedData);
     res.json(updatedProject);
   }),
 
   deleteProject: asyncHandler(async (req: RequestWithId, res: Response) => {
+    const id = req.params.id as string;
     logger.info('Deleting project via REST API', {
       requestId: req.requestId,
-      projectId: req.params.id,
+      projectId: id,
     });
 
-    await deleteProject(req.params.id);
+    await deleteProject(id);
     res.status(204).send();
   }),
 };

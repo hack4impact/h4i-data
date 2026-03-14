@@ -4,7 +4,7 @@ import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
 
 // Add request ID to Express Request type
-interface RequestWithId extends Request {
+export interface RequestWithId extends Request {
   requestId?: string;
 }
 
@@ -108,7 +108,7 @@ export function errorHandler(
       statusCode,
     },
     timestamp: new Date().toISOString(),
-    ip: req.ip || req.connection.remoteAddress,
+    ip: req.ip || req.socket.remoteAddress,
   };
 
   // Log based on severity

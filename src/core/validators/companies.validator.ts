@@ -5,4 +5,4 @@ export const createCompanySchema = z.object({
   location_id: z.uuid().optional(),
 });
 
-export const updateCompanySchema = createCompanySchema.partial(); // All fields are optional
+export const updateCompanySchema = createCompanySchema.partial();

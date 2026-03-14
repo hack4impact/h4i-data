@@ -2,16 +2,17 @@ import express from 'express';
 import { createRestApp } from './api/rest/server';
 import { createGraphqlApp } from './api/graphql/server';
 import { env } from './config/server';
-import { connectDB, disconnectDB } from './config/database'; // Import disconnectDB
-import cors from 'cors';
-import { corsConfig } from './config/cors';
+import { connectDB, disconnectDB } from './config/database';
+import { logger } from './config/logger';
 
 async function startServer() {
   await connectDB();
 
   const app = express();
-  // allows access to the api
-  app.use(cors(corsConfig));
+
+  app.get('/health', (_req, res) => {
+    res.json({ status: 'ok' });
+  });
 
   // Mount the REST API
   const restApp = createRestApp();
@@ -21,22 +22,21 @@ async function startServer() {
   const graphqlApp = createGraphqlApp();
   app.use('/api/graphql', graphqlApp);
 
-  const port = process.env.PORT || env.PORT || 3000;
-  const server = app.listen(port, () => {
-    console.log(`Integrated server ready at http://localhost:${env.PORT}`);
-    console.log(`REST API available at http://localhost:${env.PORT}/api/rest`);
-    console.log(
-      `GraphQL API available at http://localhost:${env.PORT}/api/graphql`
-    );
+  const server = app.listen(env.PORT, () => {
+    logger.info('Integrated server started', {
+      port: env.PORT,
+      rest: `http://localhost:${env.PORT}/api/rest`,
+      graphql: `http://localhost:${env.PORT}/api/graphql`,
+    });
   });
 
   // --- Graceful shutdown logic ---
   async function shutdown(signal: string) {
-    console.log(`\nReceived ${signal}, shutting down gracefully...`);
+    logger.info('Shutting down gracefully', { signal });
 
     // 1. Stop the server from accepting new connections
     server.close(async () => {
-      console.log('HTTP server closed.');
+      logger.info('HTTP server closed');
 
       // 2. Disconnect from the database
       await disconnectDB();

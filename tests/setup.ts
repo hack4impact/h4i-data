@@ -4,7 +4,8 @@ import { prisma, connectDB, disconnectDB } from '../src/config/database';
 beforeAll(async () => {
   // Only connect for integration tests, not unit tests
   const testFilePath = expect.getState().testPath;
-  const isIntegrationTest = testFilePath?.includes('/integration/') ?? false;
+  const isIntegrationTest =
+    testFilePath?.match(/[/\\]integration[/\\]/) != null;
 
   if (isIntegrationTest) {
     try {
@@ -20,7 +21,8 @@ beforeAll(async () => {
 afterAll(async () => {
   // Only disconnect for integration tests
   const testFilePath = expect.getState().testPath;
-  const isIntegrationTest = testFilePath?.includes('/integration/') ?? false;
+  const isIntegrationTest =
+    testFilePath?.match(/[/\\]integration[/\\]/) != null;
 
   if (isIntegrationTest) {
     try {
@@ -36,19 +38,31 @@ beforeEach(async () => {
   try {
     // Only clean for tests that actually use the database (not mocked unit tests)
     const testFilePath = expect.getState().testPath;
-    const isUnitTest = testFilePath?.includes('/unit/') ?? false;
+    const isUnitTest = testFilePath?.match(/[/\\]unit[/\\]/) != null;
 
     // Skip cleanup for unit tests since they mock the database
     if (!isUnitTest) {
-      await prisma.volunteer_assignment.deleteMany({});
-      await prisma.volunteer_role_project.deleteMany({});
+      // Delete in order respecting foreign key constraints
+      await prisma.project_staffing.deleteMany({});
+      await prisma.project_resources.deleteMany({});
+      await prisma.project_engagements.deleteMany({});
+      await prisma.officer_assignments.deleteMany({});
       await prisma.volunteer_history.deleteMany({});
-
-      await prisma.nonprofit_chapter_project.deleteMany({});
-      await prisma.sponsor_chapter.deleteMany({});
-
+      await prisma.mentorships.deleteMany({});
+      await prisma.constituent_links.deleteMany({});
+      await prisma.mentors.deleteMany({});
+      await prisma.volunteers.deleteMany({});
+      await prisma.academic_terms.deleteMany({});
+      await prisma.universities.deleteMany({});
+      await prisma.project_roles.deleteMany({});
+      await prisma.officer_roles.deleteMany({});
       await prisma.projects.deleteMany({});
       await prisma.chapters.deleteMany({});
+      await prisma.partners.deleteMany({});
+      await prisma.constituents.deleteMany({});
+      await prisma.companies.deleteMany({});
+      await prisma.majors.deleteMany({});
+      await prisma.locations.deleteMany({});
     }
   } catch (error) {
     console.error('Failed to clean database between tests:', error);

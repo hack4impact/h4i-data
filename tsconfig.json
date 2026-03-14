@@ -2,14 +2,14 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "target": "es2016",
-    "module": "Node16",
+    "target": "ES2022",
+    "module": "NodeNext",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "moduleResolution": "node16",
+    "moduleResolution": "NodeNext",
     "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
+    "isolatedModules": true
   },
   "include": ["src/**/*.ts"],
   "exclude": [

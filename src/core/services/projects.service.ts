@@ -1,4 +1,5 @@
 import { prisma } from '../../config/database';
+import { Prisma } from '@prisma/client';
 import { createProjectSchema, updateProjectSchema } from '../validators';
 import { logger } from '../../config/logger';
 import {
@@ -65,10 +66,7 @@ export async function getProjectById(id: string) {
 
 export async function createProject(data: CreateProjectInput) {
   try {
-    logger.info('Creating new project', {
-      projectName: data.name,
-      projectData: data,
-    });
+    logger.info('Creating new project', { projectName: data.name });
 
     const project = await prisma.projects.create({ data });
 
@@ -80,7 +78,6 @@ export async function createProject(data: CreateProjectInput) {
     return project;
   } catch (error) {
     logger.error('Failed to create project', {
-      projectData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create project');
@@ -106,20 +103,18 @@ export async function updateProject(id: string, data: UpdateProjectInput) {
 
     return project;
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
+    ) {
+      throw new NotFoundError('Project', id);
+    }
+
     logger.error('Failed to update project', {
       projectId: id,
       updateData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
-
-    // Check if project doesn't exist
-    if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
-    ) {
-      throw new NotFoundError('Project', id);
-    }
-
     throw new DatabaseError('Failed to update project');
   }
 }
@@ -139,19 +134,17 @@ export async function deleteProject(id: string) {
 
     return project;
   } catch (error) {
-    logger.error('Failed to delete project', {
-      projectId: id,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-
-    // Check if project doesn't exist
     if (
-      error instanceof Error &&
-      error.message.includes('Record to delete does not exist')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('Project', id);
     }
 
+    logger.error('Failed to delete project', {
+      projectId: id,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     throw new DatabaseError('Failed to delete project');
   }
 }

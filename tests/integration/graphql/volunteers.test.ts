@@ -1,202 +1,269 @@
 import request from 'supertest';
-import express from 'express';
-import { Server } from 'http';
 import { createGraphqlApp } from '../../../src/api/graphql/server';
-import { env } from '../../../src/config/server';
 
-let server: Server;
-let app: express.Application;
-let universityId: string;
-let volunteerId: string;
+const app = createGraphqlApp();
 
-beforeAll(async () => {
-  app = createGraphqlApp();
-  server = app.listen(env.GRAPHQL_PORT);
-
-  // create a university location and get its id
-  const universityMutation = `
-    mutation CreateLocation($input: CreateLocationInput!) {
-      createLocation(input: $input) {
-        location_id
-        name
-        address
-        country_code
-        subdivision_code
+// Helper function to create a constituent for tests
+const createTestConstituent = async (email?: string) => {
+  const constituentMutation = `
+    mutation CreateConstituent($input: CreateConstituentInput!) {
+      createConstituent(input: $input) {
+        constituent_id
       }
     }
   `;
-
-  const universityVariables = {
+  const uniqueEmail =
+    email || `test.constituent.${Date.now()}.${Math.random()}@example.com`;
+  const constituentVariables = {
     input: {
-      name: 'Test Location ',
-      address: '123 Test St',
-      country_code: 'US',
-      subdivision_code: 'NY',
+      first_name: 'Test',
+      last_name: 'User',
+      primary_email: uniqueEmail,
     },
   };
+  const response = await request(app)
+    .post('/')
+    .send({ query: constituentMutation, variables: constituentVariables });
+  return response.body.data.createConstituent.constituent_id;
+};
 
-  const universityResponse = await request(server)
-    .post('/') // GraphQL server is at the root
-    .send({ query: universityMutation, variables: universityVariables });
+// Helper function to create a major lookup record for tests
+const createTestMajor = async (name: string) => {
+  const mutation = `
+    mutation CreateMajor($input: CreateMajorInput!) {
+      createMajor(input: $input) {
+        major_id
+      }
+    }
+  `;
+  const response = await request(app)
+    .post('/')
+    .send({ query: mutation, variables: { input: { name } } });
+  return response.body.data.createMajor.major_id;
+};
 
-  universityId = universityResponse.body.data.createLocation.location_id;
-});
-
-afterAll(() => {
-  server.close();
-});
+// Helper function to create a volunteer for tests
+const createTestVolunteer = async (constituentId: string) => {
+  const volunteerMutation = `
+    mutation CreateVolunteer($input: CreateVolunteerInput!) {
+      createVolunteer(input: $input) {
+        volunteer_id
+      }
+    }
+  `;
+  const volunteerVariables = {
+    input: {
+      volunteer_id: constituentId,
+      org_email: 'test.volunteer@org.edu',
+      volunteer_class: 'COLLEGIATE',
+    },
+  };
+  const response = await request(app)
+    .post('/')
+    .send({ query: volunteerMutation, variables: volunteerVariables });
+  return response.body.data.createVolunteer.volunteer_id;
+};
 
 describe('GraphQL API - Volunteers', () => {
   it('should create a new volunteer via mutation', async () => {
+    // Arrange: Create a constituent to associate the volunteer with
+    const constituentId = await createTestConstituent();
+
+    // Act
     const mutation = `
       mutation CreateVolunteer($input: CreateVolunteerInput!) {
         createVolunteer(input: $input) {
           volunteer_id
-          first_name
-          last_name
-          email
-          graduation_date
-          university_id
-          volunteer_status
-          volunteer_type
-          h4i_email
-          chapter_id
-          company_id
+          org_email
+          volunteer_class
         }
       }
     `;
     const variables = {
       input: {
-        first_name: 'John',
-        last_name: 'Doe',
-        email:
-          'john.doe' +
-          Date.now() +
-          Math.floor(Math.random() * 1000) +
-          '@example.com',
-        graduation_date: new Date('2026-06-18').toISOString(),
-        volunteer_status: 'STUDENT',
-        volunteer_type: 'BOTH',
-        university_id: universityId, // Test UUID from Supabase
+        volunteer_id: constituentId,
+        org_email: 'john@org.edu',
+        status: 'ACTIVE',
+        volunteer_class: 'COLLEGIATE',
       },
     };
-
-    const response = await request(server)
-      .post('/') // GraphQL server is at the root
+    const response = await request(app)
+      .post('/')
       .send({ query: mutation, variables });
 
-    // Assertions
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const volunteer = response.body.data.createVolunteer;
-    expect(volunteer).toHaveProperty('volunteer_id');
-    expect(volunteer.first_name).toBe('John');
-
-    volunteerId = volunteer.volunteer_id;
+    expect(volunteer.volunteer_id).toBe(constituentId);
+    expect(volunteer.org_email).toBe('john@org.edu');
   });
 
   it('should fetch a volunteer by their ID via query', async () => {
-    // Now fetch it
+    // Arrange
+    const constituentId = await createTestConstituent();
+    const volunteerId = await createTestVolunteer(constituentId);
+
+    // Act
     const query = `
       query Volunteer($id: ID!) {
         volunteer(id: $id) {
           volunteer_id
-          first_name
-          last_name
-          email
-          volunteer_status
+          org_email
         }
       }
     `;
     const variables = { id: volunteerId };
+    const response = await request(app).post('/').send({ query, variables });
 
-    const response = await request(server).post('/').send({ query, variables });
-
-    // Assertions
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const volunteer = response.body.data.volunteer;
     expect(volunteer.volunteer_id).toBe(volunteerId);
-    expect(volunteer.first_name).toBe('John');
   });
 
   it('should fetch all volunteers', async () => {
-    // Now fetch it
-    const query = `
-      query {
-        volunteers {
-          volunteer_id
-          first_name
-          last_name
-          email
-          volunteer_status
-        }
-      }
-    `;
+    // Arrange
+    const constituentId = await createTestConstituent();
+    await createTestVolunteer(constituentId);
 
-    const response = await request(server).get('/').send({ query });
+    // Act
+    const query = `query { volunteers { volunteer_id } }`;
+    const response = await request(app).post('/').send({ query });
 
-    // Assertions
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
     const volunteers = response.body.data.volunteers;
     expect(Array.isArray(volunteers)).toBe(true);
+    expect(volunteers.length).toBeGreaterThan(0);
   });
+
   it("should provide an error if volunteer doesn't exist", async () => {
+    // Act
     const query = `
       query {
-        volunteer(id: "non-existent-id") {
+        volunteer(id: "00000000-0000-0000-0000-000000000000") {
           volunteer_id
-          first_name
         }
       }
     `;
+    const response = await request(app).post('/').send({ query });
 
-    const response = await request(server).get('/').send({ query });
-
-    // Assertions
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body.data.volunteer).toBeNull();
-    expect(response.body.errors).toBeDefined();
-    expect(response.body.errors[0].message).toMatch(
-      /Database error: Failed to retrieve volunteer/
-    );
   });
 
-  it('should update a new volunteer', async () => {
-    // Now update the volunteer
+  it('should update a volunteer', async () => {
+    // Arrange
+    const constituentId = await createTestConstituent();
+    const volunteerId = await createTestVolunteer(constituentId);
+    const majorId = await createTestMajor(
+      `SE-GQL-${Date.now()}.${Math.random()}`
+    );
+
+    // Act
     const updateMutation = `
       mutation UpdateVolunteer($id: ID!, $input: UpdateVolunteerInput!) {
         updateVolunteer(id: $id, input: $input) {
           volunteer_id
-          first_name
-          last_name
+          major_id
         }
       }
     `;
-
     const updateVariables = {
       id: volunteerId,
-      input: {
-        first_name: 'New Updated John',
-        last_name: 'New Updated Smith',
-      },
+      input: { major_id: majorId },
     };
-
-    const updateResponse = await request(server)
-      .post('/') // GraphQL server is at the root
+    const response = await request(app)
+      .post('/')
       .send({ query: updateMutation, variables: updateVariables });
 
-    expect(updateResponse.status).toBe(200);
-    expect(updateResponse.body.errors).toBeUndefined();
-    const updatedVolunteer = updateResponse.body.data.updateVolunteer;
-    expect(updatedVolunteer.volunteer_id).toBe(volunteerId);
-    expect(updatedVolunteer.first_name).toBe('New Updated John');
-    expect(updatedVolunteer.last_name).toBe('New Updated Smith');
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    const updatedVolunteer = response.body.data.updateVolunteer;
+    expect(updatedVolunteer.major_id).toBe(majorId);
+  });
+
+  it('should return errors when updating a non-existent volunteer', async () => {
+    // Act
+    const mutation = `
+      mutation UpdateVolunteer($id: ID!, $input: UpdateVolunteerInput!) {
+        updateVolunteer(id: $id, input: $input) {
+          volunteer_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: {
+          id: '00000000-0000-0000-0000-000000000000',
+          input: { org_email: 'updated@org.edu' },
+        },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return a validation error for an invalid volunteer input', async () => {
+    // Arrange
+    const constituentId = await createTestConstituent();
+    const volunteerId = await createTestVolunteer(constituentId);
+
+    // Act
+    const mutation = `
+      mutation UpdateVolunteer($id: ID!, $input: UpdateVolunteerInput!) {
+        updateVolunteer(id: $id, input: $input) {
+          volunteer_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: volunteerId, input: { org_email: 'not-an-email' } },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('should return errors when deleting a non-existent volunteer', async () => {
+    // Act
+    const mutation = `
+      mutation DeleteVolunteer($id: ID!) {
+        deleteVolunteer(id: $id) {
+          volunteer_id
+        }
+      }
+    `;
+    const response = await request(app)
+      .post('/')
+      .send({
+        query: mutation,
+        variables: { id: '00000000-0000-0000-0000-000000000000' },
+      });
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeDefined();
   });
 
   it('should delete a volunteer', async () => {
-    // Now delete the volunteer
+    // Arrange
+    const constituentId = await createTestConstituent();
+    const volunteerId = await createTestVolunteer(constituentId);
+
+    // Act
     const deleteMutation = `
       mutation DeleteVolunteer($id: ID!) {
         deleteVolunteer(id: $id) {
@@ -205,16 +272,26 @@ describe('GraphQL API - Volunteers', () => {
       }
     `;
     const deleteVariables = { id: volunteerId };
-    const deleteResponse = await request(server)
-      .post('/') // GraphQL server is at the root
+    const response = await request(app)
+      .post('/')
       .send({ query: deleteMutation, variables: deleteVariables });
 
-    // Assertions
-    expect(deleteResponse.status).toBe(200);
-    expect(deleteResponse.body.errors).toBeUndefined();
-    expect(deleteResponse.body.data.deleteVolunteer).toHaveProperty(
-      'volunteer_id',
-      volunteerId
-    );
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body.errors).toBeUndefined();
+    expect(response.body.data.deleteVolunteer.volunteer_id).toBe(volunteerId);
+
+    // Verify deletion
+    const verifyQuery = `
+      query {
+        volunteer(id: "${volunteerId}") {
+          volunteer_id
+        }
+      }
+    `;
+    const verifyResponse = await request(app)
+      .post('/')
+      .send({ query: verifyQuery });
+    expect(verifyResponse.body.data.volunteer).toBeNull();
   });
 });

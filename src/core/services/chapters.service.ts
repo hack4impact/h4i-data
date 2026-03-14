@@ -1,5 +1,6 @@
 // src/core/services/chapter.service.ts
 import { prisma } from '../../config/database';
+import { Prisma } from '@prisma/client';
 import { createChapterSchema, updateChapterSchema } from '../validators';
 import { logger } from '../../config/logger';
 import {
@@ -16,7 +17,7 @@ export async function getAllChapters() {
   try {
     logger.info('Fetching all chapters');
     const chapters = await prisma.chapters.findMany({
-      orderBy: { created_at: 'desc' },
+      orderBy: { name: 'asc' },
     });
 
     logger.info('Successfully retrieved chapters', {
@@ -66,10 +67,7 @@ export async function getChapterById(id: string) {
 
 export async function createChapter(data: CreateChapterInput) {
   try {
-    logger.info('Creating new chapter', {
-      chapterName: data.name,
-      chapterData: data,
-    });
+    logger.info('Creating new chapter', { chapterName: data.name });
 
     const chapter = await prisma.chapters.create({ data });
 
@@ -81,7 +79,6 @@ export async function createChapter(data: CreateChapterInput) {
     return chapter;
   } catch (error) {
     logger.error('Failed to create chapter', {
-      chapterData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw new DatabaseError('Failed to create chapter');
@@ -107,20 +104,18 @@ export async function updateChapter(id: string, data: UpdateChapterInput) {
 
     return chapter;
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
+    ) {
+      throw new NotFoundError('Chapter', id);
+    }
+
     logger.error('Failed to update chapter', {
       chapterId: id,
       updateData: data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
-
-    // Check if chapter doesn't exist
-    if (
-      error instanceof Error &&
-      error.message.includes('Record to update not found')
-    ) {
-      throw new NotFoundError('Chapter', id);
-    }
-
     throw new DatabaseError('Failed to update chapter');
   }
 }
@@ -140,19 +135,17 @@ export async function deleteChapter(id: string) {
 
     return chapter;
   } catch (error) {
-    logger.error('Failed to delete chapter', {
-      chapterId: id,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-
-    // Check if chapter doesn't exist
     if (
-      error instanceof Error &&
-      error.message.includes('Record to delete does not exist')
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
     ) {
       throw new NotFoundError('Chapter', id);
     }
 
+    logger.error('Failed to delete chapter', {
+      chapterId: id,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     throw new DatabaseError('Failed to delete chapter');
   }
 }

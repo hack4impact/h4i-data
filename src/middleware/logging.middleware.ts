@@ -1,11 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { logger } from '../config/logger';
 import { randomUUID } from 'crypto';
-
-// Add request ID to Express Request type
-interface RequestWithId extends Request {
-  requestId?: string;
-}
+import { RequestWithId } from './error.middleware';
 
 // Generate unique request ID
 const generateRequestId = (): string => randomUUID();
@@ -31,13 +27,14 @@ export function requestLogger(
     method: req.method,
     url: req.originalUrl || req.url,
     userAgent: req.get('User-Agent'),
-    ip: req.ip || req.connection.remoteAddress,
+    ip: req.ip || req.socket.remoteAddress,
     contentLength: req.get('Content-Length'),
     contentType: req.get('Content-Type'),
     timestamp: new Date().toISOString(),
   });
 
-  // Capture original res.end to log when response completes
+  // Capture original res.send to log when response completes
+  // res.json() calls res.send() internally, so this intercepts both
   const originalSend = res.send;
   res.send = function (data) {
     const duration = Date.now() - start;

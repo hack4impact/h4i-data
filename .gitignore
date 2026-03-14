@@ -11,3 +11,6 @@ logs/
 coverage/
 
 dist/
+
+.DS_Store
+.claude/
