@@ -12,10 +12,10 @@ const createTestProject = async () => {
   return res.body.project_id;
 };
 
-const createTestDeliverable = async (projectId: string, label: string) => {
+const createTestResource = async (projectId: string, label: string) => {
   const mutation = `
-    mutation CreateProjectDeliverable($input: CreateProjectDeliverableInput!) {
-      createProjectDeliverable(input: $input) {
+    mutation CreateProjectResource($input: CreateProjectResourceInput!) {
+      createProjectResource(input: $input) {
         project_resource_id
         project_id
         label
@@ -28,18 +28,18 @@ const createTestDeliverable = async (projectId: string, label: string) => {
       query: mutation,
       variables: { input: { project_id: projectId, label } },
     });
-  return response.body.data.createProjectDeliverable;
+  return response.body.data.createProjectResource;
 };
 
-describe('GraphQL API - Project Deliverables', () => {
-  it('should create a new project deliverable via mutation', async () => {
+describe('GraphQL API - Project Resources', () => {
+  it('should create a new project resource via mutation', async () => {
     // Arrange
     const projectId = await createTestProject();
 
     // Act
     const mutation = `
-      mutation CreateProjectDeliverable($input: CreateProjectDeliverableInput!) {
-        createProjectDeliverable(input: $input) {
+      mutation CreateProjectResource($input: CreateProjectResourceInput!) {
+        createProjectResource(input: $input) {
           project_resource_id
           project_id
           label
@@ -62,22 +62,22 @@ describe('GraphQL API - Project Deliverables', () => {
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    const deliverable = response.body.data.createProjectDeliverable;
-    expect(deliverable).toHaveProperty('project_resource_id');
-    expect(deliverable.project_id).toBe(projectId);
-    expect(deliverable.label).toBe('Source Code');
-    expect(deliverable.category).toBe('CODE');
+    const resource = response.body.data.createProjectResource;
+    expect(resource).toHaveProperty('project_resource_id');
+    expect(resource.project_id).toBe(projectId);
+    expect(resource.label).toBe('Source Code');
+    expect(resource.category).toBe('CODE');
   });
 
-  it('should fetch a project deliverable by ID via query', async () => {
+  it('should fetch a project resource by ID via query', async () => {
     // Arrange
     const projectId = await createTestProject();
-    const created = await createTestDeliverable(projectId, 'Design Spec');
+    const created = await createTestResource(projectId, 'Design Spec');
 
     // Act
     const query = `
-      query ProjectDeliverable($id: ID!) {
-        projectDeliverable(id: $id) {
+      query ProjectResource($id: ID!) {
+        projectResource(id: $id) {
           project_resource_id
           label
         }
@@ -90,16 +90,16 @@ describe('GraphQL API - Project Deliverables', () => {
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.projectDeliverable.project_resource_id).toBe(
+    expect(response.body.data.projectResource.project_resource_id).toBe(
       created.project_resource_id
     );
   });
 
-  it('should return null for a non-existent project deliverable ID', async () => {
+  it('should return null for a non-existent project resource ID', async () => {
     // Act
     const query = `
       query {
-        projectDeliverable(id: "00000000-0000-0000-0000-000000000000") {
+        projectResource(id: "00000000-0000-0000-0000-000000000000") {
           project_resource_id
         }
       }
@@ -108,34 +108,34 @@ describe('GraphQL API - Project Deliverables', () => {
 
     // Assert
     expect(response.status).toBe(200);
-    expect(response.body.data.projectDeliverable).toBeNull();
+    expect(response.body.data.projectResource).toBeNull();
   });
 
-  it('should fetch all project deliverables via query', async () => {
+  it('should fetch all project resources via query', async () => {
     // Arrange
     const projectId = await createTestProject();
-    await createTestDeliverable(projectId, 'Documentation');
+    await createTestResource(projectId, 'Documentation');
 
     // Act
-    const query = `query { projectDeliverables { project_resource_id } }`;
+    const query = `query { projectResources { project_resource_id } }`;
     const response = await request(app).post('/').send({ query });
 
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(Array.isArray(response.body.data.projectDeliverables)).toBe(true);
-    expect(response.body.data.projectDeliverables.length).toBeGreaterThan(0);
+    expect(Array.isArray(response.body.data.projectResources)).toBe(true);
+    expect(response.body.data.projectResources.length).toBeGreaterThan(0);
   });
 
-  it('should update a project deliverable via mutation', async () => {
+  it('should update a project resource via mutation', async () => {
     // Arrange
     const projectId = await createTestProject();
-    const created = await createTestDeliverable(projectId, 'Original Label');
+    const created = await createTestResource(projectId, 'Original Label');
 
     // Act
     const mutation = `
-      mutation UpdateProjectDeliverable($id: ID!, $input: UpdateProjectDeliverableInput!) {
-        updateProjectDeliverable(id: $id, input: $input) {
+      mutation UpdateProjectResource($id: ID!, $input: UpdateProjectResourceInput!) {
+        updateProjectResource(id: $id, input: $input) {
           project_resource_id
           label
         }
@@ -152,16 +152,16 @@ describe('GraphQL API - Project Deliverables', () => {
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(response.body.data.updateProjectDeliverable.label).toBe(
+    expect(response.body.data.updateProjectResource.label).toBe(
       'Updated Label'
     );
   });
 
-  it('should return errors when updating a non-existent project deliverable', async () => {
+  it('should return errors when updating a non-existent project resource', async () => {
     // Act
     const mutation = `
-      mutation UpdateProjectDeliverable($id: ID!, $input: UpdateProjectDeliverableInput!) {
-        updateProjectDeliverable(id: $id, input: $input) {
+      mutation UpdateProjectResource($id: ID!, $input: UpdateProjectResourceInput!) {
+        updateProjectResource(id: $id, input: $input) {
           project_resource_id
         }
       }
@@ -181,15 +181,15 @@ describe('GraphQL API - Project Deliverables', () => {
     expect(response.body.errors).toBeDefined();
   });
 
-  it('should return a validation error for an invalid project deliverable input', async () => {
+  it('should return a validation error for an invalid project resource input', async () => {
     // Arrange
     const projectId = await createTestProject();
-    const created = await createTestDeliverable(projectId, 'Original Label');
+    const created = await createTestResource(projectId, 'Original Label');
 
     // Act
     const mutation = `
-      mutation UpdateProjectDeliverable($id: ID!, $input: UpdateProjectDeliverableInput!) {
-        updateProjectDeliverable(id: $id, input: $input) {
+      mutation UpdateProjectResource($id: ID!, $input: UpdateProjectResourceInput!) {
+        updateProjectResource(id: $id, input: $input) {
           project_resource_id
         }
       }
@@ -209,11 +209,11 @@ describe('GraphQL API - Project Deliverables', () => {
     expect(response.body.errors).toBeDefined();
   });
 
-  it('should return errors when deleting a non-existent project deliverable', async () => {
+  it('should return errors when deleting a non-existent project resource', async () => {
     // Act
     const mutation = `
-      mutation DeleteProjectDeliverable($id: ID!) {
-        deleteProjectDeliverable(id: $id) {
+      mutation DeleteProjectResource($id: ID!) {
+        deleteProjectResource(id: $id) {
           project_resource_id
         }
       }
@@ -230,15 +230,15 @@ describe('GraphQL API - Project Deliverables', () => {
     expect(response.body.errors).toBeDefined();
   });
 
-  it('should delete a project deliverable via mutation', async () => {
+  it('should delete a project resource via mutation', async () => {
     // Arrange
     const projectId = await createTestProject();
-    const created = await createTestDeliverable(projectId, 'To Delete');
+    const created = await createTestResource(projectId, 'To Delete');
 
     // Act
     const mutation = `
-      mutation DeleteProjectDeliverable($id: ID!) {
-        deleteProjectDeliverable(id: $id) {
+      mutation DeleteProjectResource($id: ID!) {
+        deleteProjectResource(id: $id) {
           project_resource_id
         }
       }
@@ -253,15 +253,15 @@ describe('GraphQL API - Project Deliverables', () => {
     // Assert
     expect(response.status).toBe(200);
     expect(response.body.errors).toBeUndefined();
-    expect(
-      response.body.data.deleteProjectDeliverable.project_resource_id
-    ).toBe(created.project_resource_id);
+    expect(response.body.data.deleteProjectResource.project_resource_id).toBe(
+      created.project_resource_id
+    );
 
     // Verify it's gone
-    const verifyQuery = `query { projectDeliverable(id: "${created.project_resource_id}") { project_resource_id } }`;
+    const verifyQuery = `query { projectResource(id: "${created.project_resource_id}") { project_resource_id } }`;
     const verifyResponse = await request(app)
       .post('/')
       .send({ query: verifyQuery });
-    expect(verifyResponse.body.data.projectDeliverable).toBeNull();
+    expect(verifyResponse.body.data.projectResource).toBeNull();
   });
 });

@@ -10,12 +10,12 @@ const createTestProject = async () => {
   return res.body.project_id;
 };
 
-describe('REST API - /project-deliverables', () => {
-  describe('POST /project-deliverables', () => {
-    it('should create a new project deliverable', async () => {
+describe('REST API - /project-resources', () => {
+  describe('POST /project-resources', () => {
+    it('should create a new project resource', async () => {
       const projectId = await createTestProject();
 
-      const response = await request(app).post('/project-deliverables').send({
+      const response = await request(app).post('/project-resources').send({
         project_id: projectId,
         label: 'Source Code',
         url: 'https://github.com/org/repo',
@@ -29,7 +29,7 @@ describe('REST API - /project-deliverables', () => {
 
     it('should return 400 for invalid data', async () => {
       const response = await request(app)
-        .post('/project-deliverables')
+        .post('/project-resources')
         .send({ label: 'Missing project_id' });
 
       expect(response.status).toBe(400);
@@ -37,15 +37,15 @@ describe('REST API - /project-deliverables', () => {
     });
   });
 
-  describe('GET /project-deliverables', () => {
-    it('should fetch all project deliverables', async () => {
+  describe('GET /project-resources', () => {
+    it('should fetch all project resources', async () => {
       const projectId = await createTestProject();
-      await request(app).post('/project-deliverables').send({
+      await request(app).post('/project-resources').send({
         project_id: projectId,
         url: 'https://github.com/org/repo2',
       });
 
-      const response = await request(app).get('/project-deliverables');
+      const response = await request(app).get('/project-resources');
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
@@ -53,90 +53,90 @@ describe('REST API - /project-deliverables', () => {
     });
   });
 
-  describe('GET /project-deliverables/:id', () => {
-    it('should fetch a project deliverable by ID', async () => {
+  describe('GET /project-resources/:id', () => {
+    it('should fetch a project resource by ID', async () => {
       const projectId = await createTestProject();
-      const created = await request(app).post('/project-deliverables').send({
+      const created = await request(app).post('/project-resources').send({
         project_id: projectId,
         label: 'Design Spec',
       });
       const id = created.body.project_resource_id;
 
-      const response = await request(app).get(`/project-deliverables/${id}`);
+      const response = await request(app).get(`/project-resources/${id}`);
 
       expect(response.status).toBe(200);
       expect(response.body.project_resource_id).toBe(id);
     });
 
-    it('should return 404 for a non-existent deliverable', async () => {
+    it('should return 404 for a non-existent resource', async () => {
       const response = await request(app).get(
-        '/project-deliverables/00000000-0000-0000-0000-000000000000'
+        '/project-resources/00000000-0000-0000-0000-000000000000'
       );
 
       expect(response.status).toBe(404);
     });
   });
 
-  describe('PATCH /project-deliverables/:id', () => {
-    it('should update a project deliverable', async () => {
+  describe('PATCH /project-resources/:id', () => {
+    it('should update a project resource', async () => {
       const projectId = await createTestProject();
-      const created = await request(app).post('/project-deliverables').send({
+      const created = await request(app).post('/project-resources').send({
         project_id: projectId,
         label: 'Original Label',
       });
       const id = created.body.project_resource_id;
 
       const response = await request(app)
-        .patch(`/project-deliverables/${id}`)
+        .patch(`/project-resources/${id}`)
         .send({ label: 'Updated Label' });
 
       expect(response.status).toBe(200);
       expect(response.body.label).toBe('Updated Label');
     });
 
-    it('should return 404 for a non-existent project deliverable', async () => {
+    it('should return 404 for a non-existent resource', async () => {
       const response = await request(app)
-        .patch('/project-deliverables/00000000-0000-0000-0000-000000000000')
+        .patch('/project-resources/00000000-0000-0000-0000-000000000000')
         .send({ label: 'Updated Label' });
       expect(response.status).toBe(404);
     });
 
     it('should return 400 for invalid data', async () => {
       const projectId = await createTestProject();
-      const created = await request(app).post('/project-deliverables').send({
+      const created = await request(app).post('/project-resources').send({
         project_id: projectId,
         label: 'Original Label',
       });
       const id = created.body.project_resource_id;
 
       const response = await request(app)
-        .patch(`/project-deliverables/${id}`)
+        .patch(`/project-resources/${id}`)
         .send({ url: 'not-a-url' });
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error');
     });
   });
 
-  describe('DELETE /project-deliverables/:id', () => {
-    it('should delete a project deliverable', async () => {
+  describe('DELETE /project-resources/:id', () => {
+    it('should delete a project resource', async () => {
       const projectId = await createTestProject();
-      const created = await request(app).post('/project-deliverables').send({
+      const created = await request(app).post('/project-resources').send({
         project_id: projectId,
         label: 'To Delete',
       });
       const id = created.body.project_resource_id;
 
-      const response = await request(app).delete(`/project-deliverables/${id}`);
+      const response = await request(app).delete(`/project-resources/${id}`);
 
       expect(response.status).toBe(204);
 
-      const getResponse = await request(app).get(`/project-deliverables/${id}`);
+      const getResponse = await request(app).get(`/project-resources/${id}`);
       expect(getResponse.status).toBe(404);
     });
 
-    it('should return 404 for a non-existent project deliverable', async () => {
+    it('should return 404 for a non-existent resource', async () => {
       const response = await request(app).delete(
-        '/project-deliverables/00000000-0000-0000-0000-000000000000'
+        '/project-resources/00000000-0000-0000-0000-000000000000'
       );
       expect(response.status).toBe(404);
     });
