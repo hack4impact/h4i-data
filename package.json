@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Backend API for volunteer management with GraphQL and REST endpoints",
   "main": "src/app.ts",
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "scripts": {
     "build": "tsc && prisma generate",
     "dev": "ts-node src/app.ts",
@@ -12,7 +15,10 @@
     "format": "prettier --write src/",
     "lint": "eslint src/ --ext .ts",
     "prepare": "husky",
-    "seed:test": "docker compose exec -T test-db psql -U postgres -d test_db -f /docker-entrypoint-initdb.d/seed.sql",
+    "seed": "prisma db seed",
+    "seed:dev": "NODE_ENV=development prisma db seed",
+    "seed:test": "NODE_ENV=test prisma db seed",
+    "seed:test:legacy": "docker compose exec -T test-db psql -U postgres -d test_db -f /docker-entrypoint-initdb.d/seed.sql",
     "start": "node dist/app.js",
     "test": "npm run test:unit && npm run test:integration",
     "test:coverage": "jest --coverage --testPathIgnorePatterns=tests/integration",
@@ -60,6 +66,7 @@
     "graphql": "^15.8.0",
     "graphql-scalars": "^1.24.2",
     "helmet": "^8.1.0",
+    "iterall": "^1.3.0",
     "pg": "^8.15.6",
     "winston": "^3.17.0"
   },

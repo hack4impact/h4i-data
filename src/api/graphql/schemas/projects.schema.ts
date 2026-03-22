@@ -1,4 +1,14 @@
 export const projectSchemaString = `
+  enum ProjectLengthSortOption {
+    LONGEST_TO_SHORTEST
+    SHORTEST_TO_LONGEST
+  }
+
+  input ProjectFilterInput {
+    statuses: [String!]
+    lengthSort: ProjectLengthSortOption
+  }
+
   type Project {
     project_id: ID!
     name: String!
@@ -11,7 +21,7 @@ export const projectSchemaString = `
   }
 
   type Query {
-    projects(sortOrder: String): [Project!]!
+    projects(sortOrder: String, filter: ProjectFilterInput): [Project!]!
     project(id: ID!): Project
   }
 
