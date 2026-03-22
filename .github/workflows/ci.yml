@@ -44,7 +44,7 @@ jobs:
         run: npx prisma generate
 
       - name: Prisma migrate
-        run: npx prisma migrate deploy
+        run: npx prisma migrate reset --force
 
       - name: Verify Prisma client
         run: ls -la node_modules/.prisma/client
